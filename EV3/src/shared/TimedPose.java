@@ -28,5 +28,4 @@ public class TimedPose extends Pose{
 	public TimedPoint toTimedPoint(){
 		return new TimedPoint((int)this._location.x,(int)this._location.y,timer);
 	}
-
 }

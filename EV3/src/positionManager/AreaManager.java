@@ -16,25 +16,29 @@ public class AreaManager extends Thread implements ModeListener {
 	private PoseGiver pg;
 	
 	public AreaManager(PoseGiver pg){
+		currentColor = -1;
 		colorSensor = new ColorSensor();
-		this.refreshRate = 150;
+		this.refreshRate = 500;
 		colorSensor.setCalibration();
 		this.pg = pg;
+		currentArea = Area.getAreaWithPosition(pg.getPosition());
 		Main.printf("[AREA MANAGER]          : Initialized");
 	}
 	
 	public void run(){
-		Main.printf("[AREA MANAGER]          : Started");
 		colorSensor.lightOn();
 		while(!isInterrupted() && currentMode != Mode.END){
-			updateColor();
+			if(updateColor()){
+				currentArea = currentArea.colorChange(currentColor, pg.getPosition());
+				Main.printf("[AREA MANAGER]          : COLOR DETECTED = " + currentColor + "NEW AREA = " + currentArea.toString());
+			}
 			syncWait();
 		}
 		colorSensor.lightOff();
 		Main.printf("[AREA MANAGER]          : Finished");
 	}
 	
-	private void updateColor(){
+	private boolean updateColor(){
 		int checkColor = colorSensor.getCurrentColor();
 		if(checkColor != currentColor){
 			currentColor = checkColor;
@@ -69,7 +73,9 @@ public class AreaManager extends Thread implements ModeListener {
 					
 					break;
 			}
+			return true;
 		}
+		return false;
 	}
 	
 	public void syncWait(){

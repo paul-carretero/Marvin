@@ -26,8 +26,8 @@ public class PositionCalculator extends Thread implements ModeListener, MoveList
 	public void run() {
 		Main.printf("[POSITION CALCULATOR]   : Started");
 		while(!isInterrupted() && mode != Mode.END){
-			//Main.printf("[POSITION CALCULATOR]   : " + odometryPoseProvider.getPose().toString());
-			Main.printf("[POSITION CALCULATOR]   : Radar : " + radar.getNearItemDistance());
+			Main.printf("[POSITION CALCULATOR]   : " + odometryPoseProvider.getPose().toString());
+			//Main.printf("[POSITION CALCULATOR]   : Radar : " + radar.getNearItemDistance());
 			syncWait();
 		}
 		Main.printf("[POSITION CALCULATOR]   : Finished");

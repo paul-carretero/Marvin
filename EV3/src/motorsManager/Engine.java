@@ -1,7 +1,6 @@
 package motorsManager;
 
 import aiPlanner.Main;
-import aiPlanner.Marvin;
 import eventManager.EventHandler;
 import interfaces.EngineUpdateListener;
 import interfaces.WaitProvider;
@@ -24,7 +23,7 @@ public class Engine implements EngineUpdateListener{
 	private float coeffCorrectionForward = 1;
 	WaitProvider waitProvider;
 	
-	private float right_wheel_correction = -0.3f; // positif ou negatif...
+	private final float right_wheel_correction = -0.2f; // positif ou negatif...
 	
 	public Engine(EventHandler eventManager, WaitProvider marvin){
 		leftMotor	= new EV3LargeRegulatedMotor(LocalEV3.get().getPort(Main.LEFT_WHEEL));
@@ -48,12 +47,6 @@ public class Engine implements EngineUpdateListener{
 
 
 	public void goForward(float distance, float speed){
-		if(speed > 200){
-			distance = 0.999f * distance - 1.5537f; // 0.1% d'erreur sur 1m ...
-		}
-		else{
-			distance = 0.9944f * distance - 0.46f; // 0.1% d'erreur sur 1m ...
-		}
 		int waitTime = (int) ((distance * 10000f/speed) * coeffCorrectionForward);
 		pilot.setLinearSpeed(speed);
 		Main.printf("[ENGINE]                : waitTime = " + waitTime);
@@ -63,12 +56,6 @@ public class Engine implements EngineUpdateListener{
 	}
 	
 	public void goBackward(float distance, float speed){
-		if(speed > 200){
-			distance = 0.999f * distance - 1.5537f; // 0.1% d'erreur sur 1m ...
-		}
-		else{
-			distance = 0.9944f * distance - 0.46f; // 0.1% d'erreur sur 1m ...
-		}
 		int waitTime = (int) (((distance*10000)/speed) * coeffCorrectionBackward);
 		pilot.setLinearSpeed(speed);
 		pilot.backward();
@@ -113,13 +100,6 @@ public class Engine implements EngineUpdateListener{
 	
 	public void stop() {
 		pilot.stop();
-	}
-	
-	// positif = vers la droite
-	// negatif = vers la gauche
-	public void correctAngleDirection(float c) {
-		right_wheel_correction = right_wheel_correction + c;
-		rightWheel = WheeledChassis.modelWheel(new EV3LargeRegulatedMotor(LocalEV3.get().getPort(Main.RIGHT_WHEEL)), Main.WHEEL_DIAMETER + right_wheel_correction).offset(Main.DISTANCE_TO_CENTER);
 	}
 	
 	public void syncWait(int ms){

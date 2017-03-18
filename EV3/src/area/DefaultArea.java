@@ -1,7 +1,6 @@
 package area;
 
 import lejos.robotics.navigation.Pose;
-import shared.Point;
 
 public class DefaultArea extends Area {
 
@@ -10,12 +9,12 @@ public class DefaultArea extends Area {
 	}
 
 	@Override
-	public int getConsistency(Point p) {
+	public int getConsistency(Pose p) {
 		return -1;
 	}
 
 	@Override
-	public Area colorChange(int Color, Pose p) {
+	public Area colorChange(int color, Pose p) {
 		return this;
 	}
 

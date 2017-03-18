@@ -11,8 +11,8 @@ import shared.Timer;
 
 public class Main{
 	
-	public static final int X_INITIAL 				= 100; // ou 50 ou 150
-	public static final int Y_INITIAL 				= 0; // 30
+	public static final int X_INITIAL 				= 180; // ou 50 ou 150
+	public static final int Y_INITIAL 				= 60; // 30
 	public static final int H_INITIAL 				= 90;
 	
 	/* DEPART COTE 2
@@ -53,8 +53,8 @@ public class Main{
 	public static final String TOUCH_SENSOR 		= "S2";
 	public static final String US_SENSOR    		= "S3";
 	
-	public static final float WHEEL_DIAMETER        = 56;
-	public static final float DISTANCE_TO_CENTER    = 62.525f;
+	public static final float WHEEL_DIAMETER        = 56.5f;
+	public static final float DISTANCE_TO_CENTER    = 61.5f;
 	public static final String LEFT_WHEEL 			= "C";
 	public static final String RIGHT_WHEEL			= "B";
 	public static final String GRABER    			= "D";

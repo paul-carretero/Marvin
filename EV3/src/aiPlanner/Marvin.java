@@ -44,7 +44,6 @@ public class Marvin implements SignalListener, WaitProvider{
 		Main.setState(Main.HAND_OPEN, false);
 		Main.setState(Main.HAVE_PALET, false);
 		
-		Main.TIMER.resetTimer();
 		modeListener = new ArrayList<ModeListener>();
 		
 		/**********************************************************/
@@ -88,12 +87,14 @@ public class Marvin implements SignalListener, WaitProvider{
 		System.out.println(" AWAITING ORDERS");
 		Button.ENTER.waitForPressAndRelease();
 		Sound.beep();
+		Main.TIMER.resetTimer();
 		/**********************************************************/
 				
 		while(!goals.isEmpty() && !(Main.TIMER.getElapsedMin() > 5)){
 			goals.pop().startWrapper();
 		}
-		//engine.turnHere(10, Main.ROTATION_SPEED);
+		engine.turnHere(-180, Main.ROTATION_SPEED);
+		syncWait(1000);
 		updateMode(Mode.END);
 		syncWait(1000);
 		cleanUp();
@@ -170,6 +171,7 @@ public class Marvin implements SignalListener, WaitProvider{
 			Thread.currentThread().interrupt();
 		}
 		Main.printf("[MARVIN]                : I told you this would all end in tears.");
+		syncWait(500);
 	}
 
 	protected PositionCalculator getPositionManager() {

@@ -2,7 +2,6 @@ package area;
 
 import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
-import shared.Point;
 
 public class TopArea extends Area{
 
@@ -14,12 +13,12 @@ public class TopArea extends Area{
 	}
 
 	@Override
-	public int getConsistency(Point p) {
-		if(p.y() > (yBottom - MARGE_ERREUR)){
+	public int getConsistency(Pose p) {
+		if(p.getY() > (yBottom - MARGE_ERREUR)){
 			return 0;
 		}
 		else{
-			return yBottom - p.y();
+			return (int) (yBottom - p.getY());
 		}
 	}
 
@@ -30,7 +29,7 @@ public class TopArea extends Area{
 		}
 		else if(color == Main.COLOR_WHITE){
 			// on évite les cas limites
-			if( Math.abs(p.getHeading()) > (0 + AMBIGUOUS_ANGLE) && Math.abs(p.getHeading()) < (180 - AMBIGUOUS_ANGLE) ){
+			if( checkAmbiguousAngleHorizontal(p) ){
 				if(p.getX() < Main.X_YELLOW_LINE){
 					return Main.getArea(10);
 				}
