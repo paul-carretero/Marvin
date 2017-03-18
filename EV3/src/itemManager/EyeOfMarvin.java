@@ -5,114 +5,107 @@ import java.util.List;
 
 import aiPlanner.Main;
 import interfaces.ItemGiver;
-import interfaces.ModeListener;
 import interfaces.PoseGiver;
 import interfaces.ServerListener;
 import interfaces.SignalListener;
 import shared.Item;
 import shared.ItemType;
-import shared.Mode;
 import shared.Point;
-import shared.SignalType;
-import shared.TimedPoint;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 public class EyeOfMarvin implements ServerListener, ItemGiver {
 	private PoseGiver 		poseGiver;
-	private volatile 		List<Item> masterList;
-	private final int 		maxDistanceBias = 5; // imprécision du serveur, en cm
+	private volatile 		Hashtable<Point,Item> masterTable;
 	private SignalListener 	evtManager;
+	private final static int		MAP_PRECISION = 5; // on arrondi au multiple de MAP_PRECISION
 	
 	public EyeOfMarvin(PoseGiver pg, SignalListener evtManager) {
 		this.poseGiver	= pg;
 		this.evtManager 	= evtManager;
-		masterList 			= new ArrayList<Item>();
-		masterList.add(new Item(Main.X_INITIAL, Main.Y_INITIAL, Main.TIMER.getElapsedMs(), ItemType.ME));
+		masterTable 			= new Hashtable<Point,Item>();
+		putInHashTable(new Item(Main.X_INITIAL, Main.Y_INITIAL, Main.TIMER.getElapsedMs(), ItemType.ME));
 		Main.printf("[EYE OF MARVIN]         : Initialized");
 	}
 	
-	//on check les element de la master liste qui n'ont pas bougé avec un nouveau timeout
-	private void updateMasterList(TimedPoint tp){
-		boolean isupdated = false;
-		for(Item item : masterList){
-			if(item.getDistance(tp) < maxDistanceBias && !isupdated){
-				item.update(tp.x(), tp.y(), tp.getReferenceTime());
-				isupdated = true;
+	public static void averagize(Item i){
+		i.silentUpdate((i.x()/MAP_PRECISION)*MAP_PRECISION,(i.y()/MAP_PRECISION)*MAP_PRECISION);
+	}
+	
+	private void putInHashTable(Item i){
+		averagize(i);
+		Point key = new Point(i.x(), i.y());
+		if(masterTable.containsKey(key)){
+			masterTable.get(key).updateTimeStamp(i.getReferenceTime());
+			if(i.getType() != ItemType.UNDEFINED){
+				masterTable.get(key).setType(i.getType());
 			}
 		}
-		if(!isupdated){
-			masterList.add(new Item(tp.x(), tp.y(), tp.getReferenceTime(), ItemType.UNDEFINED));
+		else{
+			masterTable.put(key,i);
 		}
 	}
 	
-	// retourne l'item flagué comme me
-	private Item findMe(){
-		Item marvin = null;
-		for(Item item : masterList){
+	public Item getMarvinPosition(){
+		Enumeration<Item> items = masterTable.elements();
+		while(items.hasMoreElements()){
+			Item item = items.nextElement();
 			if(item.getType() == ItemType.ME){
-				marvin = item;
+				return item;
 			}
 		}
-		return marvin;
+		return null;
 	}
 	
-	private void updateMe(){
-		Point currentPosition = poseGiver.getPosition().toTimedPoint();
-		Item marvin = findMe();
-		Item marvinNewPos = marvin;
-		int currentDistance = 9999;
-		// on choisit l'item qui est le plus proche de nous
-		for(Item item : masterList){
-			if(item.getDistance(currentPosition) < currentDistance){
-				marvinNewPos = item;
-				currentDistance = item.getDistance(currentPosition);
-			}
-		}
-		marvin.update(marvinNewPos.x(), marvinNewPos.y(), marvinNewPos.getReferenceTime());
-		masterList.remove(marvinNewPos); // une fois qu'on a mid à jour marvin (l'original) alors on peut supprime son clone.
-	}
-	
-	// on défini comme pallet les items qui sont la et qui n'ont pas bougé depuis plus de 1 seconde
-	// a refaire pour ne pas supprimer les ancien point des ennemy et me
-	private void updatePalletMasterList(){
-		for(Item item : masterList){
-			// tout les item qui n'ont pas bougé et qui ont juste été mid à jour
-			if(item.getMovedDistance() < maxDistanceBias && item.getType() == ItemType.UNDEFINED){
-				item.setType(ItemType.PALLET);
-			}			
-		}
-	}
-	
-	private void cleanMasterList(int timeout){
-		List<Item> deleteList = new ArrayList<Item>();
-		for(Item item : masterList){
-			// tout les item qui n'ont pas bougé et qui ont juste été mid à jour
-			if(item.getMovedDistance() < maxDistanceBias && item.getType() == ItemType.UNDEFINED){
-				item.setType(ItemType.PALLET);
-			}			
-			if(item.getReferenceTime() < timeout && item.getType() != ItemType.ME){
-				deleteList.add(item);
-			}
-		}
-		masterList.removeAll(deleteList);
-		deleteList.clear();
-	}
-
-	public void receiveRawPoints(List<Item> PointsList) {
-		int timeout = 0;
+	public void receiveRawPoints(int timeout, List<Item> PointsList) {
 		// pour tout les timedPoint présent dans la liste recue on verifie la masterliste et on met a jour leur timestamp
-		for(TimedPoint tp : PointsList){
-			updateMasterList(tp);
-			timeout = tp.getReferenceTime();
+		//printList(PointsList);
+		for(Item tp : PointsList){
+			putInHashTable(tp);
 		}
-		printList(masterList);
-		/*updateMe();
-		updatePalletMasterList();
-		cleanMasterList(timeout);*/
+		Main.printf("---->" + timeout + "<----");
+		cleanHashTable(getObsoleteKey(timeout));
+		printHashtable(masterTable);
+	}
+	
+	private void cleanHashTable(List<Point> obsoleteKey) {
+		for(Point p : obsoleteKey){
+			masterTable.remove(p);
+		}
 	}
 
+	// side effect : flag comme item les objects qui n'ont pas bougé de puis un bout de temps...
+	private List<Point> getObsoleteKey(int timeout) {
+		List<Point> toDelete = new ArrayList<Point>();
+		Enumeration<Point> keys = masterTable.keys();
+		
+		while(keys.hasMoreElements()){
+			Point key = keys.nextElement();
+			Item i = masterTable.get(key);
+			if(i.getReferenceTime() < timeout && i.getType() != ItemType.ME ){
+				toDelete.add(key);
+			}
+			else if(i.getLifeTime() > 1000 && i.getType() == ItemType.UNDEFINED){
+				i.setType(ItemType.PALLET);
+			}
+		}
+		return toDelete;
+	}
+	
 	public static void printList(List<Item> list){
+		Main.printf("--------------------------------------");
 		for(Item i : list){
 			Main.printf("[EYE OF MARVIN]         : " + i.toString());
+		}
+		Main.printf("======================================");
+	}
+
+	public static void printHashtable(Hashtable<Point,Item> ht){
+		Enumeration<Item> items = ht.elements();
+		Main.printf("--------------------------------" + ht.size() + "Elements");
+		while(items.hasMoreElements()){
+			Item item = items.nextElement();
+			Main.printf("[EYE OF MARVIN]         : " + item.toString());
 		}
 		Main.printf("------------------------------------------------------");
 	}
@@ -120,18 +113,10 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	public Item getNearestPallet() {
 		Point currentPosition = poseGiver.getPosition().toTimedPoint();
 		int currentDistance = 9999;
-		Item nearestPallet = null;
-		// on choisit l'item qui est le plus proche de nous
-		for(Item item : masterList){
-			if(item.getDistance(currentPosition) < currentDistance && item.getType() == ItemType.PALLET){
-				nearestPallet = item;
-				currentDistance = item.getDistance(currentPosition);
-			}
-		}
-		return nearestPallet;
+		return null;
 	}
 
-	public List<Item> getItemsList() {
-		return masterList;
+	public Hashtable<Point,Item> getmasterTable() {
+		return masterTable;
 	}
 }

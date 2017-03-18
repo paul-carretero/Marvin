@@ -17,7 +17,7 @@ public class PositionCalculator extends Thread implements ModeListener, MoveList
 	private TimedPose 				latestXCheck;
 	private TimedPose 				latestYCheck;
 	private TimedPose 				lastCalculatedPosition;
-	private int 					refreshRate = 300;
+	private int 					refreshRate = 100;
 	private volatile Mode			mode;
 	private VisionSensor 			radar;
 	private OdometryPoseProvider 	odometryPoseProvider;
@@ -26,7 +26,7 @@ public class PositionCalculator extends Thread implements ModeListener, MoveList
 	public void run() {
 		Main.printf("[POSITION CALCULATOR]   : Started");
 		while(!isInterrupted() && mode != Mode.END){
-			Main.printf("[POSITION CALCULATOR]   : " + odometryPoseProvider.getPose().toString());
+			//Main.printf("[POSITION CALCULATOR]   : " + odometryPoseProvider.getPose().toString());
 			//Main.printf("[POSITION CALCULATOR]   : Radar : " + radar.getNearItemDistance());
 			syncWait();
 		}

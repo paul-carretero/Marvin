@@ -1,13 +1,8 @@
 package positionManager;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -90,34 +85,6 @@ public class ColorCalibrator {
 		float[][] readColors = (float[][])ois.readObject() ;
 		ois.close();
 		
-		/*BufferedWriter outputWritter =  new BufferedWriter(new FileWriter("conf.txt"));
-		
-		for(float f[] : colors){
-			for(float c : f){
-				outputWritter.write(Float.toString(c) + ";");
-			}
-			outputWritter.newLine();
-		}
-		outputWritter.flush();
-		outputWritter.close();
-		
-		BufferedReader inputReader = new BufferedReader(new FileReader("conf.txt"));
-		
-		float[][] readColors = new float[7][average.sampleSize()];
-		
-		int i = 0;
-		int j = 0;
-		String l = inputReader.readLine();
-		while(l != null){
-			j = 0;
-			for(String s : l.split(";")){
-				readColors[i][j] = Float.parseFloat(s);
-				j = j+1;
-			}
-			l = inputReader.readLine();
-			i = i+1;
-		}*/
-		
 		boolean again = true;
 		
 		while (again) {
@@ -179,6 +146,7 @@ public class ColorCalibrator {
 				again = false;
 			}
 		}
+		colorSensor.close();
 	}
 
 }

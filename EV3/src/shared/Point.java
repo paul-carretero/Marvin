@@ -12,6 +12,29 @@ public class Point {
 		return y;
 	}
 	
+	public int setX(int x){
+		return this.x = x;
+	}
+	
+	public int setY(int y){
+		return this.y = y;
+	}
+	
+	@Override
+	public boolean equals(Object  o){
+		if (!(o instanceof Point)) {
+	        return false;
+	    } else {
+	    	Point p = (Point)o;
+	    	return (y() == p.y() && x() == p.x());
+	    }
+	}
+	
+	@Override
+	public int hashCode() {
+		return (this.x()) + (1000 * (this.y())); // parfait si x et y < 1000...
+	}
+	
 	public void update(int x, int y){
 		this.x = x;
 		this.y = y;

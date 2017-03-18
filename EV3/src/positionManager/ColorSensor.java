@@ -17,11 +17,13 @@ public class ColorSensor {
 	private float[][] colors;
 	private Port port;
 	private EV3ColorSensor colorSensor;
+	private SampleProvider average;
 	
 	public ColorSensor(){
 		port        = LocalEV3.get().getPort(Main.COLOR_SENSOR);
 		colorSensor = new EV3ColorSensor(port);
 		colors      = new float[16][0];
+		average		= new MeanFilter(colorSensor.getRGBMode(), 1);
 	}
 	
 	public void lightOn(){
@@ -41,7 +43,6 @@ public class ColorSensor {
 	 * calibrée
 	 */
 	public int getCurrentColor(){
-		SampleProvider average = new MeanFilter(colorSensor.getRGBMode(), 1);
 		float[]        sample  = new float[average.sampleSize()];
 		double         minscal = Double.MAX_VALUE;
 		int            color   = -1;

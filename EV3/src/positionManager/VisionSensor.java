@@ -5,6 +5,7 @@ import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
+import lejos.utility.Delay;
 
 public class VisionSensor {
 	private EV3UltrasonicSensor radarUS;
@@ -13,8 +14,11 @@ public class VisionSensor {
 	public VisionSensor(){
 		Port port  = LocalEV3.get().getPort(Main.US_SENSOR);
 		radarUS = new EV3UltrasonicSensor(port);
-		radar = radarUS.getDistanceMode();
+		Delay.msDelay(500);
+		radarUS.disable();
+		Delay.msDelay(500);
 		radarUS.enable();
+		radar = radarUS.getDistanceMode();
 	}
 	
 	public int getNearItemDistance(){

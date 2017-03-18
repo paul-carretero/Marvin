@@ -23,6 +23,6 @@ public class Item extends TimedPoint{
 	}
 
 	public String toString(){
-		return "Item = [" + type.toString() + "] + POS : [" + x +"," + y + "]";
+		return "Item = [" + type.toString() + "] + POS : [" + x +"," + y + "] @ " + getReferenceTime();
 	}
 }

@@ -1,10 +1,11 @@
 package interfaces;
 
-import java.util.List;
+import java.util.Hashtable;
 
 import shared.Item;
+import shared.Point;
 
 public interface ItemGiver {
 	public Item getNearestPallet();
-	public List<Item> getItemsList();
+	public Hashtable<Point,Item> getmasterTable();
 }

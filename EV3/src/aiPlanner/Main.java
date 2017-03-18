@@ -11,8 +11,8 @@ import shared.Timer;
 
 public class Main{
 	
-	public static final int X_INITIAL 				= 180; // ou 50 ou 150
-	public static final int Y_INITIAL 				= 60; // 30
+	public static final int X_INITIAL 				= 100; // ou 50 ou 150
+	public static final int Y_INITIAL 				= 30; // 30
 	public static final int H_INITIAL 				= 90;
 	
 	/* DEPART COTE 2
