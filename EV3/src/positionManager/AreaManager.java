@@ -1,7 +1,9 @@
 package positionManager;
 
 import aiPlanner.Main;
+import area.Area;
 import interfaces.ModeListener;
+import interfaces.PoseGiver;
 import shared.Mode;
 
 public class AreaManager extends Thread implements ModeListener {
@@ -11,11 +13,13 @@ public class AreaManager extends Thread implements ModeListener {
 	private int refreshRate;
 	private volatile Mode currentMode;
 	private int currentColor;
+	private PoseGiver pg;
 	
-	public AreaManager(){
+	public AreaManager(PoseGiver pg){
 		colorSensor = new ColorSensor();
 		this.refreshRate = 150;
 		colorSensor.setCalibration();
+		this.pg = pg;
 		Main.printf("[AREA MANAGER]          : Initialized");
 	}
 	
@@ -34,7 +38,37 @@ public class AreaManager extends Thread implements ModeListener {
 		int checkColor = colorSensor.getCurrentColor();
 		if(checkColor != currentColor){
 			currentColor = checkColor;
-			//Main.printf("Detected Color : " + currentColor);
+			switch(checkColor){
+				case Main.COLOR_BLACK:
+					if(pg.getPosition().getY() < 125 || pg.getPosition().getY() > 175 ){
+						pg.sendFixY(Main.X_BLACK_LINE);
+					}
+					else if(pg.getPosition().getX() > 125 || pg.getPosition().getX() < 75 ){
+						pg.sendFixY(Main.Y_BLACK_LINE);
+					}
+					break;
+				case Main.COLOR_BLUE:
+					pg.sendFixY(Main.Y_BLUE_LINE);
+					break;
+				case Main.COLOR_GREEN:
+					pg.sendFixY(Main.Y_GREEN_LINE);
+					break;
+				case Main.COLOR_RED:
+					pg.sendFixX(Main.X_RED_LINE);
+					break;
+				case Main.COLOR_YELLOW:
+					pg.sendFixX(Main.X_YELLOW_LINE);
+					break;
+				case Main.COLOR_WHITE:
+					if(pg.getPosition().getY() < 150){
+						pg.sendFixY(Main.Y_BOTTOM_WHITE);
+					}
+					else{
+						pg.sendFixY(Main.Y_TOP_WHITE);
+					}
+					
+					break;
+			}
 		}
 	}
 	

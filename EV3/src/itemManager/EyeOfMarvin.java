@@ -6,7 +6,7 @@ import java.util.List;
 import aiPlanner.Main;
 import interfaces.ItemGiver;
 import interfaces.ModeListener;
-import interfaces.PositionGiver;
+import interfaces.PoseGiver;
 import interfaces.ServerListener;
 import interfaces.SignalListener;
 import shared.Item;
@@ -17,13 +17,13 @@ import shared.SignalType;
 import shared.TimedPoint;
 
 public class EyeOfMarvin implements ServerListener, ItemGiver {
-	private PositionGiver 	positionGiver;
+	private PoseGiver 		poseGiver;
 	private volatile 		List<Item> masterList;
 	private final int 		maxDistanceBias = 5; // imprécision du serveur, en cm
 	private SignalListener 	evtManager;
 	
-	public EyeOfMarvin(PositionGiver pg, SignalListener evtManager) {
-		this.positionGiver	= pg;
+	public EyeOfMarvin(PoseGiver pg, SignalListener evtManager) {
+		this.poseGiver	= pg;
 		this.evtManager 	= evtManager;
 		masterList 			= new ArrayList<Item>();
 		masterList.add(new Item(Main.X_INITIAL, Main.Y_INITIAL, Main.TIMER.getElapsedMs(), ItemType.ME));
@@ -56,7 +56,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	}
 	
 	private void updateMe(){
-		Point currentPosition = positionGiver.getPosition().toTimedPoint();
+		Point currentPosition = poseGiver.getPosition().toTimedPoint();
 		Item marvin = findMe();
 		Item marvinNewPos = marvin;
 		int currentDistance = 9999;
@@ -118,7 +118,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	}
 	
 	public Item getNearestPallet() {
-		Point currentPosition = positionGiver.getPosition().toTimedPoint();
+		Point currentPosition = poseGiver.getPosition().toTimedPoint();
 		int currentDistance = 9999;
 		Item nearestPallet = null;
 		// on choisit l'item qui est le plus proche de nous

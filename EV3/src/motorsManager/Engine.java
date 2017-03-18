@@ -24,7 +24,7 @@ public class Engine implements EngineUpdateListener{
 	private float coeffCorrectionForward = 1;
 	WaitProvider waitProvider;
 	
-	private float right_wheel_correction = 0; // positif ou negatif...
+	private float right_wheel_correction = -0.3f; // positif ou negatif...
 	
 	public Engine(EventHandler eventManager, WaitProvider marvin){
 		leftMotor	= new EV3LargeRegulatedMotor(LocalEV3.get().getPort(Main.LEFT_WHEEL));
@@ -47,8 +47,14 @@ public class Engine implements EngineUpdateListener{
 	}
 
 
-	public void goForward(int distance, int speed){
-		int waitTime = (int) (((distance*10000)/speed) * coeffCorrectionForward);
+	public void goForward(float distance, float speed){
+		if(speed > 200){
+			distance = 0.999f * distance - 1.5537f; // 0.1% d'erreur sur 1m ...
+		}
+		else{
+			distance = 0.9944f * distance - 0.46f; // 0.1% d'erreur sur 1m ...
+		}
+		int waitTime = (int) ((distance * 10000f/speed) * coeffCorrectionForward);
 		pilot.setLinearSpeed(speed);
 		Main.printf("[ENGINE]                : waitTime = " + waitTime);
 		pilot.forward();
@@ -56,7 +62,13 @@ public class Engine implements EngineUpdateListener{
 		pilot.stop();
 	}
 	
-	public void goBackward(int distance, int speed){
+	public void goBackward(float distance, float speed){
+		if(speed > 200){
+			distance = 0.999f * distance - 1.5537f; // 0.1% d'erreur sur 1m ...
+		}
+		else{
+			distance = 0.9944f * distance - 0.46f; // 0.1% d'erreur sur 1m ...
+		}
 		int waitTime = (int) (((distance*10000)/speed) * coeffCorrectionBackward);
 		pilot.setLinearSpeed(speed);
 		pilot.backward();

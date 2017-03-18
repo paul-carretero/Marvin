@@ -3,7 +3,7 @@ package positionManager;
 import aiPlanner.Main;
 import interfaces.ModeListener;
 import interfaces.MoveListener;
-import interfaces.PositionGiver;
+import interfaces.PoseGiver;
 import interfaces.SignalListener;
 import shared.Mode;
 import shared.SignalType;
@@ -12,7 +12,7 @@ import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MoveProvider;
 import lejos.robotics.navigation.Pose;
 
-public class PositionCalculator extends Thread implements ModeListener, MoveListener, PositionGiver, SignalListener {
+public class PositionCalculator extends Thread implements ModeListener, MoveListener, PoseGiver, SignalListener {
 
 	private TimedPose 				latestXCheck;
 	private TimedPose 				latestYCheck;
@@ -25,8 +25,9 @@ public class PositionCalculator extends Thread implements ModeListener, MoveList
 	
 	public void run() {
 		Main.printf("[POSITION CALCULATOR]   : Started");
-		while(!isInterrupted()){
-			Main.printf("[POSITION CALCULATOR]   : " + odometryPoseProvider.getPose().toString());
+		while(!isInterrupted() && mode != Mode.END){
+			//Main.printf("[POSITION CALCULATOR]   : " + odometryPoseProvider.getPose().toString());
+			Main.printf("[POSITION CALCULATOR]   : Radar : " + radar.getNearItemDistance());
 			syncWait();
 		}
 		Main.printf("[POSITION CALCULATOR]   : Finished");
@@ -92,5 +93,21 @@ public class PositionCalculator extends Thread implements ModeListener, MoveList
 	public void signal(SignalType e) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void sendFixX(int x) {
+		Pose tempPose = odometryPoseProvider.getPose();
+		tempPose.setLocation(x, tempPose.getY());
+		odometryPoseProvider.setPose(tempPose);
+		lastCalculatedPosition.setLocation(x, lastCalculatedPosition.getY());
+		latestXCheck = new TimedPose(x, lastCalculatedPosition.getY(), lastCalculatedPosition.getHeading());
+	}
+
+	public void sendFixY(int y) {
+		Pose tempPose = odometryPoseProvider.getPose();
+		tempPose.setLocation(tempPose.getX(), y);
+		odometryPoseProvider.setPose(tempPose);
+		lastCalculatedPosition.setLocation(lastCalculatedPosition.getX(), y);
+		latestXCheck = new TimedPose(lastCalculatedPosition.getX(), y, lastCalculatedPosition.getHeading());
 	}
 }

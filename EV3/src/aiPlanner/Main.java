@@ -6,6 +6,7 @@ package aiPlanner;
 
 import java.net.*;
 
+import area.*;
 import shared.Timer;
 
 public class Main{
@@ -20,16 +21,19 @@ public class Main{
 	public static final int H_INITIAL 				= -90;
 	*/
 	
-	public static final int X_OBJECTIVE_WHITE		= 270;
-	public static final int X_DEFEND_WHITE 			= 30;
+	public static final int Y_OBJECTIVE_WHITE		= 270;
+	public static final int Y_DEFEND_WHITE 			= 30;
 	
-	public static final int X_GREEN_LINE 			= 90;
-	public static final int X_BLUE_LINE 			= 210;
-	public static final int X_BLACK_LINE 			= 150;
+	public static final int Y_BOTTOM_WHITE			= 30;
+	public static final int Y_TOP_WHITE 			= 270;
 	
-	public static final int Y_RED_LINE 				= 150;
-	public static final int Y_YELLOW_LINE 			= 50;
-	public static final int Y_BLACK_LINE 			= 100;
+	public static final int Y_GREEN_LINE 			= 210;
+	public static final int Y_BLUE_LINE 			= 90;
+	public static final int Y_BLACK_LINE 			= 150;
+	
+	public static final int X_RED_LINE 				= 150;
+	public static final int X_YELLOW_LINE 			= 50;
+	public static final int X_BLACK_LINE 			= 100;
 	
 	public static final int STARTED 				= 0;
 	public static final int HAS_MOVED 				= 1;
@@ -75,23 +79,32 @@ public class Main{
 	
 	public static final Timer TIMER 				= new Timer();
 		
-	/*public static final Area[] AREAS				= {
-		new Area('A',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('B',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('C',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('D',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('E',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('F',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('G',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('H',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('I',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('J',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('K',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('L',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('M',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('N',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE),
-		new Area('O',0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE,0,COLOR_BLUE)
-	};*/
+	public static final Area[] AREAS				= {
+		new BottomArea(0),
+		new BorderLeftArea(1,Y_BLUE_LINE,COLOR_BLUE,Y_BOTTOM_WHITE,COLOR_WHITE),
+		new InnerArea(2,X_BLACK_LINE,COLOR_BLACK,X_YELLOW_LINE,COLOR_YELLOW,Y_BLUE_LINE,COLOR_BLUE,Y_BOTTOM_WHITE,COLOR_WHITE),
+		new InnerArea(3,X_RED_LINE,COLOR_RED,X_BLACK_LINE,COLOR_BLACK,Y_BLUE_LINE,COLOR_BLUE,Y_BOTTOM_WHITE,COLOR_WHITE),
+		new BorderRightArea(4,Y_BLUE_LINE,COLOR_BLUE,Y_BOTTOM_WHITE,COLOR_WHITE),	
+		new BorderLeftArea(5,Y_BLACK_LINE,COLOR_BLACK,Y_BLUE_LINE,COLOR_BLUE),
+		new CenterArea(6),
+		new BorderRightArea(7,Y_BLACK_LINE,COLOR_BLACK,Y_BLUE_LINE,COLOR_BLUE),		
+		new BorderLeftArea(8,Y_GREEN_LINE,COLOR_GREEN,Y_BLACK_LINE,COLOR_BLACK),
+		new BorderRightArea(9,Y_GREEN_LINE,COLOR_GREEN,Y_BLACK_LINE,COLOR_BLACK),
+		new BorderRightArea(10,Y_TOP_WHITE,COLOR_WHITE,Y_GREEN_LINE,COLOR_GREEN),
+		new InnerArea(11,X_BLACK_LINE,COLOR_BLACK,X_YELLOW_LINE,COLOR_YELLOW,Y_TOP_WHITE,COLOR_WHITE,Y_GREEN_LINE,COLOR_GREEN),
+		new InnerArea(12,X_RED_LINE,COLOR_RED,X_BLACK_LINE,COLOR_BLACK,Y_TOP_WHITE,COLOR_WHITE,Y_GREEN_LINE,COLOR_GREEN),
+		new BorderRightArea(13,Y_TOP_WHITE,COLOR_WHITE,Y_GREEN_LINE,COLOR_GREEN),
+		new TopArea(14),
+		new DefaultArea(15)
+	};
+	
+	public static Area getArea(int id){
+		return AREAS[id];
+	}
+	
+	public static float distancePointDroite(float px, float py, float a, float b, float c){
+		return (float) ( (Math.abs( (a*px + b*py + c) )) / (Math.sqrt(a*a + b*b)));
+	}
 	
 	synchronized public static void setState(int i, boolean state){
 		GLOBALSTATE[i] = state;

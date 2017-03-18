@@ -58,13 +58,13 @@ public class Marvin implements SignalListener, WaitProvider{
 		System.out.println(" _____/_o_\\_____");
 		eventManager 	= new EventHandler();
 		engine 			= new Engine(eventManager,this);
-		areaManager		= new AreaManager();
 		System.out.println("(==(/_______\\)==)");
 		graber 			= new GraberManager();
 		positionManager = new PositionCalculator();
 		System.out.println(" \\==\\/     \\/==/");
 		itemManager 	= new EyeOfMarvin(positionManager, eventManager);
 		System.out.println("_________________");
+		areaManager		= new AreaManager(positionManager);
 		server 			= new Server(itemManager);
 
 		eventManager.addSignalListener(this);
@@ -86,16 +86,14 @@ public class Marvin implements SignalListener, WaitProvider{
 		syncWait(100);
 		
 		System.out.println(" AWAITING ORDERS");
-		//Button.ENTER.waitForPressAndRelease();
+		Button.ENTER.waitForPressAndRelease();
 		Sound.beep();
 		/**********************************************************/
 				
 		while(!goals.isEmpty() && !(Main.TIMER.getElapsedMin() > 5)){
 			goals.pop().startWrapper();
 		}
-		
-		engine.goForward(80, Main.CRUISE_SPEED);
-		
+		//engine.turnHere(10, Main.ROTATION_SPEED);
 		updateMode(Mode.END);
 		syncWait(1000);
 		cleanUp();
