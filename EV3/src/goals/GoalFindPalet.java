@@ -1,4 +1,6 @@
-package aiPlanner;
+package goals;
+
+import aiPlanner.Marvin;
 
 public class GoalFindPalet extends Goal {
 	
@@ -28,7 +30,7 @@ public class GoalFindPalet extends Goal {
 	}
 	
 	@Override
-	protected String getName() {
+	public String getName() {
 		return NAME;
 	}
 

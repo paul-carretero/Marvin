@@ -81,7 +81,7 @@ public class ColorSensor {
 			ois.close();
 		}
 		catch (Exception e) {
-			Main.printf("[COLOR SENSOR]         : Impossible de charger le fichier de calibration");
+			Main.printf("[COLOR SENSOR]          : Impossible de charger le fichier de calibration");
 		}
 	}
 }

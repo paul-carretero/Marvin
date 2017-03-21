@@ -44,8 +44,6 @@ public class BorderRightArea extends Area{
 				if(color == Main.COLOR_BLUE && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(7);
 				}
-				Main.printf("color == Main.COLOR_RED = " + (color == Main.COLOR_RED));
-				Main.printf("checkAmbiguousAngleVertical = " + checkAmbiguousAngleVertical(p) );
 				if(color == Main.COLOR_RED && checkAmbiguousAngleVertical(p) ){
 					return Main.getArea(3);
 				}

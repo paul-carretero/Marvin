@@ -1,11 +1,13 @@
-package aiPlanner;
+package goals;
 
-public class GoalRecalibrate extends Goal {
+import aiPlanner.Marvin;
+
+public class GoalFindEnnemy extends Goal {
 	
-	protected final String NAME = "GoalRecalibrate";
+	protected	final	String	NAME	=	"GoalFindEnnemy";
 
-	public GoalRecalibrate(Marvin ia) {
-		super(ia);
+	public GoalFindEnnemy(Marvin ia, int timeout) {
+		super(ia, timeout);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -17,7 +19,7 @@ public class GoalRecalibrate extends Goal {
 
 	@Override
 	public void start() {
-		Main.printf("Sounds awful.");
+		// TODO Auto-generated method stub
 		
 	}
 
@@ -28,7 +30,7 @@ public class GoalRecalibrate extends Goal {
 	}
 	
 	@Override
-	protected String getName() {
+	public String getName() {
 		return NAME;
 	}
 

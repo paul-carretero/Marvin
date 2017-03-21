@@ -55,11 +55,14 @@ public class EventHandler extends Thread implements ModeListener, MoveListener, 
 		if((currentPression == SignalType.PRESSION_PUSHED) && (pressSensor.isPressed() == false)){
 			currentPression = SignalType.PRESSION_RELEASED;
 			broadcast(SignalType.PRESSION_RELEASED);
+			
 		}
 		else{
 			if((currentPression == SignalType.PRESSION_RELEASED) && (pressSensor.isPressed())){
+				Main.printf("PRESSION HANDLER = " + Main.getState(Main.PRESSION));
 				currentPression = SignalType.PRESSION_PUSHED;
 				broadcast(SignalType.PRESSION_PUSHED);
+				Main.setState(Main.PRESSION, true);
 			}
 		}
 	}

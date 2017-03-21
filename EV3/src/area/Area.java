@@ -7,19 +7,20 @@ public abstract class Area {
 
 	protected int ID;
 	protected final static int AMBIGUOUS_ANGLE = 10;
+	protected static final int MARGE_ERREUR = 30; // en mm
 	
 	public Area(int id){
 		this.ID = id;
 	}
 	
 	public static Area getAreaWithPosition(Pose p){
-		if(p.getY() < (Main.Y_BOTTOM_WHITE)){
+		if(p.getY() > (Main.Y_TOP_WHITE)){
 			return Main.getArea(0);
 		}
-		else if(p.getY() > (Main.Y_TOP_WHITE)){
+		else if(p.getY() < (Main.Y_BOTTOM_WHITE)){
 			return Main.getArea(14);
 		}
-		else if(p.getY() > (Main.Y_GREEN_LINE) && p.getY() < (Main.Y_TOP_WHITE)){
+		else if(p.getY() < (Main.Y_GREEN_LINE) && p.getY() > (Main.Y_BOTTOM_WHITE)){
 			if(p.getX() < (Main.X_YELLOW_LINE)){
 				return Main.getArea(10);
 			}
@@ -33,7 +34,7 @@ public abstract class Area {
 				return Main.getArea(13);
 			}
 		}
-		else if(p.getY() > (Main.Y_BLACK_LINE) && p.getY() < (Main.Y_GREEN_LINE)){
+		else if(p.getY() < (Main.Y_BLACK_LINE) && p.getY() > (Main.Y_GREEN_LINE)){
 			if(p.getX() < (Main.X_YELLOW_LINE)){
 				return Main.getArea(8);
 			}
@@ -47,7 +48,7 @@ public abstract class Area {
 				return Main.getArea(9);
 			}
 		}
-		else if(p.getY() > (Main.Y_BLUE_LINE) && p.getY() < (Main.Y_BLACK_LINE)){
+		else if(p.getY() < (Main.Y_BLUE_LINE) && p.getY() > (Main.Y_BLACK_LINE)){
 			if(p.getX() < (Main.X_YELLOW_LINE)){
 				return Main.getArea(5);
 			}
@@ -61,7 +62,7 @@ public abstract class Area {
 				return Main.getArea(7);
 			}
 		}
-		else if(p.getY() > (Main.Y_BOTTOM_WHITE) && p.getY() < (Main.Y_BLUE_LINE)){
+		else if(p.getY() < (Main.Y_TOP_WHITE) && p.getY() > (Main.Y_BLUE_LINE)){
 			if(p.getX() < (Main.X_YELLOW_LINE)){
 				return Main.getArea(1);
 			}
@@ -81,8 +82,6 @@ public abstract class Area {
 	public String toString(){
 		return "A"+ID;
 	}
-	
-	protected static final int MARGE_ERREUR = 3;
 	
 	public abstract int getConsistency(Pose p);
 	

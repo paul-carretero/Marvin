@@ -14,15 +14,15 @@ public class CenterArea extends Area {
 		if(
 				p.getX() < (Main.X_RED_LINE + MARGE_ERREUR) && 
 				p.getX() > (Main.X_YELLOW_LINE - MARGE_ERREUR) &&
-				p.getY() < (Main.Y_GREEN_LINE + MARGE_ERREUR) &&
-				p.getY() > (Main.Y_BLUE_LINE - MARGE_ERREUR))
+				p.getY() > (Main.Y_GREEN_LINE - MARGE_ERREUR) &&
+				p.getY() < (Main.Y_BLUE_LINE + MARGE_ERREUR))
 		{
 			return 0;
 		}
 		else{
 			return (int) Math.max(
 					Math.max( (p.getX() - Main.X_RED_LINE) , (Main.X_YELLOW_LINE - p.getX())),
-					Math.max( (p.getY() - Main.Y_GREEN_LINE) , (Main.Y_BLUE_LINE - p.getY()))
+					Math.max( (p.getY() - Main.Y_BLUE_LINE) , (Main.Y_GREEN_LINE - p.getY()))
 			);
 		}
 	}
@@ -35,7 +35,7 @@ public class CenterArea extends Area {
 		case Main.COLOR_BLACK:
 			// ici on soustrait bien la marge d'erreur au lieu de la rajouté, afin d'éviter les cas limites
 			if(p.getX() < (Main.X_RED_LINE - MARGE_ERREUR) && p.getX() > (Main.X_YELLOW_LINE + MARGE_ERREUR) && 
-				p.getY() < (Main.Y_GREEN_LINE - MARGE_ERREUR) && p.getY() > (Main.Y_BLUE_LINE + MARGE_ERREUR)){
+				p.getY() < (Main.Y_BLUE_LINE - MARGE_ERREUR) && p.getY() > (Main.Y_GREEN_LINE + MARGE_ERREUR)){
 				return this;
 			}
 			else{
@@ -43,10 +43,10 @@ public class CenterArea extends Area {
 			}
 		case Main.COLOR_RED:
 			if( checkAmbiguousAngleVertical(p) ){
-				if(p.getY() < (Main.Y_GREEN_LINE) && p.getY() > (Main.Y_BLACK_LINE)){
+				if(p.getY() > (Main.Y_GREEN_LINE) && p.getY() < (Main.Y_BLACK_LINE)){
 					return Main.getArea(9);
 				}
-				if(p.getY() < (Main.Y_BLACK_LINE) && p.getY() > (Main.Y_BLUE_LINE)){
+				if(p.getY() > (Main.Y_BLACK_LINE) && p.getY() < (Main.Y_BLUE_LINE)){
 					return Main.getArea(7);
 				}
 			}
@@ -70,10 +70,10 @@ public class CenterArea extends Area {
 			}
 		case Main.COLOR_YELLOW:
 			if( checkAmbiguousAngleVertical(p) ){
-				if(p.getY() < (Main.Y_GREEN_LINE) && p.getY() > (Main.Y_BLACK_LINE)){
+				if(p.getY() > (Main.Y_GREEN_LINE) && p.getY() < (Main.Y_BLACK_LINE)){
 					return Main.getArea(8);
 				}
-				if(p.getY() < (Main.Y_BLACK_LINE) && p.getY() > (Main.Y_BLUE_LINE)){
+				if(p.getY() > (Main.Y_BLACK_LINE) && p.getY() < (Main.Y_BLUE_LINE)){
 					return Main.getArea(5);
 				}
 			}

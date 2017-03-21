@@ -5,19 +5,17 @@ import lejos.robotics.navigation.Pose;
 
 public class BottomArea extends Area{
 	
-	private final int yTop = 30;
-
 	public BottomArea(int id) {
 		super(id);
 	}
 
 	@Override
 	public int getConsistency(Pose p) {
-		if(p.getY() < (yTop + MARGE_ERREUR)){
+		if(p.getY() < (Main.Y_BOTTOM_WHITE + MARGE_ERREUR)){
 			return 0;
 		}
 		else{
-			return (int) (p.getY() - yTop);
+			return (int) (p.getY() - Main.Y_BOTTOM_WHITE);
 		}
 	}
 
@@ -30,16 +28,16 @@ public class BottomArea extends Area{
 			// on évite les cas limites
 			if( checkAmbiguousAngleHorizontal(p) ){
 				if(p.getX() < Main.X_YELLOW_LINE){
-					return Main.getArea(1);
+					return Main.getArea(10);
 				}
 				if(p.getX() > Main.X_YELLOW_LINE && p.getX() < Main.X_BLACK_LINE){
-					return Main.getArea(2);
+					return Main.getArea(11);
 				}
 				if(p.getX() > Main.X_BLACK_LINE && p.getX() < Main.X_RED_LINE){
-					return Main.getArea(3);
+					return Main.getArea(12);
 				}
 				if(p.getX() > Main.X_RED_LINE){
-					return Main.getArea(4);
+					return Main.getArea(13);
 				}
 			}
 		}

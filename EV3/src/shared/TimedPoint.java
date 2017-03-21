@@ -2,7 +2,7 @@ package shared;
 
 import aiPlanner.Main;
 
-public class TimedPoint extends Point{
+public class TimedPoint extends IntPoint{
 	private int createdTime;
 	private int referenceTime;
 

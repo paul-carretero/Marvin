@@ -1,10 +1,12 @@
-package aiPlanner;
+package goals;
 
-public class GoalGrab extends Goal {
+import aiPlanner.Marvin;
+
+public class GoalGrabAndDropPalet extends Goal {
 	
-	protected final String NAME = "GoalGrab";
+	protected final String NAME = "GoalGrabAndDropPalet";
 
-	public GoalGrab(Marvin ia, int timeout) {
+	public GoalGrabAndDropPalet(Marvin ia, int timeout) {
 		super(ia, timeout);
 		// TODO Auto-generated constructor stub
 	}
@@ -17,7 +19,7 @@ public class GoalGrab extends Goal {
 
 	@Override
 	public void start() {
-		Main.printf("Here I am, brain the size of a planet, and they ask me to pick up a piece of paper.");
+		// TODO Auto-generated method stub
 		
 	}
 
@@ -26,9 +28,10 @@ public class GoalGrab extends Goal {
 		// TODO Auto-generated method stub
 		
 	}
-
+	
 	@Override
-	protected String getName() {
+	public String getName() {
 		return NAME;
 	}
+
 }

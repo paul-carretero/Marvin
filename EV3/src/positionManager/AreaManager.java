@@ -38,16 +38,17 @@ public class AreaManager extends Thread implements ModeListener {
 		Main.printf("[AREA MANAGER]          : Finished");
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean updateColor(){
 		int checkColor = colorSensor.getCurrentColor();
-		if(checkColor != currentColor){
+		if(checkColor != currentColor && false){
 			currentColor = checkColor;
 			switch(checkColor){
 				case Main.COLOR_BLACK:
-					if(pg.getPosition().getY() < 125 || pg.getPosition().getY() > 175 ){
+					if(pg.getPosition().getY() < 1250 || pg.getPosition().getY() > 1750 ){
 						pg.sendFixY(Main.X_BLACK_LINE);
 					}
-					else if(pg.getPosition().getX() > 125 || pg.getPosition().getX() < 75 ){
+					else if(pg.getPosition().getX() > 1250 || pg.getPosition().getX() < 750 ){
 						pg.sendFixY(Main.Y_BLACK_LINE);
 					}
 					break;
@@ -64,7 +65,7 @@ public class AreaManager extends Thread implements ModeListener {
 					pg.sendFixX(Main.X_YELLOW_LINE);
 					break;
 				case Main.COLOR_WHITE:
-					if(pg.getPosition().getY() < 150){
+					if(pg.getPosition().getY() < Main.Y_BLACK_LINE){
 						pg.sendFixY(Main.Y_BOTTOM_WHITE);
 					}
 					else{

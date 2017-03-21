@@ -4,8 +4,6 @@ import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
 
 public class TopArea extends Area{
-
-	private final int yBottom = 270;
 	
 	public TopArea(int id) {
 		super(id);
@@ -14,11 +12,11 @@ public class TopArea extends Area{
 
 	@Override
 	public int getConsistency(Pose p) {
-		if(p.getY() > (yBottom - MARGE_ERREUR)){
+		if(p.getY() > (Main.Y_TOP_WHITE - MARGE_ERREUR)){
 			return 0;
 		}
 		else{
-			return (int) (yBottom - p.getY());
+			return (int) (Main.Y_TOP_WHITE - p.getY());
 		}
 	}
 

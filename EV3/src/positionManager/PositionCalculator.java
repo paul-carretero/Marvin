@@ -14,33 +14,37 @@ import lejos.robotics.navigation.Pose;
 
 public class PositionCalculator extends Thread implements ModeListener, MoveListener, PoseGiver, SignalListener {
 
-	private TimedPose 				latestXCheck;
-	private TimedPose 				latestYCheck;
-	private TimedPose 				lastCalculatedPosition;
-	private int 					refreshRate = 100;
+	private Pose 					lastCalculatedPosition;
+	private int 					refreshRate = 250;
 	private volatile Mode			mode;
 	private VisionSensor 			radar;
 	private OdometryPoseProvider 	odometryPoseProvider;
 	
+	public PositionCalculator(){
+		this.lastCalculatedPosition	= new TimedPose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
+		this.mode 					= Mode.ACTIVE;
+		this.radar 					= new VisionSensor();
+		Main.printf("[POSITION CALCULATOR]   : Initialized");
+	}
 	
 	public void run() {
 		Main.printf("[POSITION CALCULATOR]   : Started");
 		while(!isInterrupted() && mode != Mode.END){
-			//Main.printf("[POSITION CALCULATOR]   : " + odometryPoseProvider.getPose().toString());
+			//Main.printf("[POSITION CALCULATOR]   : " + lastCalculatedPosition.toString());
 			//Main.printf("[POSITION CALCULATOR]   : Radar : " + radar.getNearItemDistance());
+			updatePose();
 			syncWait();
 		}
 		Main.printf("[POSITION CALCULATOR]   : Finished");
 		
 	}
 	
-	public PositionCalculator(){
-		this.latestXCheck 			= new TimedPose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
-		this.latestYCheck 			= new TimedPose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
-		this.lastCalculatedPosition	= new TimedPose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
-		this.mode 					= Mode.ACTIVE;
-		this.radar 					= new VisionSensor();
-		Main.printf("[POSITION CALCULATOR]   : Initialized");
+	private void updatePose() {
+		Pose odometriquePose = odometryPoseProvider.getPose();
+		//TODO adjust with radar
+		//TODO adust with Map
+		//TODO adjust with Area
+		lastCalculatedPosition = odometriquePose;
 	}
 	
 	public void addOdometryPoseProvider(MoveProvider mp){
@@ -66,7 +70,7 @@ public class PositionCalculator extends Thread implements ModeListener, MoveList
 		this.mode = m;
 	}
 
-	public TimedPose getPosition() {
+	public Pose getPosition() {
 		return lastCalculatedPosition;
 	}
 
@@ -99,15 +103,15 @@ public class PositionCalculator extends Thread implements ModeListener, MoveList
 		Pose tempPose = odometryPoseProvider.getPose();
 		tempPose.setLocation(x, tempPose.getY());
 		odometryPoseProvider.setPose(tempPose);
-		lastCalculatedPosition.setLocation(x, lastCalculatedPosition.getY());
-		latestXCheck = new TimedPose(x, lastCalculatedPosition.getY(), lastCalculatedPosition.getHeading());
 	}
 
 	public void sendFixY(int y) {
 		Pose tempPose = odometryPoseProvider.getPose();
 		tempPose.setLocation(tempPose.getX(), y);
 		odometryPoseProvider.setPose(tempPose);
-		lastCalculatedPosition.setLocation(lastCalculatedPosition.getX(), y);
-		latestXCheck = new TimedPose(lastCalculatedPosition.getX(), y, lastCalculatedPosition.getHeading());
+	}
+
+	public int getRadarDistance() {
+		return radar.getNearItemDistance();
 	}
 }

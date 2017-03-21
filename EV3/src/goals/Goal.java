@@ -1,15 +1,23 @@
-package aiPlanner;
+package goals;
 
 import java.util.ArrayList;
 
+import aiPlanner.Main;
+import aiPlanner.Marvin;
 import shared.Mode;
 
 public abstract class Goal {
-	protected ArrayList<Integer> preConditions;
-	protected ArrayList<Integer> postConditions;
-	protected Mode runningMode;
-	protected int timeout;
-	protected Marvin ia;
+	protected 	ArrayList<Integer>	preConditions;
+	protected 	ArrayList<Integer>	postConditions;
+	protected 	Mode 				runningMode;
+	protected	int 				timeout;
+	protected	Marvin 				ia;
+	
+	public enum OrderType {
+		ALLOWED,
+		MANDATORY,
+		FORBIDEN;
+	}
 	
 	protected Goal(Marvin ia) {
 		this.preConditions = new ArrayList<Integer>();
@@ -31,7 +39,7 @@ public abstract class Goal {
 	
 	protected abstract void defineDefault();
 	
-	protected abstract String getName();
+	public abstract String getName();
 
 	protected Mode getRunningMode() {
 		return runningMode;
@@ -85,12 +93,13 @@ public abstract class Goal {
 		}
 	}
 	
-	protected void startWrapper(){
+	public void startWrapper(){
 		if(!timeOverCheck()){
 			if(this.checkPreConditions()){
 				ia.updateMode(this.getRunningMode());
 				Main.printf("EXECUTE GOAL : " + getName().toUpperCase());
 				this.start();
+				this.setPostConditions();
 				ia.updateMode(Mode.ACTIVE);
 			}
 			else{
@@ -111,7 +120,10 @@ public abstract class Goal {
 				switch (e) {
 				case (Main.CALIBRATED):
 					ia.pushGoal(new GoalRecalibrate(ia));
-					break;
+					return true;
+				case (Main.HAND_OPEN):
+					ia.open();
+					return true;
 				default:
 					return false;
 				}

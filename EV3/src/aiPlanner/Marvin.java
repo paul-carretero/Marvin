@@ -1,6 +1,9 @@
 package aiPlanner;
 
 import eventManager.EventHandler;
+import goals.Goal;
+import goals.GoalFactory;
+import goals.GoalRecalibrate;
 import interfaces.ModeListener;
 import interfaces.SignalListener;
 import interfaces.WaitProvider;
@@ -21,19 +24,19 @@ import java.util.Deque;
 
 public class Marvin implements SignalListener, WaitProvider{
 	
-	private Deque<Goal> 		goals;
-	private EyeOfMarvin 		itemManager;
-	private EventHandler 		eventManager;
-	private PositionCalculator 	positionManager;
-	private Mode 				currentMode = Mode.PASSIVE;
-	private Server 				server;
-	private GraberManager 		graber;
-	private Engine 				engine;
-	private TimedPose 			currentPose;
-	private AreaManager			areaManager;
-	private List<ModeListener>	modeListener;
+	private	Deque<Goal> 		goals;
+	private	EyeOfMarvin 		itemManager;
+	private	EventHandler 		eventManager;
+	private	PositionCalculator 	positionManager;
+	private	Mode 				currentMode = Mode.PASSIVE;
+	private	Server 				server;
+	private	GraberManager 		graber;
+	private	Engine 				engine;
+	private	AreaManager			areaManager;
+	private	List<ModeListener>	modeListener;
+	private SoundManager		audio;
 	
-	public Marvin(int mode){
+	public Marvin(){
 		
 		Main.printf("Not that anyone cares what I say, but the restaurant is at the *other* end of the Universe.");
 		
@@ -43,29 +46,27 @@ public class Marvin implements SignalListener, WaitProvider{
 		Main.setState(Main.CALIBRATED, true);
 		Main.setState(Main.HAND_OPEN, false);
 		Main.setState(Main.HAVE_PALET, false);
+		Main.setState(Main.PRESSION, false);
 		
-		modeListener = new ArrayList<ModeListener>();
-		
-		/**********************************************************/
-		
-		GoalFactory GFactory = new GoalFactory(this);
-		
-		goals 			= GFactory.initializeStartGoals();
+		modeListener	= new ArrayList<ModeListener>();
 		
 		/**********************************************************/
 		currentMode 	= Mode.PASSIVE;
-		System.out.println(" _____/_o_\\_____");
+		//System.out.println(" _____/_o_\\_____");
 		eventManager 	= new EventHandler();
 		engine 			= new Engine(eventManager,this);
-		System.out.println("(==(/_______\\)==)");
 		graber 			= new GraberManager();
+		//System.out.println("(==(/_______\\)==)");
 		positionManager = new PositionCalculator();
-		System.out.println(" \\==\\/     \\/==/");
+		//System.out.println(" \\==\\/     \\/==/");
 		itemManager 	= new EyeOfMarvin(positionManager, eventManager);
-		System.out.println("_________________");
+		//System.out.println("_________________");
 		areaManager		= new AreaManager(positionManager);
 		server 			= new Server(itemManager);
+		audio			= new SoundManager();
 
+		/**********************************************************/
+		
 		eventManager.addSignalListener(this);
 		eventManager.addSignalListener(positionManager);
 		
@@ -73,31 +74,53 @@ public class Marvin implements SignalListener, WaitProvider{
 		modeListener.add(areaManager);
 		modeListener.add(graber);
 		modeListener.add(positionManager);
+		modeListener.add(audio);
 		
 		positionManager.addOdometryPoseProvider(engine.getPilot());
-		System.out.println("MARVIN : STAND-BY");
+		
+		//System.out.println("MARVIN : STAND-BY");
+		
+		/**********************************************************/
+		
 		eventManager.start();
 		positionManager.start();
 		graber.start();
 		server.start();
 		areaManager.start();
+		audio.start();
 		
-		System.out.println(" AWAITING ORDERS");
+		/**********************************************************/
+		
+		//System.out.println(" AWAITING ORDERS");
+		
+		/**********************************************************/
+		
+		GoalFactory GFactory 	= new GoalFactory(this,positionManager);
+		goals 					= GFactory.initializeStartGoals();
+		
+		/**********************************************************/
+		
+		audio.addIntro();
+		audio.addVictoryTheme();
 		Button.ENTER.waitForPressAndRelease();
 		Sound.beep();
 		Main.TIMER.resetTimer();
+		
 		/**********************************************************/
 				
 		while(!goals.isEmpty() && !(Main.TIMER.getElapsedMin() > 5)){
 			goals.pop().startWrapper();
 		}
-		syncWait(1000);
+		
+		/**********************************************************/
+
+		syncWait(500);
 		updateMode(Mode.END);
-		syncWait(1000);
+		syncWait(500);
 		cleanUp();
 	}
 
-	protected void updateMode(Mode m) {
+	public void updateMode(Mode m) {
 		if(currentMode != m){
 			currentMode = m;
 			Main.printf("[MARVIN]                : Mode : " + m.toString());
@@ -134,9 +157,11 @@ public class Marvin implements SignalListener, WaitProvider{
 			}
 			break;
 		case PRESSION_RELEASED:
+			Main.setState(Main.PRESSION, false);
 			break;
 		case STOP:
 			synchronized(this){
+				updateMode(Mode.END);
 				notify();
 			}
 			engine.stop();
@@ -147,9 +172,8 @@ public class Marvin implements SignalListener, WaitProvider{
 			break;
 		}
 	}
-
 	
-	synchronized protected void cleanUp(){
+	public synchronized void cleanUp(){
 		goals.clear();
 		Main.printf("[MARVIN]                : I'm just trying to die.");
 		try {
@@ -164,6 +188,8 @@ public class Marvin implements SignalListener, WaitProvider{
 			eventManager.join();
 			areaManager.interrupt();
 			areaManager.join();
+			audio.interrupt();
+			audio.join();
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
@@ -177,7 +203,9 @@ public class Marvin implements SignalListener, WaitProvider{
 	
 	synchronized public void pushGoal(Goal g){
 		Main.printf("[MARVIN]                : Why should I want to make anything up? Life's bad enough as it is without wanting to invent any more of it.");
-		goals.push(g);
+		if(currentMode != Mode.END){
+			goals.push(g);
+		}
 	}
 	
 	public void syncWait(int ms){
@@ -188,5 +216,35 @@ public class Marvin implements SignalListener, WaitProvider{
 				Thread.currentThread().interrupt();
 			}
 		}
+	}
+	
+	public void goForward(int distance, int speed){
+		if(distance > 0 && speed > 0 && currentMode != Mode.END){
+			engine.goForward(distance, speed);
+		}
+	}
+	
+	public void goBackward(int distance, int speed){
+		if(distance > 0 && speed > 0 && currentMode != Mode.END){
+			engine.goBackward(distance, speed);
+		}
+	}
+	
+	public void turnHere(int angle, int speed){
+		if(angle != 0 && speed > 0 && currentMode != Mode.END){
+			engine.turnHere(angle, speed);
+		}
+	}
+	
+	protected void turnSmooth(int angle){
+		engine.turnSmoothForward(angle);
+	}
+
+	public void open() {
+		graber.open();
+	}
+
+	public void grab() {
+		graber.close();
 	}
 }
