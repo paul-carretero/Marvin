@@ -1,6 +1,7 @@
 package area;
 
 import lejos.robotics.navigation.Pose;
+import shared.Color;
 
 public class DefaultArea extends Area {
 
@@ -14,7 +15,7 @@ public class DefaultArea extends Area {
 	}
 
 	@Override
-	public Area colorChange(int color, Pose p) {
+	public Area colorChange(Color color, Pose p) {
 		return this;
 	}
 

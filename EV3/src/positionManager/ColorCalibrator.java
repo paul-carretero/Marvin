@@ -19,6 +19,14 @@ import lejos.robotics.filter.MeanFilter;
 
 public class ColorCalibrator {
 	
+	public static final int COLOR_BLUE 				= 0;
+	public static final int COLOR_BLACK 			= 1;
+	public static final int COLOR_WHITE 			= 2;
+	public static final int COLOR_GREY 				= 3;
+	public static final int COLOR_YELLOW 			= 4;
+	public static final int COLOR_RED 				= 5;
+	public static final int COLOR_GREEN 			= 6;
+	
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		Port port = LocalEV3.get().getPort(Main.COLOR_SENSOR);
 		EV3ColorSensor colorSensor = new EV3ColorSensor(port);
@@ -31,43 +39,43 @@ public class ColorCalibrator {
 		Button.ENTER.waitForPressAndRelease();
 		float[] blue = new float[average.sampleSize()];
 		average.fetchSample(blue, 0);
-		colors[Main.COLOR_BLUE] = blue;
+		colors[COLOR_BLUE] = blue;
 		
 		System.out.println("Press enter to calibrate red...");
 		Button.ENTER.waitForPressAndRelease();
 		float[] red = new float[average.sampleSize()];
 		average.fetchSample(red, 0);
-		colors[Main.COLOR_RED] = red;
+		colors[COLOR_RED] = red;
 		
 		System.out.println("Press enter to calibrate green...");
 		Button.ENTER.waitForPressAndRelease();
 		float[] green = new float[average.sampleSize()];
 		average.fetchSample(green, 0);
-		colors[Main.COLOR_GREEN] = green;
+		colors[COLOR_GREEN] = green;
 
 		System.out.println("Press enter to calibrate black...");
 		Button.ENTER.waitForPressAndRelease();
 		float[] black = new float[average.sampleSize()];
 		average.fetchSample(black, 0);
-		colors[Main.COLOR_BLACK] = black;
+		colors[COLOR_BLACK] = black;
 		
 		System.out.println("Press enter to calibrate grey...");
 		Button.ENTER.waitForPressAndRelease();
 		float[] grey = new float[average.sampleSize()];
 		average.fetchSample(grey, 0);
-		colors[Main.COLOR_GREY] = grey;
+		colors[COLOR_GREY] = grey;
 		
 		System.out.println("Press enter to calibrate white...");
 		Button.ENTER.waitForPressAndRelease();
 		float[] white = new float[average.sampleSize()];
 		average.fetchSample(white, 0);
-		colors[Main.COLOR_WHITE] = white;
+		colors[COLOR_WHITE] = white;
 		
 		System.out.println("Press enter to calibrate yellow...");
 		Button.ENTER.waitForPressAndRelease();
 		float[] yellow = new float[average.sampleSize()];
 		average.fetchSample(yellow, 0);
-		colors[Main.COLOR_YELLOW] = yellow;
+		colors[COLOR_YELLOW] = yellow;
 		
 		colorSensor.setFloodlight(false);
 		
@@ -95,43 +103,43 @@ public class ColorCalibrator {
 			double minscal = Double.MAX_VALUE;
 			String color = "";
 			
-			double scalaire = ColorSensor.scalaire(sample, readColors[Main.COLOR_BLUE]);	
+			double scalaire = ColorSensor.scalaire(sample, readColors[COLOR_BLUE]);	
 			if (scalaire < minscal) {
 				minscal = scalaire;
 				color = "blue";
 			}
 			
-			scalaire = ColorSensor.scalaire(sample, readColors[Main.COLOR_RED]);
+			scalaire = ColorSensor.scalaire(sample, readColors[COLOR_RED]);
 			if (scalaire < minscal) {
 				minscal = scalaire;
 				color = "red";
 			}
 			
-			scalaire = ColorSensor.scalaire(sample, readColors[Main.COLOR_GREEN]);
+			scalaire = ColorSensor.scalaire(sample, readColors[COLOR_GREEN]);
 			if (scalaire < minscal) {
 				minscal = scalaire;
 				color = "green";
 			}
 			
-			scalaire = ColorSensor.scalaire(sample, readColors[Main.COLOR_BLACK]);
+			scalaire = ColorSensor.scalaire(sample, readColors[COLOR_BLACK]);
 			if (scalaire < minscal) {
 				minscal = scalaire;
 				color = "black";
 			}
 			
-			scalaire = ColorSensor.scalaire(sample, readColors[Main.COLOR_GREY]);
+			scalaire = ColorSensor.scalaire(sample, readColors[COLOR_GREY]);
 			if (scalaire < minscal) {
 				minscal = scalaire;
 				color = "grey";
 			}
 			
-			scalaire = ColorSensor.scalaire(sample, readColors[Main.COLOR_YELLOW]);
+			scalaire = ColorSensor.scalaire(sample, readColors[COLOR_YELLOW]);
 			if (scalaire < minscal) {
 				minscal = scalaire;
 				color = "yellow";
 			}
 			
-			scalaire = ColorSensor.scalaire(sample, readColors[Main.COLOR_WHITE]);
+			scalaire = ColorSensor.scalaire(sample, readColors[COLOR_WHITE]);
 			if (scalaire < minscal) {
 				minscal = scalaire;
 				color = "white";

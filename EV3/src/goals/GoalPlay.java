@@ -7,17 +7,12 @@ public class GoalPlay extends Goal {
 	
 	protected final String NAME = "GoalPlay";
 
-	public GoalPlay(Marvin ia, int timeout) {
-		super(ia, timeout);
-	}
-	
-	public GoalPlay(Marvin ia) {
-		super(ia, 360000); // 6 min;
+	public GoalPlay(GoalFactory gf, Marvin ia, int timeout) {
+		super(gf, ia, timeout);
 	}
 
 	@Override
 	protected void defineDefault() {
-		preConditions.add(Main.CALIBRATED);
 		preConditions.add(Main.HAND_OPEN);
 	}
 
@@ -26,11 +21,6 @@ public class GoalPlay extends Goal {
 		Main.printf("This is the sort of thing you lifeforms enjoy, is it?");
 	}
 
-	@Override
-	public void preConditionsFailHandler() {
-		ia.cleanUp();
-	}
-	
 	@Override
 	public String getName() {
 		return NAME;

@@ -7,8 +7,8 @@ public class GoalRecalibrate extends Goal {
 	
 	protected final String NAME = "GoalRecalibrate";
 
-	public GoalRecalibrate(Marvin ia) {
-		super(ia);
+	public GoalRecalibrate(GoalFactory gf, Marvin ia, int timeout) {
+		super(gf, ia, timeout);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -21,12 +21,6 @@ public class GoalRecalibrate extends Goal {
 	@Override
 	public void start() {
 		Main.printf("Sounds awful.");
-		
-	}
-
-	@Override
-	public void preConditionsFailHandler() {
-		// TODO Auto-generated method stub
 		
 	}
 	

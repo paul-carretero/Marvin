@@ -1,20 +1,20 @@
 package goals;
 
+import aiPlanner.Main;
 import aiPlanner.Marvin;
 
 public class GoalGrabAndDropPalet extends Goal {
 	
 	protected final String NAME = "GoalGrabAndDropPalet";
 
-	public GoalGrabAndDropPalet(Marvin ia, int timeout) {
-		super(ia, timeout);
+	public GoalGrabAndDropPalet(GoalFactory gf,  Marvin ia, int timeout) {
+		super(gf, ia, timeout);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	protected void defineDefault() {
-		// TODO Auto-generated method stub
-		
+		preConditions.add(Main.HAND_OPEN);
 	}
 
 	@Override
@@ -23,12 +23,6 @@ public class GoalGrabAndDropPalet extends Goal {
 		
 	}
 
-	@Override
-	public void preConditionsFailHandler() {
-		// TODO Auto-generated method stub
-		
-	}
-	
 	@Override
 	public String getName() {
 		return NAME;

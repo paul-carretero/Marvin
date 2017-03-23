@@ -12,6 +12,7 @@ public abstract class Goal {
 	protected 	Mode 				runningMode;
 	protected	int 				timeout;
 	protected	Marvin 				ia;
+	protected	GoalFactory			gf;
 	
 	public enum OrderType {
 		ALLOWED,
@@ -19,22 +20,18 @@ public abstract class Goal {
 		FORBIDEN;
 	}
 	
-	protected Goal(Marvin ia) {
-		this.preConditions = new ArrayList<Integer>();
-		this.postConditions = new ArrayList<Integer>();
+	protected Goal(GoalFactory gf, Marvin ia, int timeout) {
+		this.preConditions 	= new ArrayList<Integer>();
+		this.postConditions	= new ArrayList<Integer>();
+		this.ia				= ia;
+		this.gf				= gf;
 		this.setRunningMode(Mode.ACTIVE);
-		this.setTimeout(500000);
-		this.ia = ia;
+		this.setTimeout(timeout);
 		defineDefault();
 	}
 	
-	protected Goal(Marvin ia, int timeout) {
-		this.preConditions = new ArrayList<Integer>();
-		this.postConditions = new ArrayList<Integer>();
-		this.setRunningMode(Mode.ACTIVE);
-		this.setTimeout(timeout);
-		this.ia = ia;
-		defineDefault();
+	protected boolean checkTimeout(){
+		return timeout > Main.TIMER.getElapsedMs();
 	}
 	
 	protected abstract void defineDefault();
@@ -47,14 +44,6 @@ public abstract class Goal {
 
 	protected void setRunningMode(Mode runningMode) {
 		this.runningMode = runningMode;
-	}
-	
-	protected ArrayList<Integer> getPrecondition(){
-		return preConditions;
-	}
-	
-	protected ArrayList<Integer> getPostCondition(){
-		return postConditions;
 	}
 
 	protected boolean checkPreConditions(){
@@ -95,7 +84,7 @@ public abstract class Goal {
 	
 	public void startWrapper(){
 		if(!timeOverCheck()){
-			if(this.checkPreConditions()){
+			if(this.checkPreConditions() && this.checkTimeout()){
 				ia.updateMode(this.getRunningMode());
 				Main.printf("EXECUTE GOAL : " + getName().toUpperCase());
 				this.start();
@@ -104,31 +93,10 @@ public abstract class Goal {
 			}
 			else{
 				Main.printf("FAIL EXECUTE GOAL : " + getName().toUpperCase());
-				this.preConditionsFailHandler();
 			}
 		}
 		// else on ne fait rien , l'ia passera à l'objectif suivant.
 	}
 	
-	protected abstract void preConditionsFailHandler();
-
 	protected abstract void start();
-	
-	protected boolean genericSolver(){
-		for(int e : preConditions){
-			if(!Main.GLOBALSTATE[e]){
-				switch (e) {
-				case (Main.CALIBRATED):
-					ia.pushGoal(new GoalRecalibrate(ia));
-					return true;
-				case (Main.HAND_OPEN):
-					ia.open();
-					return true;
-				default:
-					return false;
-				}
-			}
-		}
-		return true;
-	}
 }

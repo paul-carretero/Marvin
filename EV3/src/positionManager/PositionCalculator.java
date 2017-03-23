@@ -2,58 +2,52 @@ package positionManager;
 
 import aiPlanner.Main;
 import interfaces.ModeListener;
-import interfaces.MoveListener;
 import interfaces.PoseGiver;
-import interfaces.SignalListener;
 import shared.Mode;
-import shared.SignalType;
-import shared.TimedPose;
 import lejos.robotics.localization.OdometryPoseProvider;
 import lejos.robotics.navigation.MoveProvider;
 import lejos.robotics.navigation.Pose;
 
-public class PositionCalculator extends Thread implements ModeListener, MoveListener, PoseGiver, SignalListener {
+public class PositionCalculator extends Thread implements ModeListener, PoseGiver {
 
-	private Pose 					lastCalculatedPosition;
-	private int 					refreshRate = 250;
+	private int 					refreshRate = 400;
 	private volatile Mode			mode;
 	private VisionSensor 			radar;
 	private OdometryPoseProvider 	odometryPoseProvider;
+	private DirectionCalculator 	directionCalculator;
 	
-	public PositionCalculator(){
-		this.lastCalculatedPosition	= new TimedPose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
+	public PositionCalculator(MoveProvider mp, DirectionCalculator directionCalculator){
 		this.mode 					= Mode.ACTIVE;
 		this.radar 					= new VisionSensor();
+		this.odometryPoseProvider 	= new OdometryPoseProvider(mp);
+		this.directionCalculator	= directionCalculator;
+		
+		odometryPoseProvider.setPose(new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL));
+		
 		Main.printf("[POSITION CALCULATOR]   : Initialized");
 	}
 	
 	public void run() {
 		Main.printf("[POSITION CALCULATOR]   : Started");
 		while(!isInterrupted() && mode != Mode.END){
+			updatePose();
+			
 			//Main.printf("[POSITION CALCULATOR]   : " + lastCalculatedPosition.toString());
 			//Main.printf("[POSITION CALCULATOR]   : Radar : " + radar.getNearItemDistance());
-			updatePose();
+			
 			syncWait();
 		}
 		Main.printf("[POSITION CALCULATOR]   : Finished");
 		
 	}
 	
-	private void updatePose() {
-		Pose odometriquePose = odometryPoseProvider.getPose();
-		//TODO adjust with radar
-		//TODO adust with Map
-		//TODO adjust with Area
-		lastCalculatedPosition = odometriquePose;
-	}
-	
-	public void addOdometryPoseProvider(MoveProvider mp){
-		odometryPoseProvider = new OdometryPoseProvider(mp);
-		updateOdometry(new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL));
-	}
-	
-	public void updateOdometry(Pose p){
-		odometryPoseProvider.setPose(p);
+	private void updatePose() {						// define position / define lost
+		Pose pose = odometryPoseProvider.getPose(); // 60%			   / 0%
+		//TODO adjust with radar					// 10%			   / 20%
+		//TODO adjust with Map						// 30%			   / 40%
+		//TODO adjust with Area						// 0%			   / 40%
+		//directionCalculator.updateAngle(pose);
+		odometryPoseProvider.setPose(pose);
 	}
 	
 	public void syncWait(){
@@ -71,32 +65,7 @@ public class PositionCalculator extends Thread implements ModeListener, MoveList
 	}
 
 	public Pose getPosition() {
-		return lastCalculatedPosition;
-	}
-
-	public void movementForward(TimedPose start, int speed, int distance) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void movementBackward(TimedPose start, int speed, int distance) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void turnSmooth(int angle, int startTime) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	public void turnHere(int angle, int startTime) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void signal(SignalType e) {
-		// TODO Auto-generated method stub
-		
+		return odometryPoseProvider.getPose();
 	}
 
 	public void sendFixX(int x) {

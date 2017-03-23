@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import aiPlanner.Main;
+import aiPlanner.Marvin;
 import interfaces.ModeListener;
 import interfaces.SignalListener;
 import lejos.hardware.Button;
@@ -14,18 +15,18 @@ import lejos.robotics.navigation.MoveProvider;
 import shared.Mode;
 import shared.SignalType;
 
-public class EventHandler extends Thread implements ModeListener, MoveListener, SignalListener{
-	private List<SignalListener> signalListeners;
-	private int refreshRate;
-	private PressionSensor pressSensor;
+public class EventHandler extends Thread implements ModeListener, MoveListener{
 	
-	private SignalType currentPression;
-	private boolean currentEsc;
+	private SignalListener	aiPlanner;
+	private int 			refreshRate;
+	private PressionSensor	pressSensor;
+	private SignalType 		currentPression;
+	private boolean 		currentEsc;
 	
 	
-	public EventHandler(){
+	public EventHandler(Marvin marvin){
 		pressSensor 	= new PressionSensor();
-		signalListeners = new ArrayList<SignalListener>();
+		aiPlanner		= marvin;
 		currentPression	= SignalType.PRESSION_RELEASED;
 		currentEsc 		= false;
 		setMode(Mode.ACTIVE);
@@ -46,7 +47,7 @@ public class EventHandler extends Thread implements ModeListener, MoveListener, 
 	private void checkEscPressed(){
 		if(Button.ESCAPE.isDown() && !currentEsc){
 			currentEsc = true;
-			broadcast(SignalType.STOP);
+			sendSignal(SignalType.STOP);
 		}
 		currentEsc = false;
 	}
@@ -54,14 +55,14 @@ public class EventHandler extends Thread implements ModeListener, MoveListener, 
 	private void checkPression(){
 		if((currentPression == SignalType.PRESSION_PUSHED) && (pressSensor.isPressed() == false)){
 			currentPression = SignalType.PRESSION_RELEASED;
-			broadcast(SignalType.PRESSION_RELEASED);
+			sendSignal(SignalType.PRESSION_RELEASED);
 			
 		}
 		else{
 			if((currentPression == SignalType.PRESSION_RELEASED) && (pressSensor.isPressed())){
 				Main.printf("PRESSION HANDLER = " + Main.getState(Main.PRESSION));
 				currentPression = SignalType.PRESSION_PUSHED;
-				broadcast(SignalType.PRESSION_PUSHED);
+				sendSignal(SignalType.PRESSION_PUSHED);
 				Main.setState(Main.PRESSION, true);
 			}
 		}
@@ -84,15 +85,9 @@ public class EventHandler extends Thread implements ModeListener, MoveListener, 
 	public void moveStopped(Move event, MoveProvider mp) {
 		Main.printf("[EVENTHANDLER]          : Move Ended");
 	}
-
-	public void addSignalListener(SignalListener l) {
-		this.signalListeners.add(l);
-	}
 	
-	public void broadcast(SignalType s){
-		for (SignalListener l : signalListeners) {
-			l.signal(s);
-		}
+	public void sendSignal(SignalType s){
+		aiPlanner.signal(s);
 	}
 	
 	public void setMode(Mode m){
@@ -106,10 +101,5 @@ public class EventHandler extends Thread implements ModeListener, MoveListener, 
 		  default:
 			  refreshRate = 1000;
 		}
-	}
-
-	public void signal(SignalType e) {
-		// TODO Auto-generated method stub
-		// doit recevoir le signal lost par exemple
 	}
 }

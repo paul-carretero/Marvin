@@ -2,6 +2,7 @@ package area;
 
 import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
+import shared.Color;
 
 public class CenterArea extends Area {
 
@@ -28,11 +29,11 @@ public class CenterArea extends Area {
 	}
 
 	@Override
-	public Area colorChange(int color, Pose p) {
+	public Area colorChange(Color color, Pose p) {
 		switch (color) {
-		case Main.COLOR_GREY:
+		case GREY:
 			return this;
-		case Main.COLOR_BLACK:
+		case BLACK:
 			// ici on soustrait bien la marge d'erreur au lieu de la rajouté, afin d'éviter les cas limites
 			if(p.getX() < (Main.X_RED_LINE - MARGE_ERREUR) && p.getX() > (Main.X_YELLOW_LINE + MARGE_ERREUR) && 
 				p.getY() < (Main.Y_BLUE_LINE - MARGE_ERREUR) && p.getY() > (Main.Y_GREEN_LINE + MARGE_ERREUR)){
@@ -41,7 +42,7 @@ public class CenterArea extends Area {
 			else{
 				return Main.getArea(15);
 			}
-		case Main.COLOR_RED:
+		case RED:
 			if( checkAmbiguousAngleVertical(p) ){
 				if(p.getY() > (Main.Y_GREEN_LINE) && p.getY() < (Main.Y_BLACK_LINE)){
 					return Main.getArea(9);
@@ -50,7 +51,7 @@ public class CenterArea extends Area {
 					return Main.getArea(7);
 				}
 			}
-		case Main.COLOR_GREEN:
+		case GREEN:
 			if( checkAmbiguousAngleHorizontal(p) ){
 				if(p.getX() < (Main.X_RED_LINE) && p.getX() > (Main.X_BLACK_LINE)){
 					return Main.getArea(12);
@@ -59,7 +60,7 @@ public class CenterArea extends Area {
 					return Main.getArea(11);
 				}
 			}
-		case Main.COLOR_BLUE:
+		case BLUE:
 			if( checkAmbiguousAngleHorizontal(p) ){
 				if(p.getX() < (Main.X_RED_LINE) && p.getX() > (Main.X_BLACK_LINE)){
 					return Main.getArea(3);
@@ -68,7 +69,7 @@ public class CenterArea extends Area {
 					return Main.getArea(2);
 				}
 			}
-		case Main.COLOR_YELLOW:
+		case YELLOW:
 			if( checkAmbiguousAngleVertical(p) ){
 				if(p.getY() > (Main.Y_GREEN_LINE) && p.getY() < (Main.Y_BLACK_LINE)){
 					return Main.getArea(8);

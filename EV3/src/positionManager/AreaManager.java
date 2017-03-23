@@ -4,6 +4,7 @@ import aiPlanner.Main;
 import area.Area;
 import interfaces.ModeListener;
 import interfaces.PoseGiver;
+import shared.Color;
 import shared.Mode;
 
 public class AreaManager extends Thread implements ModeListener {
@@ -12,11 +13,11 @@ public class AreaManager extends Thread implements ModeListener {
 	private ColorSensor colorSensor;
 	private int refreshRate;
 	private volatile Mode currentMode;
-	private int currentColor;
+	private Color currentColor;
 	private PoseGiver pg;
 	
 	public AreaManager(PoseGiver pg){
-		currentColor = -1;
+		currentColor = null;
 		colorSensor = new ColorSensor();
 		this.refreshRate = 500;
 		colorSensor.setCalibration();
@@ -38,13 +39,13 @@ public class AreaManager extends Thread implements ModeListener {
 		Main.printf("[AREA MANAGER]          : Finished");
 	}
 	
-	@SuppressWarnings("unused")
+	@SuppressWarnings("incomplete-switch")
 	private boolean updateColor(){
-		int checkColor = colorSensor.getCurrentColor();
-		if(checkColor != currentColor && false){
+		Color checkColor = colorSensor.getCurrentColor();
+		if(checkColor != currentColor){
 			currentColor = checkColor;
 			switch(checkColor){
-				case Main.COLOR_BLACK:
+				case BLACK:
 					if(pg.getPosition().getY() < 1250 || pg.getPosition().getY() > 1750 ){
 						pg.sendFixY(Main.X_BLACK_LINE);
 					}
@@ -52,26 +53,25 @@ public class AreaManager extends Thread implements ModeListener {
 						pg.sendFixY(Main.Y_BLACK_LINE);
 					}
 					break;
-				case Main.COLOR_BLUE:
+				case BLUE:
 					pg.sendFixY(Main.Y_BLUE_LINE);
 					break;
-				case Main.COLOR_GREEN:
+				case GREEN:
 					pg.sendFixY(Main.Y_GREEN_LINE);
 					break;
-				case Main.COLOR_RED:
+				case RED:
 					pg.sendFixX(Main.X_RED_LINE);
 					break;
-				case Main.COLOR_YELLOW:
+				case YELLOW:
 					pg.sendFixX(Main.X_YELLOW_LINE);
 					break;
-				case Main.COLOR_WHITE:
+				case WHITE:
 					if(pg.getPosition().getY() < Main.Y_BLACK_LINE){
 						pg.sendFixY(Main.Y_BOTTOM_WHITE);
 					}
 					else{
 						pg.sendFixY(Main.Y_TOP_WHITE);
 					}
-					
 					break;
 			}
 			return true;

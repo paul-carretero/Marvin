@@ -2,6 +2,7 @@ package area;
 
 import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
+import shared.Color;
 
 public abstract class Area {
 
@@ -85,7 +86,7 @@ public abstract class Area {
 	
 	public abstract int getConsistency(Pose p);
 	
-	public abstract Area colorChange(int color, Pose p);
+	public abstract Area colorChange(Color currentColor, Pose p);
 	
 	public static boolean checkAmbiguousAngleVertical(Pose p){
 		return Math.abs(p.getHeading()) > (90 + AMBIGUOUS_ANGLE) || 

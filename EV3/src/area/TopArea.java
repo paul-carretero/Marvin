@@ -2,6 +2,7 @@ package area;
 
 import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
+import shared.Color;
 
 public class TopArea extends Area{
 	
@@ -21,24 +22,24 @@ public class TopArea extends Area{
 	}
 
 	@Override
-	public Area colorChange(int color, Pose p) {
-		if(color == Main.COLOR_GREY){
+	public Area colorChange(Color color, Pose p) {
+		if(color == Color.GREY){
 			return this;
 		}
-		else if(color == Main.COLOR_WHITE){
+		else if(color == Color.WHITE){
 			// on évite les cas limites
 			if( checkAmbiguousAngleHorizontal(p) ){
 				if(p.getX() < Main.X_YELLOW_LINE){
-					return Main.getArea(10);
+					return Main.getArea(1);
 				}
 				else if(p.getX() > Main.X_YELLOW_LINE && p.getX() < Main.X_BLACK_LINE){
-					return Main.getArea(11);
+					return Main.getArea(2);
 				}
 				else if(p.getX() > Main.X_BLACK_LINE && p.getX() < Main.X_RED_LINE){
-					return Main.getArea(12);
+					return Main.getArea(3);
 				}
 				else if(p.getX() > Main.X_RED_LINE){
-					return Main.getArea(13);
+					return Main.getArea(4);
 				}
 			}
 		}

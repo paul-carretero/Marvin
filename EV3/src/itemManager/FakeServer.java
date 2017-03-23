@@ -1,9 +1,5 @@
 package itemManager;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,12 +9,7 @@ import lejos.utility.Delay;
 import shared.Item;
 import shared.ItemType;
 
-public class Server extends Thread{
-	
-	private int port = 8888;
-	private byte[] buffer = new byte[2048];
-	private DatagramSocket dsocket;
-	private DatagramPacket packet;
+public class FakeServer extends Thread{
 	
 	private List<Item> lastPointsReceived;
 	private int lastReceivedTimer = 0;
@@ -27,9 +18,9 @@ public class Server extends Thread{
 
 	@Override
 	public void run() {
-		Main.printf("[SERVER]                : Started");
+		Main.printf("[FAKE SERVER]           : Started");
 		while(! isInterrupted() && !stop){
-			String rawData = "0;88;178\n1;88;178\n2;56;149\n3;278;96\n4;102;33\n";
+			String rawData = "0;1000;2700\n1;880;1780\n2;560;1490\n3;2780;960\n4;1020;330\n";
 			lastReceivedTimer = Main.TIMER.getElapsedMs();
 			String[] items = rawData.split("\n");
 			lastPointsReceived = new ArrayList<Item>();
@@ -45,25 +36,17 @@ public class Server extends Thread{
 			eom.receiveRawPoints(lastReceivedTimer, lastPointsReceived);
 			Delay.msDelay(100);
 		}
-		Main.printf("[SERVER]                : Finished");
+		Main.printf("[FAKE SERVER]           : Finished");
 	}
 	
 	@Override
 	public void interrupt(){
-		this.dsocket.close();
 		stop = true;
 	}
 	
-	public Server(ServerListener sl){
+	public FakeServer(ServerListener sl){
 		this.eom = sl;
-		try {
-			dsocket = new DatagramSocket(port);
-		} catch (SocketException e1) {
-			Main.printf("[SERVER]                : Erreur, DatagramSocket non initialisé");
-			e1.printStackTrace();
-		}
-		packet = new DatagramPacket(buffer, buffer.length);
-		Main.printf("[SERVER]                : Initialized");
+		Main.printf("[FAKE SERVER]           : Initialized");
 	}
 }
       

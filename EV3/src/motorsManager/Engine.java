@@ -2,9 +2,7 @@ package motorsManager;
 
 import aiPlanner.Main;
 import eventManager.EventHandler;
-import interfaces.EngineUpdateListener;
 import interfaces.WaitProvider;
-import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.chassis.Chassis;
@@ -12,7 +10,7 @@ import lejos.robotics.chassis.Wheel;
 import lejos.robotics.chassis.WheeledChassis;
 import lejos.robotics.navigation.MovePilot;
 
-public class Engine implements EngineUpdateListener{
+public class Engine{
 	
 	private Wheel					leftWheel				= null;
 	private Wheel					rightWheel				= null;
@@ -20,8 +18,6 @@ public class Engine implements EngineUpdateListener{
 	private EV3LargeRegulatedMotor	rightMotor				= null;
 	private Chassis					chassis					= null;
 	private MovePilot				pilot					= null;
-	private float					coeffCorrectionBackward = 1;
-	private float					coeffCorrectionForward 	= 1;
 	private WaitProvider			waitProvider 			= null;
 	
 	private final float 			right_wheel_correction 	= -0.2f; // positif ou negatif...
@@ -54,7 +50,7 @@ public class Engine implements EngineUpdateListener{
 
 	//DISTANCE EN MM
 	public void goForward(float distance, float speed){
-		int waitTime = (int) ((distance * 1000f/speed) * coeffCorrectionForward);
+		int waitTime = (int) (distance * 1000f/speed);
 		pilot.setLinearSpeed(speed);
 		pilot.forward();
 		syncWait(waitTime);
@@ -63,7 +59,7 @@ public class Engine implements EngineUpdateListener{
 	
 	//DISTANCE EN MM
 	public void goBackward(float distance, float speed){
-		int waitTime = (int) (((distance * 1000f)/speed) * coeffCorrectionBackward);
+		int waitTime = (int) ((distance * 1000f)/speed);
 		pilot.setLinearSpeed(speed);
 		pilot.backward();
 		syncWait(waitTime);
@@ -76,57 +72,11 @@ public class Engine implements EngineUpdateListener{
 		pilot.rotate(angle);
 	}
 	
-	// a calibrer...
-	public void turnSmoothForward(int angle){
-		pilot.setLinearSpeed(Main.CRUISE_SPEED);
-		pilot.arc(55, 90);
-	}
-	
-	
-	
 	public void stop() {
 		pilot.stop();
 	}
 	
 	public void syncWait(int ms){
 		waitProvider.syncWait(ms);
-	}
-
-
-	public void backwardUpdateCoef(boolean add) {
-		if(add){
-			coeffCorrectionBackward = coeffCorrectionBackward + 0.01f;
-		}
-		else if(coeffCorrectionBackward > 0.1){
-			coeffCorrectionBackward = coeffCorrectionBackward - 0.01f;
-		}
-	}
-
-
-	public void forwardUpdateCoef(boolean add) {
-		if(add){
-			coeffCorrectionForward = coeffCorrectionForward + 0.01f;
-		}
-		else if(coeffCorrectionForward > 0.1){
-			coeffCorrectionForward = coeffCorrectionForward - 0.01f;
-		}
-	}
-
-
-	public void turnHereUpdateCoef(boolean add) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	public void turnSmoothForwardUpdateCoef(boolean add) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-	public void turnSmoothBackwardUpdateCoef(boolean add) {
-		// TODO Auto-generated method stub
-		
 	}
 }

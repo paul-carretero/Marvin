@@ -37,11 +37,11 @@ public class Graber {
 			try {
 				this.wait(ms);
 			} catch (InterruptedException e) {
-				Main.printf("Finalisation de l'action du graber");
+				Main.printf("[GRABER]                : Finalisation de l'action du graber");
 				try {
 					this.wait(ms);
 				} catch (InterruptedException e1) {
-					// do nothing \O/
+					Thread.currentThread().interrupt();
 				}
 				Thread.currentThread().interrupt();
 			}

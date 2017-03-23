@@ -2,6 +2,7 @@ package area;
 
 import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
+import shared.Color;
 
 public class BottomArea extends Area{
 	
@@ -20,11 +21,11 @@ public class BottomArea extends Area{
 	}
 
 	@Override
-	public Area colorChange(int color, Pose p) {
-		if(color == Main.COLOR_GREY){
+	public Area colorChange(Color color, Pose p) {
+		if(color == Color.GREY){
 			return this;
 		}
-		else if(color == Main.COLOR_WHITE){
+		else if(color == Color.WHITE){
 			// on évite les cas limites
 			if( checkAmbiguousAngleHorizontal(p) ){
 				if(p.getX() < Main.X_YELLOW_LINE){

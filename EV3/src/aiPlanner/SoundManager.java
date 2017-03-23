@@ -8,21 +8,18 @@ import interfaces.ModeListener;
 import lejos.hardware.Sound;
 import shared.Mode;
 
-public class SoundManager extends Thread implements ModeListener{
+public class SoundManager extends Thread{
 	private volatile Queue<String> AudioList;
-	private int refreshRate = 1000;
-	private volatile Mode currentMode;
 	
 	public SoundManager(){
 		AudioList = new LinkedList<String>();
-		currentMode = Mode.ACTIVE;
 		Main.printf("[AUDIO]                 : Initialized");
 	}
 	
 	public void run(){
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 		Main.printf("[AUDIO]                 : Started");
-		while(!isInterrupted() && currentMode != Mode.END){
+		while(!isInterrupted()){
 			if(!AudioList.isEmpty()){
 				try{
 					File track = new File(AudioList.poll());
@@ -32,8 +29,12 @@ public class SoundManager extends Thread implements ModeListener{
 					Main.printf("[AUDIO]                 : Impossible de lire le fichier");
 					Main.printf("[AUDIO]                 : Erreur : " + e.toString());
 				}
+				syncWait(200);
 			}
-			syncWait();
+			else{
+				syncWait(2000);
+			}
+			
 		}
 		Main.printf("[AUDIO]                 : Finished");
 	}
@@ -43,7 +44,7 @@ public class SoundManager extends Thread implements ModeListener{
 	}
 	
 	public void addVictoryTheme(){
-		AudioList.add("victory.wav");
+		//AudioList.add("victory.wav");
 	}
 	
 	public void addTrololo(){
@@ -53,18 +54,22 @@ public class SoundManager extends Thread implements ModeListener{
 	public void addOrder(){
 		AudioList.add("order66.wav");
 	}
-
-	public void setMode(Mode m) {
-		this.currentMode = m;
-	}
 	
-	public void syncWait(){
+	public void syncWait(int t){
 		synchronized (this) {
 			try {
-				this.wait(refreshRate);
+				this.wait(t);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
 		}
+	}
+
+	public void addBip() {
+		synchronized (this) {
+			AudioList.add("bip.wav");
+			this.notify();
+		}
+		
 	}
 }

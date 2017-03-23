@@ -2,16 +2,17 @@ package area;
 
 import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
+import shared.Color;
 
 public class BorderRightArea extends Area{
 	
 	protected int maxY;
-	protected int maxYColor;
+	protected Color maxYColor;
 	
 	protected int minY;
-	protected int minYColor;
+	protected Color minYColor;
 
-	public BorderRightArea(int id, int maxY , int maxYColor , int minY , int minYColor ){
+	public BorderRightArea(int id, int maxY , Color maxYColor , int minY , Color minYColor ){
 		super(id);
 		
 		this.maxY = maxY;
@@ -35,54 +36,54 @@ public class BorderRightArea extends Area{
 	}
 
 	@Override
-	public Area colorChange(int color, Pose p) {
+	public Area colorChange(Color color, Pose p) {
 		switch (ID) {
 			case 4:
-				if(color == Main.COLOR_WHITE && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.WHITE && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(0);
 				}
-				if(color == Main.COLOR_BLUE && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.BLUE && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(7);
 				}
-				if(color == Main.COLOR_RED && checkAmbiguousAngleVertical(p) ){
+				if(color == Color.RED && checkAmbiguousAngleVertical(p) ){
 					return Main.getArea(3);
 				}
 				break;
 			case 7:
-				if(color == Main.COLOR_BLACK && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.BLACK && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(9);
 				}
-				if(color == Main.COLOR_BLUE && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.BLUE && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(4);
 				}
-				if(color == Main.COLOR_RED && checkAmbiguousAngleVertical(p) ){
+				if(color == Color.RED && checkAmbiguousAngleVertical(p) ){
 					return Main.getArea(6);
 				}
 				break;
 			case 9:
-				if(color == Main.COLOR_GREEN && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.GREEN && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(13);
 				}
-				if(color == Main.COLOR_BLACK && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.BLACK && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(7);
 				}
-				if(color == Main.COLOR_RED && checkAmbiguousAngleVertical(p) ){
+				if(color == Color.RED && checkAmbiguousAngleVertical(p) ){
 					return Main.getArea(6);
 				}
 				break;
 			case 13:
-				if(color == Main.COLOR_WHITE && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.WHITE && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(14);
 				}
-				if(color == Main.COLOR_GREEN && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.GREEN && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(9);
 				}
-				if(color == Main.COLOR_RED && checkAmbiguousAngleVertical(p) ){
+				if(color == Color.RED && checkAmbiguousAngleVertical(p) ){
 					return Main.getArea(12);
 				}
 				break;
 		}
-		if(color == Main.COLOR_GREY){
+		if(color == Color.GREY){
 			return this;
 		}
 		else{
