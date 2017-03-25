@@ -14,16 +14,21 @@ public class GoalFactory {
 	private	Marvin		ia;
 	private	PoseGiver	pg;
 	private	ItemGiver	eom;
+	private	boolean 	lastGrabOk;
 	
 	public GoalFactory(Marvin ia, PoseGiver pg, ItemGiver eom){
-		this.ia		= ia;
-		this.pg		= pg;
-		this.eom	= eom;
+		this.ia			= ia;
+		this.pg			= pg;
+		this.eom		= eom;
+		this.lastGrabOk = true;
 	}
 	
 	public Deque<Goal> initializeStartGoals(){
 		Deque<Goal> goals = new ArrayDeque<Goal>();
-		//goals.push(goalDrop(30000));
+		//goals.push(goalGrabAndDropPalet(30000));
+		//goals.push(goalGrabAndDropPalet(30000));
+		goals.push(goalGoToPosition(30000, new Point(500,1500), OrderType.FORBIDEN));
+		goals.push(goalGoToPosition(30000, new Point(1000,2100), OrderType.MANDATORY));
 		return goals;
 	}
 	
@@ -37,5 +42,18 @@ public class GoalFactory {
 	
 	public Goal goalDrop(int timeout){
 		return new GoalDrop(this,ia,timeout,pg);
+	}
+	
+	public Goal goalGrab(int timeout, Point palet){
+		if(lastGrabOk){
+			return new GoalGrabOptimist(this, ia, timeout, palet, pg, eom);
+		}
+		else{
+			return new GoalGrabPessimist(this, ia, timeout, palet, pg, eom);
+		}
+	}
+	
+	public Goal goalGrabAndDropPalet(int timeout){
+		return new GoalGrabAndDropPalet(this, ia, timeout, eom);
 	}
 }

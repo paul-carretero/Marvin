@@ -19,7 +19,7 @@ public class AreaManager extends Thread implements ModeListener {
 	public AreaManager(PoseGiver pg){
 		currentColor = null;
 		colorSensor = new ColorSensor();
-		this.refreshRate = 500;
+		this.refreshRate = 100;
 		colorSensor.setCalibration();
 		this.pg = pg;
 		currentArea = Area.getAreaWithPosition(pg.getPosition());

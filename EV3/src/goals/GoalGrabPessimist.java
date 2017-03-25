@@ -35,6 +35,11 @@ public class GoalGrabPessimist extends Goal {
 		int distance = (int)currentPose.distanceTo(pallet);
 		int angleCorrection = (int)currentPose.relativeBearing(pallet);
 		
+		System.out.println("currentPose = " + currentPose.toString());
+		System.out.println("Objective = " + pallet.toString());
+		System.out.println("distance = "+ distance);
+		System.out.println("angle = " + angleCorrection);
+		
 		ia.turnHere(angleCorrection);
 		
 		if(distance < Main.RADAR_MIN_RANGE){
@@ -68,6 +73,7 @@ public class GoalGrabPessimist extends Goal {
 			
 			while(i < 4 && continuer){
 				radarDistance = pg.getRadarDistance();
+				Main.printf("radar = " + radarDistance);
 				ia.turnHere(10);
 				if(previousRadar < radarDistance){
 					continuer = false;
@@ -75,7 +81,7 @@ public class GoalGrabPessimist extends Goal {
 				previousRadar = radarDistance;
 				i++;
 			}
-					
+			
 			if(!continuer){ // on a trouver un plus grand, c'étais donc le pas d'avant
 				ia.turnHere(-10);
 			}
@@ -87,7 +93,7 @@ public class GoalGrabPessimist extends Goal {
 			ia.setAllowInterrupt(true);
 			
 			if(radarDistance < Main.RADAR_MAX_RANGE  && Main.areApproximatlyEqual(radarDistance,distance,700) ){
-				ia.goForward(distance+100);
+				ia.goForward(distance);
 				if(!tryGrab()){
 					failGrabHandler();
 				}
@@ -96,14 +102,14 @@ public class GoalGrabPessimist extends Goal {
 	}
 
 	protected void failGrabHandler() {
-		ia.goBackward(150);
-		ia.turnHere(12);
-		ia.goForward(150);
+		ia.goBackward(180);
+		ia.turnHere(15);
+		ia.goForward(180);
 		
 		if(!tryGrab()){
-			ia.goBackward(150);
-			ia.turnHere(-24);
-			ia.goForward(150);
+			ia.goBackward(180);
+			ia.turnHere(-30);
+			ia.goForward(180);
 			tryGrab();
 		}
 	}

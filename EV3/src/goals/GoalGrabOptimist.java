@@ -26,8 +26,8 @@ public class GoalGrabOptimist extends GoalGrabPessimist {
 			ia.setAllowInterrupt(true);
 			
 			if(radarDistance < Main.RADAR_MAX_RANGE && Main.areApproximatlyEqual(radarDistance,distance,700) ){
-				ia.goForward(distance+100);
-				if(tryGrab()){
+				ia.goForward(distance);
+				if(!tryGrab()){
 					failGrabHandler();
 				}
 			}

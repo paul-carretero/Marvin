@@ -34,6 +34,9 @@ public class GoalGoToPosition extends Goal {
 		
 		int distance = (int) currentPose.distanceTo(destinationPoint);
 		
+		System.out.println("angle = " + angle);
+		System.out.println("distance = " + distance);
+		
 		// si on doit aller en marche arrière ou si c'est plus rapide
 		if(backward == OrderType.MANDATORY || (Math.abs(angle) > 90 && backward != OrderType.FORBIDEN)){
 			ia.turnHere(angle + 180);

@@ -9,6 +9,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import area.*;
+import lejos.hardware.ev3.LocalEV3;
+import lejos.robotics.navigation.Pose;
 import shared.Color;
 import shared.Timer;
 
@@ -16,8 +18,8 @@ public class Main{
 	
 	// POSITION EN MILIMETRE (oui c'est bête mais pour la "pose" ça évite des convertions multiples => librairie stupide).
 	
-	public static final int X_INITIAL 				= 1000;
-	public static final int Y_INITIAL 				= 200;
+	public static final int X_INITIAL 				= 1500;
+	public static final int Y_INITIAL 				= 2700;
 	public static final int H_INITIAL 				= -90;
 
 	
@@ -48,12 +50,12 @@ public class Main{
 	public static final String TOUCH_SENSOR 		= "S2";
 	public static final String US_SENSOR    		= "S3";
 	
-	public static final float WHEEL_DIAMETER        = 56.5f;
+	public static final float WHEEL_DIAMETER        = 57f;
 	public static final float DISTANCE_TO_CENTER    = 61.2f;
 	public static final String LEFT_WHEEL 			= "C";
 	public static final String RIGHT_WHEEL			= "B";
 	public static final String GRABER    			= "D";
-	public static final float LINEAR_ACCELERATION	= 0.2f;
+	public static final float LINEAR_ACCELERATION	= 10.0f;
 	
 	public static final int   ROTATION_SPEED		= 280;
 	public static final int   SEARCH_ROTATION_SPEED = 70;
@@ -63,7 +65,7 @@ public class Main{
 	public static final int   MAX_SPEED				= 360; // mm/s
 	
 	public static final int   GRABER_TIMER			= 1500; // 2000 en vrai sa dépan dé foi xDD
-	public static final int   GRABER_SPEED			= 500; // 800 en vrai
+	public static final int   GRABER_SPEED			= 800; // 800 en vrai
 	public static final int   DROP_DELAY			= 500;
 
 	public final static boolean[] GLOBALSTATE 		= new boolean[4]; // utiliser la méthode synchronisée pour ecriture
@@ -93,8 +95,16 @@ public class Main{
 		return AREAS[id];
 	}
 	
-	public static float distancePointDroite(float px, float py, float a, float b, float c){
+	/*public static float distancePointDroite(float px, float py, float a, float b, float c){
 		return (float) ( (Math.abs( (a*px + b*py + c) )) / (Math.sqrt(a*a + b*b)));
+	}*/
+	
+	public static void poseRealToSensor(Pose p){
+		p.moveUpdate(100);
+	}
+	
+	public static void poseSensorToReal(Pose p){
+		p.moveUpdate(-100);
 	}
 	
 	public static boolean areApproximatlyEqual(int x, int y, int marge){
@@ -113,7 +123,7 @@ public class Main{
 		try {
 			str = str + "#";
 			DatagramSocket clientSocket = new DatagramSocket();
-			InetAddress IPAddress = InetAddress.getByName("192.168.1.76");
+			InetAddress IPAddress = InetAddress.getByName("192.168.1.10");
 			byte[] sendData = new byte[256];
 			sendData = str.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 4242);
@@ -126,6 +136,7 @@ public class Main{
 
 
 	public static void main(String[] args) {
+		LocalEV3.get().getLED().setPattern(2);
 		System.out.println("       ___");
 		System.out.println(" _____/_o_\\_____");
 		System.out.println("(==(/_______\\)==)");

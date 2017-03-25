@@ -45,10 +45,10 @@ public class DirectionCalculator {
 	
 	/*
 	 * plus la différence est importante plus on corrige vite
-	 * TODO vérifier que angle est bien toujours entre -180 et 180...
+	 * traite uniquement l'angle en fonction des données de la map et rien d'autre (pas de real-sensor mode)
 	 */
 	public void updateAngle(Pose p){
-		float calcAngle = getAngle(p.getLocation());
+		float calcAngle = getAngle(eom.getMarvinPosition().toLejosPoint());
 		if(calcAngle != 9999){
 			if(Math.abs(calcAngle - p.getHeading()) < 5){
 				p.setHeading((float) ((p.getHeading() * 0.9) + (calcAngle * 0.1)));

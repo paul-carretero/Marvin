@@ -2,14 +2,18 @@ package goals;
 
 import aiPlanner.Main;
 import aiPlanner.Marvin;
+import interfaces.ItemGiver;
+import lejos.robotics.geometry.Point;
+import shared.IntPoint;
 
 public class GoalGrabAndDropPalet extends Goal {
 	
-	protected final String NAME = "GoalGrabAndDropPalet";
+	protected 	final String NAME = "GoalGrabAndDropPalet";
+	private 	ItemGiver eom;
 
-	public GoalGrabAndDropPalet(GoalFactory gf,  Marvin ia, int timeout) {
+	public GoalGrabAndDropPalet(GoalFactory gf,  Marvin ia, int timeout, ItemGiver eom) {
 		super(gf, ia, timeout);
-		// TODO Auto-generated constructor stub
+		this.eom = eom;
 	}
 
 	@Override
@@ -19,8 +23,12 @@ public class GoalGrabAndDropPalet extends Goal {
 
 	@Override
 	public void start() {
-		// TODO Auto-generated method stub
-		
+		IntPoint palet = eom.getNearestPallet();
+		Main.printf("point trouve : " + palet);
+		if(palet != null){
+			ia.pushGoal(gf.goalDrop(timeout));
+			ia.pushGoal(gf.goalGrab(timeout, palet.toLejosPoint()));
+		}
 	}
 
 	@Override

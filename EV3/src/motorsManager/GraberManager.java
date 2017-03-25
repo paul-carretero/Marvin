@@ -49,8 +49,6 @@ public class GraberManager extends Thread implements ModeListener{
 	}
 	
 	synchronized public boolean close(){
-		Main.printf(askedAction.toString());
-		Main.printf(currentState.toString());
 		if(askedAction == Action.NOTHING && currentState == Action.OPEN){
 			askedAction = Action.CLOSE;
 			return true;

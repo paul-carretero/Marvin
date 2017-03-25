@@ -32,7 +32,7 @@ public class PositionCalculator extends Thread implements ModeListener, PoseGive
 		while(!isInterrupted() && mode != Mode.END){
 			updatePose();
 			
-			//Main.printf("[POSITION CALCULATOR]   : " + lastCalculatedPosition.toString());
+			Main.printf("[POSITION CALCULATOR]   : " + odometryPoseProvider.getPose().toString());
 			//Main.printf("[POSITION CALCULATOR]   : Radar : " + radar.getNearItemDistance());
 			
 			syncWait();
@@ -63,6 +63,12 @@ public class PositionCalculator extends Thread implements ModeListener, PoseGive
 	public void setMode(Mode m) {
 		this.mode = m;
 	}
+	
+	public void swap(){
+		Pose current = odometryPoseProvider.getPose();
+		current.setHeading(current.getHeading()-180);
+		odometryPoseProvider.setPose(current);
+	}
 
 	public Pose getPosition() {
 		return odometryPoseProvider.getPose();
@@ -70,14 +76,26 @@ public class PositionCalculator extends Thread implements ModeListener, PoseGive
 
 	public void sendFixX(int x) {
 		Pose tempPose = odometryPoseProvider.getPose();
+		
+		Main.poseRealToSensor(tempPose);
+		
 		tempPose.setLocation(x, tempPose.getY());
-		odometryPoseProvider.setPose(tempPose);
+		
+		Main.poseSensorToReal(tempPose);
+		
+		//odometryPoseProvider.setPose(tempPose);
 	}
 
 	public void sendFixY(int y) {
 		Pose tempPose = odometryPoseProvider.getPose();
+		
+		Main.poseRealToSensor(tempPose);
+		
 		tempPose.setLocation(tempPose.getX(), y);
-		odometryPoseProvider.setPose(tempPose);
+		
+		Main.poseSensorToReal(tempPose);
+		
+		//odometryPoseProvider.setPose(tempPose);
 	}
 
 	public int getRadarDistance() {

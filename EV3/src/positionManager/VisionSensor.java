@@ -10,7 +10,7 @@ import lejos.utility.Delay;
 public class VisionSensor {
 	private	EV3UltrasonicSensor radarUS			= null;
 	private	SampleProvider 		radar			= null;
-	private	static	final	int	RADAR_OFFSET	= 6; // faudra surement faire une fonction de calibration...
+	private	static	final float	RADAR_OFFSET	= 100f;
 	
 	public VisionSensor(){
 		Port port  = LocalEV3.get().getPort(Main.US_SENSOR);
@@ -26,14 +26,11 @@ public class VisionSensor {
 		if(radarUS.isEnabled()){
 			float[] sample = new float[1];
 			radar.fetchSample(sample, 0);
-			int res = Math.round((sample[0] * 1000) + RADAR_OFFSET*10);
+			float res = (sample[0] * 1000f) + RADAR_OFFSET;
 			if(res < 3001){
-				return res;
+				return (int) res;
 			}
-			return 9999;
 		}
-		else{
-			return 9999;
-		}
+		return 9999;
 	}
 }

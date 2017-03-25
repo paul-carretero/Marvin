@@ -12,6 +12,7 @@ import itemManager.FakeServer;
 import itemManager.Server;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
+import lejos.hardware.ev3.LocalEV3;
 import lejos.robotics.navigation.Pose;
 import motorsManager.Engine;
 import motorsManager.GraberManager;
@@ -33,7 +34,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	private	EventHandler 		eventManager;
 	private	PositionCalculator 	positionManager;
 	private	Mode 				currentMode 		= Mode.PASSIVE;
-	private	FakeServer			server;
+	private	Server				server;
 	private	GraberManager 		graber;
 	private	Engine 				engine;
 	private GoalFactory 		GFactory;
@@ -47,13 +48,14 @@ public class Marvin implements SignalListener, WaitProvider{
 	
 	public Marvin(){
 		
+		
 		Main.printf("Not that anyone cares what I say, but the restaurant is at the *other* end of the Universe.");
 		
 		/**********************************************************/
 		
 		Main.setState(Main.HAS_MOVED, false);
-		Main.setState(Main.HAND_OPEN, false);
-		Main.setState(Main.HAVE_PALET, true);
+		Main.setState(Main.HAND_OPEN, true);
+		Main.setState(Main.HAVE_PALET, false);
 		Main.setState(Main.PRESSION, false);
 		
 		modeListener		= new ArrayList<ModeListener>();
@@ -75,7 +77,7 @@ public class Marvin implements SignalListener, WaitProvider{
 		
 		itemManager 		= new EyeOfMarvin(positionManager);
 		areaManager			= new AreaManager(positionManager);
-		server 				= new FakeServer(itemManager);
+		server 				= new Server(itemManager);
 		audio				= new SoundManager();
 
 		/**********************************************************/
@@ -102,7 +104,7 @@ public class Marvin implements SignalListener, WaitProvider{
 		goals 					= GFactory.initializeStartGoals();
 		
 		/**********************************************************/
-		
+		LocalEV3.get().getLED().setPattern(3);
 		for(int i = 0; i< 5; i++){
 			System.out.print("###");
 			syncWait(300);
@@ -112,6 +114,7 @@ public class Marvin implements SignalListener, WaitProvider{
 		System.out.println("MARVIN : STAND-BY");
 		System.out.println(" AWAITING ORDERS");
 		
+		LocalEV3.get().getLED().setPattern(1);
 		Button.ENTER.waitForPressAndRelease();
 		Sound.beep();
 		Main.TIMER.resetTimer();
@@ -123,9 +126,9 @@ public class Marvin implements SignalListener, WaitProvider{
 			setAllowInterrupt(false);
 		}
 		
-		goForward(500);
-		goBackward(500);
-		
+		//goBackward(600);
+				
+		syncWait(1000);
 		/**********************************************************/
 
 		updateMode(Mode.END);
@@ -190,9 +193,10 @@ public class Marvin implements SignalListener, WaitProvider{
 	}
 	
 	public synchronized void cleanUp(){
+		LocalEV3.get().getLED().setPattern(3);
 		goals.clear();
-		//audio.addVictoryTheme();
-		syncWait(1000);
+		audio.addVictoryTheme();
+		syncWait(2000);
 		Main.printf("[MARVIN]                : I'm just trying to die.");
 		try {
 			
@@ -244,13 +248,14 @@ public class Marvin implements SignalListener, WaitProvider{
 			engine.goForward(distance, linearSpeed);
 			
 			directionCalculator.reset();
+			
 		}
 	}
 	
 	public void goBackward(int distance){
 		if(distance > 0 && linearSpeed > 0 && currentMode != Mode.END){
 			
-			directionCalculator.startLine(false);
+			positionManager.swap();
 			
 			for(int i = 0; i<(distance/linearSpeed); i++){
 				audio.addBip();
@@ -258,7 +263,7 @@ public class Marvin implements SignalListener, WaitProvider{
 			
 			engine.goBackward(distance, linearSpeed);
 			
-			directionCalculator.reset();
+			positionManager.swap();
 		}
 	}
 	
@@ -269,13 +274,11 @@ public class Marvin implements SignalListener, WaitProvider{
 	}
 
 	public void open() {
-		//graber.open();
-		Main.setState(Main.HAND_OPEN, true);
+		graber.open();
 	}
 
 	public void grab() {
-		//graber.close();
-		Main.setState(Main.HAND_OPEN, false);
+		graber.close();
 	}
 	
 	public void setAllowInterrupt(boolean value){
