@@ -3,6 +3,7 @@ package goals;
 
 import aiPlanner.Main;
 import aiPlanner.Marvin;
+import interfaces.DistanceGiver;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
@@ -15,10 +16,11 @@ public class GoalGrabPessimist extends Goal {
 	protected 		Point		pallet 	= null;
 	protected 		PoseGiver	pg 		= null;
 	protected		ItemGiver	eom		= null;
+	protected		DistanceGiver radar = null;
 
-	public GoalGrabPessimist(GoalFactory gf, Marvin ia, int timeout, Point pallet, PoseGiver pg, ItemGiver eom) {
+	public GoalGrabPessimist(GoalFactory gf, Marvin ia, int timeout, Point pallet, PoseGiver pg, ItemGiver eom, DistanceGiver radar) {
 		super(gf, ia, timeout);
-		
+		this.radar	= radar;
 		this.eom 	= eom;
 		this.pallet	= pallet;
 		this.pg 	= pg;
@@ -34,11 +36,6 @@ public class GoalGrabPessimist extends Goal {
 
 		int distance = (int)currentPose.distanceTo(pallet);
 		int angleCorrection = (int)currentPose.relativeBearing(pallet);
-		
-		System.out.println("currentPose = " + currentPose.toString());
-		System.out.println("Objective = " + pallet.toString());
-		System.out.println("distance = "+ distance);
-		System.out.println("angle = " + angleCorrection);
 		
 		ia.turnHere(angleCorrection);
 		
@@ -61,7 +58,7 @@ public class GoalGrabPessimist extends Goal {
 	
 	@Override
 	public void start() {
-		if(eom.checkPallet(new IntPoint(pallet.x, pallet.y))){
+		if(eom.checkPallet(new IntPoint(pallet))){
 			correctPosition();
 			
 			int radarDistance 	= 9999;
@@ -72,7 +69,7 @@ public class GoalGrabPessimist extends Goal {
 			ia.turnHere(-20);
 			
 			while(i < 4 && continuer){
-				radarDistance = pg.getRadarDistance();
+				radarDistance = radar.getRadarDistance();
 				Main.printf("radar = " + radarDistance);
 				ia.turnHere(10);
 				if(previousRadar < radarDistance){
@@ -88,7 +85,7 @@ public class GoalGrabPessimist extends Goal {
 	
 			Pose currentPose 	= pg.getPosition();
 			int distance 		= (int)currentPose.distanceTo(pallet);
-			radarDistance 	= pg.getRadarDistance();
+			radarDistance 	= radar.getRadarDistance();
 			
 			ia.setAllowInterrupt(true);
 			

@@ -10,13 +10,23 @@ public class DefaultArea extends Area {
 	}
 
 	@Override
-	public int getConsistency(Pose p) {
-		return -1;
+	public boolean getConsistency(Pose p) {
+		return true;
 	}
 
 	@Override
 	public Area colorChange(Color color, Pose p) {
 		return this;
+	}
+	
+	@Override
+	public float[] getBorder() {
+		return new float[]{
+			0,
+			2000,
+			0,
+			3000
+		};
 	}
 
 }

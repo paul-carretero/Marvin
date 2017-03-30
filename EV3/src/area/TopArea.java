@@ -12,13 +12,8 @@ public class TopArea extends Area{
 	}
 
 	@Override
-	public int getConsistency(Pose p) {
-		if(p.getY() > (Main.Y_TOP_WHITE - MARGE_ERREUR)){
-			return 0;
-		}
-		else{
-			return (int) (Main.Y_TOP_WHITE - p.getY());
-		}
+	public boolean getConsistency(Pose p) {
+		return (p.getY() > (Main.Y_TOP_WHITE - MARGE_ERREUR));
 	}
 
 	@Override
@@ -44,6 +39,16 @@ public class TopArea extends Area{
 			}
 		}
 		return Main.getArea(15); // default Area
+	}
+	
+	@Override
+	public float[] getBorder() {
+		return new float[]{
+			0,
+			2000,
+			2700,
+			3000
+		};
 	}
 
 }

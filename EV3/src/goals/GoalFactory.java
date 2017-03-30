@@ -5,30 +5,33 @@ import java.util.Deque;
 
 import aiPlanner.Marvin;
 import goals.Goal.OrderType;
+import interfaces.DistanceGiver;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
 
 public class GoalFactory {
 	
-	private	Marvin		ia;
-	private	PoseGiver	pg;
-	private	ItemGiver	eom;
-	private	boolean 	lastGrabOk;
+	private	Marvin			ia;
+	private	PoseGiver		pg;
+	private	ItemGiver		eom;
+	private	boolean 		lastGrabOk;
+	private	DistanceGiver	radar;
 	
-	public GoalFactory(Marvin ia, PoseGiver pg, ItemGiver eom){
+	public GoalFactory(Marvin ia, PoseGiver pg, ItemGiver eom, DistanceGiver radar){
 		this.ia			= ia;
 		this.pg			= pg;
 		this.eom		= eom;
 		this.lastGrabOk = true;
+		this.radar		= radar;
 	}
 	
 	public Deque<Goal> initializeStartGoals(){
 		Deque<Goal> goals = new ArrayDeque<Goal>();
 		//goals.push(goalGrabAndDropPalet(30000));
 		//goals.push(goalGrabAndDropPalet(30000));
-		goals.push(goalGoToPosition(30000, new Point(500,1500), OrderType.FORBIDEN));
-		goals.push(goalGoToPosition(30000, new Point(1000,2100), OrderType.MANDATORY));
+		//goals.push(goalGoToPosition(30000, new Point(500,1500), OrderType.FORBIDEN));
+		//goals.push(goalGoToPosition(30000, new Point(1000,2100), OrderType.MANDATORY));
 		return goals;
 	}
 	
@@ -46,10 +49,10 @@ public class GoalFactory {
 	
 	public Goal goalGrab(int timeout, Point palet){
 		if(lastGrabOk){
-			return new GoalGrabOptimist(this, ia, timeout, palet, pg, eom);
+			return new GoalGrabOptimist(this, ia, timeout, palet, pg, eom, radar);
 		}
 		else{
-			return new GoalGrabPessimist(this, ia, timeout, palet, pg, eom);
+			return new GoalGrabPessimist(this, ia, timeout, palet, pg, eom, radar);
 		}
 	}
 	

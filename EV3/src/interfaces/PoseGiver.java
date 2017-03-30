@@ -6,5 +6,5 @@ public interface PoseGiver {
 	public Pose getPosition();
 	public void sendFixX(int x);
 	public void sendFixY(int y);
-	public int getRadarDistance();
+	public int getAreaId();
 }

@@ -11,21 +11,13 @@ public class CenterArea extends Area {
 	}
 
 	@Override
-	public int getConsistency(Pose p) {
-		if(
+	public boolean getConsistency(Pose p) {
+		return (
 				p.getX() < (Main.X_RED_LINE + MARGE_ERREUR) && 
 				p.getX() > (Main.X_YELLOW_LINE - MARGE_ERREUR) &&
 				p.getY() > (Main.Y_GREEN_LINE - MARGE_ERREUR) &&
-				p.getY() < (Main.Y_BLUE_LINE + MARGE_ERREUR))
-		{
-			return 0;
-		}
-		else{
-			return (int) Math.max(
-					Math.max( (p.getX() - Main.X_RED_LINE) , (Main.X_YELLOW_LINE - p.getX())),
-					Math.max( (p.getY() - Main.Y_BLUE_LINE) , (Main.Y_GREEN_LINE - p.getY()))
-			);
-		}
+				p.getY() < (Main.Y_BLUE_LINE + MARGE_ERREUR)
+		);
 	}
 
 	@Override
@@ -82,6 +74,16 @@ public class CenterArea extends Area {
 			return Main.getArea(15);
 		}
 		
+	}
+	
+	@Override
+	public float[] getBorder() {
+		return new float[]{
+			500,
+			1500,
+			900,
+			2100,
+		};
 	}
 
 }

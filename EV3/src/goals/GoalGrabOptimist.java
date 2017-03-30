@@ -2,6 +2,7 @@ package goals;
 
 import aiPlanner.Main;
 import aiPlanner.Marvin;
+import interfaces.DistanceGiver;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
@@ -10,16 +11,16 @@ import shared.IntPoint;
 
 public class GoalGrabOptimist extends GoalGrabPessimist {
 
-	public GoalGrabOptimist(GoalFactory gf, Marvin ia, int timeout, Point pallet, PoseGiver pg, ItemGiver eom) {
-		super(gf, ia, timeout, pallet, pg, eom);
+	public GoalGrabOptimist(GoalFactory gf, Marvin ia, int timeout, Point pallet, PoseGiver pg, ItemGiver eom, DistanceGiver radar) {
+		super(gf, ia, timeout, pallet, pg, eom, radar);
 	}
 	
 	@Override
 	public void start() {
-		if(eom.checkPallet(new IntPoint(pallet.x, pallet.y))){
+		if(eom.checkPallet(new IntPoint(pallet))){
 			correctPosition();
 	
-			int	radarDistance 	= pg.getRadarDistance();
+			int	radarDistance 	= radar.getRadarDistance();
 			Pose currentPose 	= pg.getPosition();
 			int distance 		= (int)currentPose.distanceTo(pallet);
 			

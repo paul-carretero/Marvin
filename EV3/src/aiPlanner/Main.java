@@ -18,7 +18,7 @@ public class Main{
 	
 	// POSITION EN MILIMETRE (oui c'est bête mais pour la "pose" ça évite des convertions multiples => librairie stupide).
 	
-	public static final int X_INITIAL 				= 1500;
+	public static final int X_INITIAL 				= 1000;
 	public static final int Y_INITIAL 				= 2700;
 	public static final int H_INITIAL 				= -90;
 
@@ -123,7 +123,7 @@ public class Main{
 		try {
 			str = str + "#";
 			DatagramSocket clientSocket = new DatagramSocket();
-			InetAddress IPAddress = InetAddress.getByName("192.168.1.10");
+			InetAddress IPAddress = InetAddress.getByName("192.168.1.76");
 			byte[] sendData = new byte[256];
 			sendData = str.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 4242);

@@ -4,9 +4,11 @@ import eventManager.EventHandler;
 import goals.Goal;
 import goals.GoalFactory;
 import goals.GoalRecalibrate;
+import interfaces.ItemGiver;
 import interfaces.ModeListener;
 import interfaces.SignalListener;
 import interfaces.WaitProvider;
+import itemManager.CentralIntelligenceService;
 import itemManager.EyeOfMarvin;
 import itemManager.FakeServer;
 import itemManager.Server;
@@ -19,6 +21,7 @@ import motorsManager.GraberManager;
 import positionManager.AreaManager;
 import positionManager.DirectionCalculator;
 import positionManager.PositionCalculator;
+import positionManager.VisionSensor;
 import shared.Mode;
 import shared.SignalType;
 
@@ -34,7 +37,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	private	EventHandler 		eventManager;
 	private	PositionCalculator 	positionManager;
 	private	Mode 				currentMode 		= Mode.PASSIVE;
-	private	Server				server;
+	private	FakeServer			server;
 	private	GraberManager 		graber;
 	private	Engine 				engine;
 	private GoalFactory 		GFactory;
@@ -45,6 +48,8 @@ public class Marvin implements SignalListener, WaitProvider{
 	private DirectionCalculator	directionCalculator = null; // pour calculer angle
 	private int					rotationSpeed		= Main.ROTATION_SPEED;
 	private int					linearSpeed			= Main.CRUISE_SPEED;
+	private CentralIntelligenceService cis			= null;
+	private VisionSensor		radar;
 	
 	public Marvin(){
 		
@@ -63,22 +68,23 @@ public class Marvin implements SignalListener, WaitProvider{
 		
 		/**********************************************************/
 		
-		eventManager 		= new EventHandler(this);
-		engine 				= new Engine(eventManager,this);
-		graber 				= new GraberManager();
-		directionCalculator = new DirectionCalculator();
-		
 		try {
-			positionManager	= new PositionCalculator(engine.getPilot(), directionCalculator);
+			radar			= new VisionSensor();
 		} catch (Exception e) {
 			Main.printf(e.getMessage());
 			System.exit(1);
 		}
 		
+		eventManager 		= new EventHandler(this);
+		engine 				= new Engine(eventManager,this);
+		graber 				= new GraberManager();
+		directionCalculator = new DirectionCalculator();
+		positionManager		= new PositionCalculator(engine.getPilot(), directionCalculator, radar, this);
 		itemManager 		= new EyeOfMarvin(positionManager);
 		areaManager			= new AreaManager(positionManager);
-		server 				= new Server(itemManager);
+		server 				= new FakeServer(itemManager);
 		audio				= new SoundManager();
+		cis					= new CentralIntelligenceService(itemManager, positionManager);
 
 		/**********************************************************/
 		
@@ -86,8 +92,11 @@ public class Marvin implements SignalListener, WaitProvider{
 		modeListener.add(areaManager);
 		modeListener.add(graber);
 		modeListener.add(positionManager);
+		modeListener.add(cis);
 		
 		directionCalculator.addEom(itemManager);
+		positionManager.addItemGiver(itemManager);
+		positionManager.addAreaManager(areaManager);
 		
 		/**********************************************************/
 		
@@ -97,10 +106,11 @@ public class Marvin implements SignalListener, WaitProvider{
 		server.start();
 		areaManager.start();
 		audio.start();
+		cis.start();
 		
 		/**********************************************************/
 		
-		GFactory 				= new GoalFactory(this,positionManager, this.itemManager);
+		GFactory 				= new GoalFactory(this,positionManager, this.itemManager, radar);
 		goals 					= GFactory.initializeStartGoals();
 		
 		/**********************************************************/
@@ -125,13 +135,10 @@ public class Marvin implements SignalListener, WaitProvider{
 			goals.pop().startWrapper();
 			setAllowInterrupt(false);
 		}
-		
-		//goBackward(600);
 				
-		syncWait(1000);
+		
 		/**********************************************************/
-
-		updateMode(Mode.END);
+		
 		cleanUp();
 	}
 
@@ -194,6 +201,8 @@ public class Marvin implements SignalListener, WaitProvider{
 	
 	public synchronized void cleanUp(){
 		LocalEV3.get().getLED().setPattern(3);
+		syncWait(1000);
+		updateMode(Mode.END);
 		goals.clear();
 		audio.addVictoryTheme();
 		syncWait(2000);
@@ -243,7 +252,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	public void goForward(int distance){
 		if(distance > 0 && linearSpeed > 0 && currentMode != Mode.END){
 			
-			directionCalculator.startLine(true);
+			directionCalculator.startLine();
 			
 			engine.goForward(distance, linearSpeed);
 			

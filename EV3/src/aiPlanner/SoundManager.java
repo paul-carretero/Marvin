@@ -4,9 +4,7 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import interfaces.ModeListener;
 import lejos.hardware.Sound;
-import shared.Mode;
 
 public class SoundManager extends Thread{
 	private volatile Queue<String> AudioList;
@@ -44,7 +42,7 @@ public class SoundManager extends Thread{
 	}
 	
 	public void addVictoryTheme(){
-		//AudioList.add("victory.wav");
+		AudioList.add("victory.wav");
 	}
 	
 	public void addTrololo(){

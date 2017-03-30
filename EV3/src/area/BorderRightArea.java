@@ -23,16 +23,9 @@ public class BorderRightArea extends Area{
 	}
 
 	@Override
-	public int getConsistency(Pose p) {
-		if(p.getX() > (Main.X_RED_LINE - MARGE_ERREUR) && 
-				p.getY() < (maxY + MARGE_ERREUR) && p.getY() > (minY + MARGE_ERREUR)){
-			return 0;
-		}
-		else{
-			return (int) Math.max(
-					Math.max(p.getX() - Main.X_RED_LINE, minY - p.getY()),
-					p.getY() - maxY);
-		}
+	public boolean getConsistency(Pose p) {
+		return (p.getX() > (Main.X_RED_LINE - MARGE_ERREUR) && 
+				p.getY() < (maxY + MARGE_ERREUR) && p.getY() > (minY + MARGE_ERREUR));
 	}
 
 	@Override
@@ -89,6 +82,16 @@ public class BorderRightArea extends Area{
 		else{
 			return Main.getArea(15); // default Area
 		}
+	}
+
+	@Override
+	public float[] getBorder() {
+		return new float[]{
+			1500,
+			2000,
+			minY,
+			maxY
+		};
 	}
 
 }

@@ -3,7 +3,6 @@ package goals;
 import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.ItemGiver;
-import lejos.robotics.geometry.Point;
 import shared.IntPoint;
 
 public class GoalGrabAndDropPalet extends Goal {

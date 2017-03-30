@@ -9,12 +9,10 @@ import shared.Item;
 public class DirectionCalculator {
 	
 	private Point startPoint 	= null;
-	private boolean forward		= true;
 	private ItemGiver eom		= null;
 	
 	public DirectionCalculator(){
 		this.startPoint	= null;
-		this.forward	= true;
 		Main.printf("[DIRECTION CALCULATOR]  : Initialized");
 	}
 	
@@ -22,22 +20,11 @@ public class DirectionCalculator {
 		this.eom = eom;
 	}
 	
-	protected float getAngle(Point p){
+	public float getAngle(Point p){
 		if(startPoint != null && p != null){
 			// pas sur si la distance est de moins de 10cm, ajustable éventuellement
 			if(startPoint.distance(p) > 100 ){
-				float realAngle = startPoint.angleTo(p);
-				if(forward){
-					return realAngle;
-				}
-				else{
-					if(realAngle > 0){
-						return realAngle - 180;
-					}
-					else{
-						return realAngle + 180;
-					}
-				}
+				return startPoint.angleTo(p);
 			}
 		}
 		return 9999;
@@ -66,11 +53,14 @@ public class DirectionCalculator {
 		startPoint = null;
 	}
 	
-	public void startLine(boolean forward){
+	
+	/*
+	 * always forward
+	 */
+	public void startLine(){
 		if(eom != null){
 			Item eomStart = eom.getMarvinPosition();
 			if(eomStart != null){
-				this.forward 	= forward;
 				this.startPoint	= eomStart.toLejosPoint();
 			}
 			else{

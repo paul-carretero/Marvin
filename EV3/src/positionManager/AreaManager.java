@@ -2,12 +2,13 @@ package positionManager;
 
 import aiPlanner.Main;
 import area.Area;
+import interfaces.AreaGiver;
 import interfaces.ModeListener;
 import interfaces.PoseGiver;
 import shared.Color;
 import shared.Mode;
 
-public class AreaManager extends Thread implements ModeListener {
+public class AreaManager extends Thread implements ModeListener, AreaGiver {
 	
 	private Area currentArea;
 	private ColorSensor colorSensor;
@@ -17,12 +18,13 @@ public class AreaManager extends Thread implements ModeListener {
 	private PoseGiver pg;
 	
 	public AreaManager(PoseGiver pg){
-		currentColor = null;
-		colorSensor = new ColorSensor();
-		this.refreshRate = 100;
+		this.currentColor	= null;
+		this.colorSensor	= new ColorSensor();
+		this.refreshRate	= 100;
+		this.pg				= pg;
+		this.currentArea	= Area.getAreaWithPosition(pg.getPosition());
+		
 		colorSensor.setCalibration();
-		this.pg = pg;
-		currentArea = Area.getAreaWithPosition(pg.getPosition());
 		Main.printf("[AREA MANAGER]          : Initialized");
 	}
 	
@@ -79,7 +81,7 @@ public class AreaManager extends Thread implements ModeListener {
 		return false;
 	}
 	
-	public void syncWait(){
+	private void syncWait(){
 		synchronized (this) {
 			try {
 				this.wait(refreshRate);
@@ -91,5 +93,13 @@ public class AreaManager extends Thread implements ModeListener {
 
 	public void setMode(Mode m) {
 		this.currentMode = m;
+	}
+
+	public Area getCurrentArea() {
+		return currentArea;
+	}
+
+	public void updateArea() {
+		currentArea = Area.getAreaWithPosition(pg.getPosition());
 	}
 }

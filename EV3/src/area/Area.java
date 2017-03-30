@@ -84,7 +84,13 @@ public abstract class Area {
 		return "A"+ID;
 	}
 	
-	public abstract int getConsistency(Pose p);
+	public int getId(){
+		return ID;
+	}
+	
+	public abstract boolean getConsistency(Pose p);
+	
+	public abstract float[] getBorder();
 	
 	public abstract Area colorChange(Color currentColor, Pose p);
 	

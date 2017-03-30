@@ -2,8 +2,6 @@ package goals;
 
 import aiPlanner.Main;
 import aiPlanner.Marvin;
-import goals.Goal.OrderType;
-import interfaces.ItemGiver;
 import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
@@ -12,6 +10,7 @@ public class GoalDrop extends Goal{
 	
 	protected	final	String	NAME	= "GoalDrop";
 	protected	PoseGiver	poseGiver	= null;
+	protected	boolean		restart		= true;
 
 	public GoalDrop(GoalFactory gf, Marvin ia, int timeout, PoseGiver p) {
 		super(gf, ia, timeout);
@@ -41,7 +40,7 @@ public class GoalDrop extends Goal{
 			ia.pushGoal(this);
 			ia.pushGoal(gf.goalGoToPosition(timeout, destination, OrderType.FORBIDEN));
 		}
-		else{
+		else if(poseGiver.getAreaId() == 15 || poseGiver.getAreaId() == 0 || poseGiver.getAreaId() == 14){
 			
 			// on se place perpendiculairement au mur si ce n'est pas déjà fait
 			
@@ -70,9 +69,16 @@ public class GoalDrop extends Goal{
 			
 			// on a finit
 		}
-		
-		
-		
+		else{
+			if(restart){
+				restart = false;
+				ia.pushGoal(this);
+			}
+			else{
+				ia.open();
+				ia.goBackward(200);
+			}
+		}
 	}
 
 	@Override
