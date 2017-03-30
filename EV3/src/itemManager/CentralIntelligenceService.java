@@ -26,10 +26,12 @@ public class CentralIntelligenceService extends Thread implements ModeListener{
 		this.firstContact 			= null;
 		this.confirmationContact	= null;
 		this.notifyOnUptate			= null;
+		Main.printf("[CIS]                   : Initialized");
 	}
 	
 	@Override
 	public void run(){
+		Main.printf("[CIS]                   : started");
 		this.setPriority(MIN_PRIORITY);
 		while(this.mode != Mode.END && !isInterrupted()){
 			
@@ -51,16 +53,25 @@ public class CentralIntelligenceService extends Thread implements ModeListener{
 						if(intersection.x() > 0 && intersection.x() < 3000 && confirmationContact.getDistance(intersection) < firstContact.getDistance(intersection)){
 							updateInterceptionTarget(intersection);
 						}
+						else{
+							updateInterceptionTarget(null);
+						}
 					}
+					else{
+						updateInterceptionTarget(null);
+					}
+				}
+				else{
+					updateInterceptionTarget(null);
 				}
 				
 				// on réinitialise firstcontact à confirmationcontact (si il change de trajectoire ou autre)
 				firstContact = confirmationContact;
 				confirmationContact = null;
 			}
-			Main.printf("Ennemy target = " + interceptionTarget);
 			syncWait();
 		}
+		Main.printf("[CIS]                   : Finished");
 	}
 	
 	public void addEnnemyMoveNotifier(Object o){
@@ -81,7 +92,6 @@ public class CentralIntelligenceService extends Thread implements ModeListener{
 					}
 				}
 			}
-			Main.printf("ennemy = " + firstContact.toString());
 		}
 		else{
 			interceptionTarget = null;

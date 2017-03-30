@@ -19,10 +19,9 @@ public class FakeServer extends Thread{
 	@Override
 	public void run() {
 		Main.printf("[FAKE SERVER]           : Started");
-		int currentY = 0;
-		int currentX = 0;
+		int currentY = 2700;
 		while(! isInterrupted() && !stop){
-			String rawData = "0;1000;2700\n1;700;1300\n2;300;1000\n3;"+currentX+";"+currentY+"\n";
+			String rawData = "0;1000;"+currentY+"\n1;700;1300\n2;300;1000\n";
 			lastReceivedTimer = Main.TIMER.getElapsedMs();
 			String[] items = rawData.split("\n");
 			lastPointsReceived = new ArrayList<Item>();
@@ -37,8 +36,7 @@ public class FakeServer extends Thread{
 	        }
 			eom.receiveRawPoints(lastReceivedTimer, lastPointsReceived);
 			Delay.msDelay(300);
-			currentY = currentY+50;
-			currentX = currentX+25;
+			currentY = currentY-25;
 		}
 		Main.printf("[FAKE SERVER]           : Finished");
 	}

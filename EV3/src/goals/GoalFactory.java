@@ -59,4 +59,8 @@ public class GoalFactory {
 	public Goal goalGrabAndDropPalet(int timeout){
 		return new GoalGrabAndDropPalet(this, ia, timeout, eom);
 	}
+	
+	public Goal goalRecalibrate(int timeout){
+		return new GoalRecalibrate(this, ia, timeout);
+	}
 }

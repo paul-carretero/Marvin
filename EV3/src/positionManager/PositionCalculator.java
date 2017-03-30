@@ -17,8 +17,12 @@ import lejos.robotics.navigation.Pose;
 
 public class PositionCalculator extends Thread implements ModeListener, PoseGiver {
 
-	private static final int 		refreshRate			= 400;
+	private static final float		MAP_PERCENT			= 0.3f;
+	private static final float		RADAR_PERCENT		= 0.15f;
+	private static final float		AREA_PERCENT		= 0.3f;
+	private static final int 		REFRESH_RATE		= 400;
 	private static final int		MAX_SAMPLE_ERROR	= 180;
+	
 	private volatile Mode			mode;
 	private DistanceGiver 			radar;
 	private OdometryPoseProvider 	odometryPoseProvider;
@@ -55,7 +59,7 @@ public class PositionCalculator extends Thread implements ModeListener, PoseGive
 			if(!checkConsistancy()){
 				marvin.signal(SignalType.LOST);
 			}
-			//Main.printf("[POSITION CALCULATOR]   : " + odometryPoseProvider.getPose().toString());
+			Main.printf("[POSITION CALCULATOR]   : " + odometryPoseProvider.getPose().toString());
 			//Main.printf("[POSITION CALCULATOR]   : Radar : " + radar.getNearItemDistance());
 			syncWait();
 		}
@@ -78,7 +82,7 @@ public class PositionCalculator extends Thread implements ModeListener, PoseGive
 	
 	// radarDistance = différence entre le position carte et la position radar
 	private boolean checkConsistancy(){
-		int nCorrect = 0;
+		int nCorrect = 1;
 		
 		// radar pas super fiable
 		if(checkRadarConsistancy()){
@@ -94,12 +98,12 @@ public class PositionCalculator extends Thread implements ModeListener, PoseGive
 		}
 		
 		// si on est plutôt sur de la ou on est alors on met à jour les areas si besoin
-		if(area.getCurrentArea().getId() == 15 && nCorrect == 3){
+		if(area.getCurrentArea().getId() == 15 && nCorrect > 6){
 			area.updateArea();
 		}
 		
 		// on est sur de la ou on est avec au moins 2 ou 3 de cohérent
-		return nCorrect > 2;
+		return nCorrect > 3;
 	}
 	
 	private boolean checkRadarConsistancy() {
@@ -145,20 +149,20 @@ public class PositionCalculator extends Thread implements ModeListener, PoseGive
 		
 		// si minX est plus grand que le x actuel
 		if(borders[0] > myPose.getX()){
-			x = 0.7f * x + 0.3f * borders[0];
+			x = (1 - AREA_PERCENT) * x + (AREA_PERCENT) * borders[0];
 		}
 		
 		// si x est plus grand que maxX
 		if(borders[1] < myPose.getX()){
-			x = 0.7f * x + 0.3f * borders[1];
+			x = (1 - AREA_PERCENT) * x + (AREA_PERCENT) * borders[1];
 		}
 		
 		if(borders[2] > myPose.getY()){
-			y = 0.7f * y + 0.3f * borders[2];
+			y = (1 - AREA_PERCENT) * y + (AREA_PERCENT) * borders[2];
 		}
 		
 		if(borders[3] < myPose.getY()){
-			y = 0.7f * y + 0.3f * borders[3];
+			y = (1 - AREA_PERCENT) * y + (AREA_PERCENT) * borders[3];
 		}
 		
 		myPose.setLocation(x, y);
@@ -170,8 +174,8 @@ public class PositionCalculator extends Thread implements ModeListener, PoseGive
 		
 		Pose myPose = odometryPoseProvider.getPose();
 		
-		float x = (float) (me.x()) * 0.3f + myPose.getX() * 0.7f;
-		float y = (float) (me.y()) * 0.3f + myPose.getY() * 0.7f;
+		float x = (float) (me.x()) * (MAP_PERCENT) + myPose.getX() * (1 - MAP_PERCENT);
+		float y = (float) (me.y()) * (MAP_PERCENT) + myPose.getY() * (1 - MAP_PERCENT);
 		
 		myPose.setLocation(x, y);
 		odometryPoseProvider.setPose(myPose);
@@ -180,7 +184,7 @@ public class PositionCalculator extends Thread implements ModeListener, PoseGive
 	public void syncWait(){
 		synchronized (this) {
 			try {
-				this.wait(refreshRate);
+				this.wait(REFRESH_RATE);
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
@@ -244,7 +248,7 @@ public class PositionCalculator extends Thread implements ModeListener, PoseGive
 				tempPose.setHeading(headingToBestMatch);
 				
 				// on ne corrige que de 15% parceque le radar n'est pas fiable, dans le direction de l'item detecté
-				tempPose.moveUpdate((tempPose.distanceTo(bestMatch) - radarDistance) * 0.15f);
+				tempPose.moveUpdate((tempPose.distanceTo(bestMatch) - radarDistance) * (RADAR_PERCENT));
 				
 				tempPose.setHeading(realHeading);
 				

@@ -3,19 +3,15 @@ package aiPlanner;
 import eventManager.EventHandler;
 import goals.Goal;
 import goals.GoalFactory;
-import goals.GoalRecalibrate;
-import interfaces.ItemGiver;
 import interfaces.ModeListener;
 import interfaces.SignalListener;
 import interfaces.WaitProvider;
 import itemManager.CentralIntelligenceService;
 import itemManager.EyeOfMarvin;
 import itemManager.FakeServer;
-import itemManager.Server;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
-import lejos.robotics.navigation.Pose;
 import motorsManager.Engine;
 import motorsManager.GraberManager;
 import positionManager.AreaManager;
@@ -179,7 +175,7 @@ public class Marvin implements SignalListener, WaitProvider{
 		switch (e) {
 		case LOST:
 			if(noTypeOfGoal("GoalRecalibrate")){
-				goals.push(null);
+				goals.push(GFactory.goalRecalibrate(30000));
 			}
 			break;
 		case PRESSION_PUSHED:
