@@ -6,5 +6,8 @@ public enum SignalType {
 	LOST, 
 	UNHANDLED_ERROR,
 	STOP, 
-	STALLED_ENGINE;
+	STALLED_ENGINE, 
+	BLOCKED, 
+	NO_LOST, 
+	OBSTACLE;
 }

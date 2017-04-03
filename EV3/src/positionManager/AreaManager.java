@@ -3,17 +3,14 @@ package positionManager;
 import aiPlanner.Main;
 import area.Area;
 import interfaces.AreaGiver;
-import interfaces.ModeListener;
 import interfaces.PoseGiver;
 import shared.Color;
-import shared.Mode;
 
-public class AreaManager extends Thread implements ModeListener, AreaGiver {
+public class AreaManager extends Thread implements AreaGiver {
 	
 	private Area currentArea;
 	private ColorSensor colorSensor;
 	private int refreshRate;
-	private volatile Mode currentMode;
 	private Color currentColor;
 	private PoseGiver pg;
 	
@@ -23,56 +20,56 @@ public class AreaManager extends Thread implements ModeListener, AreaGiver {
 		this.refreshRate	= 100;
 		this.pg				= pg;
 		this.currentArea	= Area.getAreaWithPosition(pg.getPosition());
-		
-		colorSensor.setCalibration();
+		this.colorSensor.setCalibration();
 		Main.printf("[AREA MANAGER]          : Initialized");
 	}
 	
+	@Override
 	public void run(){
-		colorSensor.lightOn();
-		while(!isInterrupted() && currentMode != Mode.END){
+		this.colorSensor.lightOn();
+		while(!isInterrupted()){
 			if(updateColor()){
-				currentArea = currentArea.colorChange(currentColor, pg.getPosition());
-				Main.printf("[AREA MANAGER]          : COLOR DETECTED = " + currentColor + "NEW AREA = " + currentArea.toString());
+				this.currentArea = this.currentArea.colorChange(this.currentColor, this.pg.getPosition());
+				Main.printf("[AREA MANAGER]          : COLOR DETECTED = " + this.currentColor + "NEW AREA = " + this.currentArea.toString());
 			}
 			syncWait();
 		}
-		colorSensor.lightOff();
+		this.colorSensor.lightOff();
 		Main.printf("[AREA MANAGER]          : Finished");
 	}
 	
 	@SuppressWarnings("incomplete-switch")
 	private boolean updateColor(){
-		Color checkColor = colorSensor.getCurrentColor();
-		if(checkColor != currentColor){
-			currentColor = checkColor;
+		Color checkColor = this.colorSensor.getCurrentColor();
+		if(checkColor != this.currentColor){
+			this.currentColor = checkColor;
 			switch(checkColor){
 				case BLACK:
-					if(pg.getPosition().getY() < 1250 || pg.getPosition().getY() > 1750 ){
-						pg.sendFixY(Main.X_BLACK_LINE);
+					if(this.pg.getPosition().getY() < 1250 || this.pg.getPosition().getY() > 1750 ){
+						this.pg.sendFixY(Main.X_BLACK_LINE);
 					}
-					else if(pg.getPosition().getX() > 1250 || pg.getPosition().getX() < 750 ){
-						pg.sendFixY(Main.Y_BLACK_LINE);
+					else if(this.pg.getPosition().getX() > 1250 || this.pg.getPosition().getX() < 750 ){
+						this.pg.sendFixY(Main.Y_BLACK_LINE);
 					}
 					break;
 				case BLUE:
-					pg.sendFixY(Main.Y_BLUE_LINE);
+					this.pg.sendFixY(Main.Y_BLUE_LINE);
 					break;
 				case GREEN:
-					pg.sendFixY(Main.Y_GREEN_LINE);
+					this.pg.sendFixY(Main.Y_GREEN_LINE);
 					break;
 				case RED:
-					pg.sendFixX(Main.X_RED_LINE);
+					this.pg.sendFixX(Main.X_RED_LINE);
 					break;
 				case YELLOW:
-					pg.sendFixX(Main.X_YELLOW_LINE);
+					this.pg.sendFixX(Main.X_YELLOW_LINE);
 					break;
 				case WHITE:
-					if(pg.getPosition().getY() < Main.Y_BLACK_LINE){
-						pg.sendFixY(Main.Y_BOTTOM_WHITE);
+					if(this.pg.getPosition().getY() < Main.Y_BLACK_LINE){
+						this.pg.sendFixY(Main.Y_BOTTOM_WHITE);
 					}
 					else{
-						pg.sendFixY(Main.Y_TOP_WHITE);
+						this.pg.sendFixY(Main.Y_TOP_WHITE);
 					}
 					break;
 			}
@@ -81,25 +78,19 @@ public class AreaManager extends Thread implements ModeListener, AreaGiver {
 		return false;
 	}
 	
-	private void syncWait(){
-		synchronized (this) {
-			try {
-				this.wait(refreshRate);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
+	synchronized private void syncWait(){
+		try {
+			this.wait(this.refreshRate);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 	}
 
-	public void setMode(Mode m) {
-		this.currentMode = m;
-	}
-
 	public Area getCurrentArea() {
-		return currentArea;
+		return this.currentArea;
 	}
 
 	public void updateArea() {
-		currentArea = Area.getAreaWithPosition(pg.getPosition());
+		this.currentArea = Area.getAreaWithPosition(this.pg.getPosition());
 	}
 }

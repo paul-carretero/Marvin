@@ -10,26 +10,24 @@ public class Graber {
 	private Port port;
 	
 	public Graber(){
-		port   = LocalEV3.get().getPort(Main.GRABER);
-		graber = new EV3LargeRegulatedMotor(port);
+		this.port   = LocalEV3.get().getPort(Main.GRABER);
+		this.graber = new EV3LargeRegulatedMotor(this.port);
 	}
 	
 	public void close(){
-		if(Main.getState(Main.HAND_OPEN)){
-			graber.setSpeed(Main.GRABER_SPEED);
-			graber.backward();
-			syncWait(Main.GRABER_TIMER);
-			graber.stop();
-		}
+		this.graber.setSpeed(Main.GRABER_SPEED);
+		this.graber.backward();
+		
+		syncWait(Main.GRABER_TIMER);
+		
+		this.graber.stop();
 	}
 	
 	public void open(){
-		if(!Main.getState(Main.HAND_OPEN)){
-			graber.setSpeed(Main.GRABER_SPEED);
-			graber.forward();
-			syncWait(Main.GRABER_TIMER);
-			graber.stop();
-		}
+		this.graber.setSpeed(Main.GRABER_SPEED);
+		this.graber.forward();
+		syncWait(Main.GRABER_TIMER);
+		this.graber.stop();
 	}
 	
 	public void syncWait(int ms){
@@ -49,7 +47,7 @@ public class Graber {
 	}
 
 	public void stop() {
-		graber.stop();
+		this.graber.stop();
 	}
 
 }

@@ -4,7 +4,7 @@ public class Timer {
 	private long start;
 	
 	public int getElapsedMs(){
-		return (int) (System.currentTimeMillis() - start);
+		return (int) (System.currentTimeMillis() - this.start);
 	}
 	
 	public int getElapsedSec(){
@@ -16,14 +16,14 @@ public class Timer {
 	}
 	
 	public void resetTimer(){
-		this.start = System.currentTimeMillis();
+		this.start	= System.currentTimeMillis();
 	}
 	
 	public Timer(){
-		this.start = System.currentTimeMillis();
+		this.start	= System.currentTimeMillis();
 	}
 	
 	public Timer(long start){
-		this.start = start;
+		this.start	= start;
 	}
 }

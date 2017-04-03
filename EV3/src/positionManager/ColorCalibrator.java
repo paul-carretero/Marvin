@@ -19,13 +19,13 @@ import lejos.robotics.filter.MeanFilter;
 
 public class ColorCalibrator {
 	
-	public static final int COLOR_BLUE 				= 0;
-	public static final int COLOR_BLACK 			= 1;
-	public static final int COLOR_WHITE 			= 2;
-	public static final int COLOR_GREY 				= 3;
-	public static final int COLOR_YELLOW 			= 4;
-	public static final int COLOR_RED 				= 5;
-	public static final int COLOR_GREEN 			= 6;
+	public static final int COLOR_BLUE 		= 0;
+	public static final int COLOR_BLACK 	= 1;
+	public static final int COLOR_WHITE 	= 2;
+	public static final int COLOR_GREY 		= 3;
+	public static final int COLOR_YELLOW 	= 4;
+	public static final int COLOR_RED 		= 5;
+	public static final int COLOR_GREEN 	= 6;
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		Port port = LocalEV3.get().getPort(Main.COLOR_SENSOR);
@@ -79,7 +79,7 @@ public class ColorCalibrator {
 		
 		colorSensor.setFloodlight(false);
 		
-		File fichier =  new File("conf.txt") ;
+		final File fichier =  new File("conf.txt") ;
 		
 		PrintWriter writer = new PrintWriter(fichier);
 		writer.print("");

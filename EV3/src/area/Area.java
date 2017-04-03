@@ -6,12 +6,12 @@ import shared.Color;
 
 public abstract class Area {
 
-	protected int ID;
+	protected final int id;
 	protected final static int AMBIGUOUS_ANGLE = 10;
 	protected static final int MARGE_ERREUR = 30; // en mm
 	
 	public Area(int id){
-		this.ID = id;
+		this.id = id;
 	}
 	
 	public static Area getAreaWithPosition(Pose p){
@@ -80,12 +80,13 @@ public abstract class Area {
 		return Main.getArea(15);
 	}
 	
+	@Override
 	public String toString(){
-		return "A"+ID;
+		return "A"+this.id;
 	}
 	
 	public int getId(){
-		return ID;
+		return this.id;
 	}
 	
 	public abstract boolean getConsistency(Pose p);

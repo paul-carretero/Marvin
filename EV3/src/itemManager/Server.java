@@ -28,29 +28,29 @@ public class Server extends Thread{
 	public void run() {
 		Main.printf("[SERVER]                : Started");
 		int aJeter = 0;
-		while(! isInterrupted() && !stop){
+		while(! isInterrupted() && !this.stop){
 			try {
-				dsocket.receive(packet);
-				lastReceivedTimer = Main.TIMER.getElapsedMs();
+				this.dsocket.receive(this.packet);
+				this.lastReceivedTimer = Main.TIMER.getElapsedMs();
 			} catch (IOException e) {
 				Main.printf("[SERVER]                : Socket Closed");
-				stop = true;
+				this.stop = true;
 			}
 			if(aJeter == 0){
-				String msg = new String(buffer, 0, packet.getLength());
+				String msg = new String(this.buffer, 0, this.packet.getLength());
 				String[] items = msg.split("\n");
-				lastPointsReceived = new ArrayList<Item>();
+				this.lastPointsReceived.clear();
 				for (int i = 0; i < items.length; i++) 
 		        {
 					String[] coord = items[i].split(";");
 					if(coord.length == 3){
 			        	int x = Integer.parseInt(coord[1]);
 			        	int y = 300 - Integer.parseInt(coord[2]); // convertion en mode 'genius'
-			        	lastPointsReceived.add(new Item(x*10, y*10, lastReceivedTimer, ItemType.UNDEFINED));		        	
+			        	this.lastPointsReceived.add(new Item(x*10, y*10, this.lastReceivedTimer, ItemType.UNDEFINED));		        	
 					}
 		        }
-				eom.receiveRawPoints(lastReceivedTimer,lastPointsReceived);
-				packet.setLength(buffer.length);
+				this.eom.receiveRawPoints(this.lastReceivedTimer,this.lastPointsReceived);
+				this.packet.setLength(this.buffer.length);
 			}
 			aJeter ++;
 			if(aJeter == 4){
@@ -63,18 +63,21 @@ public class Server extends Thread{
 	@Override
 	public void interrupt(){
 		this.dsocket.close();
-		stop = true;
+		this.stop = true;
 	}
 	
 	public Server(ServerListener sl){
-		this.eom = sl;
+		this.eom 				= sl;
+		this.packet 			= new DatagramPacket(this.buffer, this.buffer.length);
+		this.lastPointsReceived	= new ArrayList<Item>();
+		
 		try {
-			dsocket = new DatagramSocket(port);
+			this.dsocket = new DatagramSocket(this.port);
 		} catch (SocketException e1) {
 			Main.printf("[SERVER]                : Erreur, DatagramSocket non initialisé");
 			e1.printStackTrace();
 		}
-		packet = new DatagramPacket(buffer, buffer.length);
+		
 		Main.printf("[SERVER]                : Initialized");
 	}
 }

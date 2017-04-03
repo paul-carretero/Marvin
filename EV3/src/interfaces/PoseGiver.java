@@ -7,4 +7,5 @@ public interface PoseGiver {
 	public void sendFixX(int x);
 	public void sendFixY(int y);
 	public int getAreaId();
+	public void setPose(Pose p);
 }

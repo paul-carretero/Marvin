@@ -7,20 +7,21 @@ import java.util.Queue;
 import lejos.hardware.Sound;
 
 public class SoundManager extends Thread{
-	private volatile Queue<String> AudioList;
+	private Queue<String> audioList;
 	
 	public SoundManager(){
-		AudioList = new LinkedList<String>();
+		this.audioList = new LinkedList<String>();
 		Main.printf("[AUDIO]                 : Initialized");
 	}
 	
+	@Override
 	public void run(){
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 		Main.printf("[AUDIO]                 : Started");
 		while(!isInterrupted()){
-			if(!AudioList.isEmpty()){
+			if(!this.audioList.isEmpty()){
 				try{
-					File track = new File(AudioList.poll());
+					final File track = new File(this.audioList.poll());
 					Sound.playSample(track);
 				}
 				catch (Exception e) {
@@ -38,36 +39,31 @@ public class SoundManager extends Thread{
 	}
 	
 	public void addIntro(){
-		AudioList.add("lalalalala.wav");
+		this.audioList.add("lalalalala.wav");
 	}
 	
 	public void addVictoryTheme(){
-		AudioList.add("victory.wav");
+		//AudioList.add("victory.wav");
 	}
 	
 	public void addTrololo(){
-		AudioList.add("trollolol.wav");
+		this.audioList.add("trollolol.wav");
 	}
 	
 	public void addOrder(){
-		AudioList.add("order66.wav");
+		this.audioList.add("order66.wav");
 	}
 	
-	public void syncWait(int t){
-		synchronized (this) {
-			try {
-				this.wait(t);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
+	synchronized public void syncWait(final int t){
+		try {
+			this.wait(t);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 	}
 
-	public void addBip() {
-		synchronized (this) {
-			AudioList.add("bip.wav");
-			this.notify();
-		}
-		
+	synchronized public void addBip() {
+			this.audioList.add("bip.wav");
+			this.notifyAll();
 	}
 }

@@ -34,13 +34,13 @@ public class InnerArea extends Area {
 	
 	@Override
 	public boolean getConsistency(Pose p){
-		return (p.getX() > (minX - MARGE_ERREUR) && p.getX() < (maxX + MARGE_ERREUR) && 
-				p.getY() < (maxY + MARGE_ERREUR) && p.getY() > (minY + MARGE_ERREUR));
+		return (p.getX() > (this.minX - MARGE_ERREUR) && p.getX() < (this.maxX + MARGE_ERREUR) && 
+				p.getY() < (this.maxY + MARGE_ERREUR) && p.getY() > (this.minY + MARGE_ERREUR));
 	}
 
 	@Override
 	public Area colorChange(Color color, Pose p) {
-		switch (ID) {
+		switch (this.id) {
 			case 2:
 				if(color == Color.WHITE && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(0);
@@ -101,18 +101,16 @@ public class InnerArea extends Area {
 		if(color == Color.GREY){
 			return this;
 		}
-		else{
-			return Main.getArea(15); // default Area
-		}
+		return Main.getArea(15); // default Area
 	}
 	
 	@Override
 	public float[] getBorder() {
 		return new float[]{
-			minX,
-			maxX,
-			minY,
-			maxY
+			this.minX,
+			this.maxX,
+			this.minY,
+			this.maxY
 		};
 	}
 }

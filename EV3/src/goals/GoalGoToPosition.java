@@ -8,13 +8,14 @@ import lejos.robotics.navigation.Pose;
 
 public class GoalGoToPosition extends Goal {
 	
-	protected final String 	NAME 				= "GoalGoToPosition";
-	protected Point 		destinationPoint 	= null;
-	protected PoseGiver		pg 					= null;
-	protected OrderType 	backward			= null;
+	protected final GoalType NAME = GoalType.GO_TO_POSITION;
+	
+	protected Point 		destinationPoint;
+	protected PoseGiver		pg;
+	protected OrderType 	backward;
 
-	public GoalGoToPosition(GoalFactory gf, Marvin ia, int timeout, Point p, OrderType backward, PoseGiver pg) {
-		super(gf, ia, timeout);
+	public GoalGoToPosition(GoalFactory gf, Marvin ia, Point p, OrderType backward, PoseGiver pg) {
+		super(gf, ia);
 		this.destinationPoint = p;
 		this.pg = pg;
 		this.backward = backward;
@@ -22,35 +23,28 @@ public class GoalGoToPosition extends Goal {
 
 	@Override
 	protected void defineDefault() {
-
-		postConditions.add(Main.HAS_MOVED);
+		this.postConditions.add(Main.HAS_MOVED);
 	}
 
 	@Override
 	public void start() {
-		Pose currentPose = pg.getPosition();
+		Pose currentPose = this.pg.getPosition();
 
-		int angle = (int) currentPose.relativeBearing(destinationPoint);
+		int angle = (int) currentPose.relativeBearing(this.destinationPoint);
 		
-		int distance = (int) currentPose.distanceTo(destinationPoint);
+		int distance = (int) currentPose.distanceTo(this.destinationPoint);
 		
 		System.out.println("angle = " + angle);
 		System.out.println("distance = " + distance);
 		
 		// si on doit aller en marche arrière ou si c'est plus rapide
-		if(backward == OrderType.MANDATORY || (Math.abs(angle) > 90 && backward != OrderType.FORBIDEN)){
-			ia.turnHere(angle + 180);
-			ia.goBackward(distance);
+		if(this.backward == OrderType.MANDATORY || (Math.abs(angle) > 90 && this.backward != OrderType.FORBIDEN)){
+			this.ia.turnHere(angle + 180);
+			this.ia.goBackward(distance);
 		}
 		else{
-			ia.turnHere(angle);
-			ia.goForward(distance);
+			this.ia.turnHere(angle);
+			this.ia.goForward(distance);
 		}
 	}
-	
-	@Override
-	public String getName() {
-		return NAME;
-	}
-
 }

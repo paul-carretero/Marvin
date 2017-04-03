@@ -1,0 +1,13 @@
+package goals;
+
+public enum GoalType {
+	DROP,
+	GO_TO_POSITION,
+	GRAB_AND_DROP,
+	GRAB_OPTIMISTE,
+	GRAB_PESSIMISTE,
+	PLAY,
+	RECALIBRATE,
+	INTERCEPT,
+	DEFAULT;
+}

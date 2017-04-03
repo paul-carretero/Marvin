@@ -28,18 +28,20 @@ public class ColorSensor {
 	private SampleProvider average;
 	
 	public ColorSensor(){
-		port        = LocalEV3.get().getPort(Main.COLOR_SENSOR);
-		colorSensor = new EV3ColorSensor(port);
-		colors      = new float[16][0];
-		average		= new MeanFilter(colorSensor.getRGBMode(), 1);
+		this.port        = LocalEV3.get().getPort(Main.COLOR_SENSOR);
+		this.colorSensor = new EV3ColorSensor(this.port);
+		this.colors      = new float[16][0];
+		this.average	 = new MeanFilter(this.colorSensor.getRGBMode(), 1);
+		
+		Main.printf("[COLOR SENSOR]          : Initialized");
 	}
 	
 	public void lightOn(){
-		colorSensor.setFloodlight(Color.WHITE);
+		this.colorSensor.setFloodlight(Color.WHITE);
 	}
 	
 	public void lightOff(){
-		colorSensor.setFloodlight(false);
+		this.colorSensor.setFloodlight(false);
 	}
 
 	/**
@@ -51,15 +53,15 @@ public class ColorSensor {
 	 * calibrée
 	 */
 	public shared.Color getCurrentColor(){
-		float[]        sample  = new float[average.sampleSize()];
+		float[]        sample  = new float[this.average.sampleSize()];
 		double         minscal = Double.MAX_VALUE;
 		int            color   = -1;
 
-		average.fetchSample(sample, 0);
+		this.average.fetchSample(sample, 0);
 
 		for(int i= 0; i< 7; i++){
-			if(colors[i].length > 0){
-				double scalaire = scalaire(sample, colors[i]);
+			if(this.colors[i].length > 0){
+				double scalaire = scalaire(sample, this.colors[i]);
 				if (scalaire < minscal) {
 					minscal = scalaire;
 					color = i;
@@ -69,7 +71,7 @@ public class ColorSensor {
 		return getRealColor(color);
 	}
 	
-	private shared.Color getRealColor(int color) {
+	private static shared.Color getRealColor(int color) {
 		switch (color) {
 		case COLOR_BLACK:
 			return shared.Color.BLACK;
@@ -106,7 +108,7 @@ public class ColorSensor {
 		try{
 			File fichierRead =  new File("conf.txt") ;
 			ObjectInputStream ois =  new ObjectInputStream(new FileInputStream(fichierRead)) ;
-			colors = (float[][])ois.readObject() ;
+			this.colors = (float[][])ois.readObject() ;
 			ois.close();
 		}
 		catch (Exception e) {

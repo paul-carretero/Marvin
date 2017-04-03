@@ -26,11 +26,11 @@ public class IntPoint {
 
 
 	public int x(){
-		return x;
+		return this.x;
 	}
 	
 	public int y(){
-		return y;
+		return this.y;
 	}
 	
 	public int setX(int x){
@@ -45,10 +45,9 @@ public class IntPoint {
 	public boolean equals(Object  o){
 		if (!(o instanceof IntPoint)) {
 	        return false;
-	    } else {
-	    	IntPoint p = (IntPoint)o;
-	    	return (y() == p.y() && x() == p.x());
 	    }
+		IntPoint p = (IntPoint)o;
+		return (y() == p.y() && x() == p.x());
 	}
 	
 	@Override
@@ -62,11 +61,11 @@ public class IntPoint {
 	}
 
 	public int getDistance(IntPoint p2){
-		return (int) Math.round(Math.sqrt((x-p2.x())*(x-p2.x()) + (y-p2.y())*(y-p2.y())));
+		return (int) Math.round(Math.sqrt((this.x-p2.x())*(this.x-p2.x()) + (this.y-p2.y())*(this.y-p2.y())));
 	}
 	
 	public Point toLejosPoint(){
-		return new Point(x,y);
+		return new Point(this.x,this.y);
 	}
 	
 	/*
@@ -103,6 +102,6 @@ public class IntPoint {
 	
 	@Override
 	public String toString(){
-		return "[X = " + x + " Y = " + y + "]";
+		return "[X = " + this.x + " Y = " + this.y + "]";
 	}
 }

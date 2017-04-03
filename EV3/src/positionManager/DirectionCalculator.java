@@ -8,8 +8,9 @@ import shared.Item;
 
 public class DirectionCalculator {
 	
-	private Point startPoint 	= null;
-	private ItemGiver eom		= null;
+	private Point startPoint;
+	private ItemGiver eom;
+	private static final int NO_ANGLE_FOUND = 9999;
 	
 	public DirectionCalculator(){
 		this.startPoint	= null;
@@ -21,13 +22,13 @@ public class DirectionCalculator {
 	}
 	
 	public float getAngle(Point p){
-		if(startPoint != null && p != null){
+		if(this.startPoint != null && p != null){
 			// pas sur si la distance est de moins de 10cm, ajustable éventuellement
-			if(startPoint.distance(p) > 100 ){
-				return startPoint.angleTo(p);
+			if(this.startPoint.distance(p) > 100 ){
+				return this.startPoint.angleTo(p);
 			}
 		}
-		return 9999;
+		return NO_ANGLE_FOUND;
 	}
 	
 	/*
@@ -35,8 +36,8 @@ public class DirectionCalculator {
 	 * traite uniquement l'angle en fonction des données de la map et rien d'autre (pas de real-sensor mode)
 	 */
 	public void updateAngle(Pose p){
-		float calcAngle = getAngle(eom.getMarvinPosition().toLejosPoint());
-		if(calcAngle != 9999){
+		float calcAngle = getAngle(this.eom.getMarvinPosition().toLejosPoint());
+		if(calcAngle != NO_ANGLE_FOUND){
 			if(Math.abs(calcAngle - p.getHeading()) < 5){
 				p.setHeading((float) ((p.getHeading() * 0.9) + (calcAngle * 0.1)));
 			}
@@ -50,7 +51,7 @@ public class DirectionCalculator {
 	}
 	
 	public void reset(){
-		startPoint = null;
+		this.startPoint = null;
 	}
 	
 	
@@ -58,8 +59,8 @@ public class DirectionCalculator {
 	 * always forward
 	 */
 	public void startLine(){
-		if(eom != null){
-			Item eomStart = eom.getMarvinPosition();
+		if(this.eom != null){
+			Item eomStart = this.eom.getMarvinPosition();
 			if(eomStart != null){
 				this.startPoint	= eomStart.toLejosPoint();
 			}

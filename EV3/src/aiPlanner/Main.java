@@ -1,6 +1,5 @@
 /*
- * TODO : implementer un compensateur d'erreur en temps réel.
- * ajouter volatile aux variables qui sont lu partout
+ * TODO : convertir en objectif les opérations arbitraires
  */
 package aiPlanner;
 
@@ -42,31 +41,36 @@ public class Main{
 	public static final int HAND_OPEN 				= 2;
 	public static final int HAVE_PALET				= 3;
 	
-	public static final int RADAR_MAX_RANGE			= 650;
-	public static final int RADAR_MIN_RANGE			= 350;
-	public static final int RADAR_RADIUS			= 10;
+	// TODO calibrer sur terrain
+	public static final int RADAR_MAX_RANGE			= 580;
+	public static final int RADAR_MIN_RANGE			= 420;
+	public static final int	RADAR_DEFAULT_RANGE		= 500; // doit être fiable... (le reste pas trop)
+	public static final int RADAR_WALL_DETECT		= 250; // distance où on est sur de ne pas avoir de pallet...
+	public static final int RADAR_OUT_OF_BOUND		= 9999;
 	
-	public static final String COLOR_SENSOR 		= "S4";
-	public static final String TOUCH_SENSOR 		= "S2";
-	public static final String US_SENSOR    		= "S3";
+	public static final String COLOR_SENSOR 		= "S2";
+	public static final String TOUCH_SENSOR 		= "S3";
+	public static final String US_SENSOR    		= "S4";
 	
-	public static final float WHEEL_DIAMETER        = 57f;
-	public static final float DISTANCE_TO_CENTER    = 61.2f;
+	public static final float WHEEL_DIAMETER        = 55.3f;
+	public static final float DISTANCE_TO_CENTER    = 61.0f;
 	public static final String LEFT_WHEEL 			= "C";
 	public static final String RIGHT_WHEEL			= "B";
 	public static final String GRABER    			= "D";
 	public static final float LINEAR_ACCELERATION	= 10.0f;
 	
-	public static final int   ROTATION_SPEED		= 280;
+	public static final int   ROTATION_SPEED		= 200;
 	public static final int   SEARCH_ROTATION_SPEED = 70;
 	
 	public static final int   RESEARCH_SPEED		= 120; // mm/s
 	public static final int   CRUISE_SPEED			= 240; // mm/s
 	public static final int   MAX_SPEED				= 360; // mm/s
 	
-	public static final int   GRABER_TIMER			= 1500; // 2000 en vrai sa dépan dé foi xDD
-	public static final int   GRABER_SPEED			= 800; // 800 en vrai
+	public static final int   GRABER_TIMER			= 1500;
+	public static final int   GRABER_SPEED			= 800;
 	public static final int   DROP_DELAY			= 500;
+	
+	public static final String	IP					= "192.168.1.76";
 
 	public final static boolean[] GLOBALSTATE 		= new boolean[4]; // utiliser la méthode synchronisée pour ecriture
 	
@@ -91,27 +95,23 @@ public class Main{
 		new DefaultArea(15)
 	};
 	
-	public static Area getArea(int id){
+	public static Area getArea(final int id){
 		return AREAS[id];
 	}
 	
-	/*public static float distancePointDroite(float px, float py, float a, float b, float c){
-		return (float) ( (Math.abs( (a*px + b*py + c) )) / (Math.sqrt(a*a + b*b)));
-	}*/
-	
-	public static void poseRealToSensor(Pose p){
+	public static void poseRealToSensor(final Pose p){
 		p.moveUpdate(100);
 	}
 	
-	public static void poseSensorToReal(Pose p){
+	public static void poseSensorToReal(final Pose p){
 		p.moveUpdate(-100);
 	}
 	
-	public static boolean areApproximatlyEqual(int x, int y, int marge){
-		return (x < (y + marge) && x > (y - marge) );
+	public static boolean areApproximatlyEqual(final int x, final int y, final int marge){
+		return x < (y + marge) && x > (y - marge);
 	}
 	
-	synchronized public static void setState(int i, boolean state){
+	synchronized public static void setState(final int i, final boolean state){
 		GLOBALSTATE[i] = state;
 	}
 	
@@ -119,11 +119,11 @@ public class Main{
 		return GLOBALSTATE[i];
 	}
 
-	public static void printf(String str){
+	public static void printf(String s){
 		try {
-			str = str + "#";
+			String str = s + "#";
 			DatagramSocket clientSocket = new DatagramSocket();
-			InetAddress IPAddress = InetAddress.getByName("192.168.1.76");
+			InetAddress IPAddress = InetAddress.getByName(IP);
 			byte[] sendData = new byte[256];
 			sendData = str.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 4242);
@@ -136,12 +136,18 @@ public class Main{
 
 
 	public static void main(String[] args) {
+		
 		LocalEV3.get().getLED().setPattern(2);
 		System.out.println("       ___");
 		System.out.println(" _____/_o_\\_____");
 		System.out.println("(==(/_______\\)==)");
 		System.out.println(" \\==\\/     \\/==/");
-		new Marvin();
+		Marvin marvin = new Marvin();
+		
+		marvin.startThreads();
+		
+		marvin.run();
+		
 		printf("@@@ The first ten million years were the worst. And the second ten million: they were the worst, too. The third ten million I didn't enjoy at all. After that, I went into a bit of a decline. @@@");
 	}
 

@@ -12,31 +12,31 @@ import lejos.robotics.navigation.MovePilot;
 
 public class Engine{
 	
-	private Wheel					leftWheel				= null;
-	private Wheel					rightWheel				= null;
-	private EV3LargeRegulatedMotor	leftMotor				= null;
-	private EV3LargeRegulatedMotor	rightMotor				= null;
-	private Chassis					chassis					= null;
-	private MovePilot				pilot					= null;
-	private WaitProvider			waitProvider 			= null;
+	private Wheel					leftWheel;
+	private Wheel					rightWheel;
+	private EV3LargeRegulatedMotor	leftMotor;
+	private EV3LargeRegulatedMotor	rightMotor;
+	private Chassis					chassis;
+	private MovePilot				pilot;
+	private WaitProvider			waitProvider;
 	
-	private final float 			right_wheel_correction 	= -0.2f; // positif ou negatif...
+	private static final float 		RIGHT_WHEEL_CORRECTION 	= -0.25f; // positif ou negatif...
 	
 	public Engine(EventHandler eventManager, WaitProvider marvin){
-		leftMotor	= new EV3LargeRegulatedMotor(LocalEV3.get().getPort(Main.LEFT_WHEEL));
-		rightMotor	= new EV3LargeRegulatedMotor(LocalEV3.get().getPort(Main.RIGHT_WHEEL));
-		leftWheel	= WheeledChassis.modelWheel(leftMotor, Main.WHEEL_DIAMETER).offset(-1*Main.DISTANCE_TO_CENTER);
-		rightWheel	= WheeledChassis.modelWheel(rightMotor, Main.WHEEL_DIAMETER + right_wheel_correction).offset(Main.DISTANCE_TO_CENTER);
+		this.leftMotor	= new EV3LargeRegulatedMotor(LocalEV3.get().getPort(Main.LEFT_WHEEL));
+		this.rightMotor	= new EV3LargeRegulatedMotor(LocalEV3.get().getPort(Main.RIGHT_WHEEL));
+		this.leftWheel	= WheeledChassis.modelWheel(this.leftMotor, Main.WHEEL_DIAMETER).offset(-1*Main.DISTANCE_TO_CENTER);
+		this.rightWheel	= WheeledChassis.modelWheel(this.rightMotor, Main.WHEEL_DIAMETER + RIGHT_WHEEL_CORRECTION).offset(Main.DISTANCE_TO_CENTER);
 		
-		chassis		= new WheeledChassis(new Wheel[]{leftWheel, rightWheel},  WheeledChassis.TYPE_DIFFERENTIAL);
-		chassis.setSpeed(Main.CRUISE_SPEED, Main.ROTATION_SPEED);
-		chassis.setAcceleration(Main.LINEAR_ACCELERATION, Main.LINEAR_ACCELERATION);
+		this.chassis	= new WheeledChassis(new Wheel[]{this.leftWheel, this.rightWheel},  WheeledChassis.TYPE_DIFFERENTIAL);
+		this.chassis.setSpeed(Main.CRUISE_SPEED, Main.ROTATION_SPEED);
+		this.chassis.setAcceleration(Main.LINEAR_ACCELERATION, Main.LINEAR_ACCELERATION);
 		
-		pilot		= new MovePilot(chassis);
-		pilot.addMoveListener(eventManager);
-		pilot.setLinearAcceleration(Main.LINEAR_ACCELERATION);
-		pilot.setAngularSpeed(Main.ROTATION_SPEED);
-		pilot.setMinRadius(0);
+		this.pilot		= new MovePilot(this.chassis);
+		this.pilot.addMoveListener(eventManager);
+		this.pilot.setLinearAcceleration(Main.LINEAR_ACCELERATION);
+		this.pilot.setAngularSpeed(Main.ROTATION_SPEED);
+		this.pilot.setMinRadius(0);
 		
 		this.waitProvider = marvin;
 		
@@ -44,39 +44,39 @@ public class Engine{
 	}
 	
 	public MovePilot getPilot(){
-		return pilot;
+		return this.pilot;
 	}
 
 
 	//DISTANCE EN MM
 	public void goForward(float distance, float speed){
 		int waitTime = (int) (distance * 1000f/speed);
-		pilot.setLinearSpeed(speed);
-		pilot.forward();
+		this.pilot.setLinearSpeed(speed);
+		this.pilot.forward();
 		syncWait(waitTime);
-		pilot.stop();
+		this.pilot.stop();
 	}
 	
 	//DISTANCE EN MM
 	public void goBackward(float distance, float speed){
 		int waitTime = (int) ((distance * 1000f)/speed);
-		pilot.setLinearSpeed(speed);
-		pilot.backward();
+		this.pilot.setLinearSpeed(speed);
+		this.pilot.backward();
 		syncWait(waitTime);
-		pilot.stop();
+		this.pilot.stop();
 	}
 	
 	public void turnHere(int angle, int speed){
 		//angle = normalize(angle);
-		pilot.setAngularSpeed(speed);
-		pilot.rotate(angle);
+		this.pilot.setAngularSpeed(speed);
+		this.pilot.rotate(angle);
 	}
 	
 	public void stop() {
-		pilot.stop();
+		this.pilot.stop();
 	}
 	
 	public void syncWait(int ms){
-		waitProvider.syncWait(ms);
+		this.waitProvider.syncWait(ms);
 	}
 }

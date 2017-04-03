@@ -12,66 +12,66 @@ import shared.IntPoint;
 
 public class GoalGrabPessimist extends Goal {
 	
-	protected final String 		NAME 	= "GoalGrab";
-	protected 		Point		pallet 	= null;
-	protected 		PoseGiver	pg 		= null;
-	protected		ItemGiver	eom		= null;
-	protected		DistanceGiver radar = null;
+	protected final GoalType		NAME = GoalType.GRAB_PESSIMISTE;
+	protected 		Point			pallet;
+	protected 		PoseGiver		pg;
+	protected		ItemGiver		eom;
+	protected		DistanceGiver 	radar;
 
-	public GoalGrabPessimist(GoalFactory gf, Marvin ia, int timeout, Point pallet, PoseGiver pg, ItemGiver eom, DistanceGiver radar) {
-		super(gf, ia, timeout);
+	public GoalGrabPessimist(GoalFactory gf, Marvin ia, Point pallet, PoseGiver pg, ItemGiver eom, DistanceGiver radar) {
+		super(gf, ia);
 		this.radar	= radar;
 		this.eom 	= eom;
 		this.pallet	= pallet;
 		this.pg 	= pg;
 	}
 
-	@Override
-	protected void defineDefault() {
-		postConditions.add(Main.HAVE_PALET);
-	}
-	
 	protected void correctPosition(){
-		Pose currentPose = pg.getPosition();
+		Pose currentPose = this.pg.getPosition();
 
-		int distance = (int)currentPose.distanceTo(pallet);
-		int angleCorrection = (int)currentPose.relativeBearing(pallet);
+		int distance = (int)currentPose.distanceTo(this.pallet);
+		int angleCorrection = (int)currentPose.relativeBearing(this.pallet);
 		
-		ia.turnHere(angleCorrection);
+		this.ia.turnHere(angleCorrection);
 		
-		if(distance < Main.RADAR_MIN_RANGE){
-			ia.goBackward(Main.RADAR_MIN_RANGE - distance + 100);
+		if(distance < Main.RADAR_DEFAULT_RANGE){
+			this.ia.goBackward(Main.RADAR_DEFAULT_RANGE - distance);
 		}
-		else if(distance > Main.RADAR_MAX_RANGE){
-			ia.goForward(distance - Main.RADAR_MAX_RANGE + 100);
+		else if(distance > Main.RADAR_DEFAULT_RANGE){
+			this.ia.goForward(distance - Main.RADAR_DEFAULT_RANGE);
 		}
 	}
 	
 	protected boolean tryGrab(){
 		if(Main.getState(Main.PRESSION)){
-			ia.grab();
 			Main.setState(Main.HAVE_PALET,true);
+			this.ia.grab();
 			return true;
 		}
 		return false;
 	}
 	
+	protected void updateStatus(){
+		this.gf.setLastGrab(Main.getState(Main.HAVE_PALET));
+	}
+	
 	@Override
 	public void start() {
-		if(eom.checkPallet(new IntPoint(pallet))){
+		this.ia.setResearchMode(true);
+		if(this.eom.checkPallet(new IntPoint(this.pallet))){
 			correctPosition();
 			
-			int radarDistance 	= 9999;
-			int previousRadar 	= 9999;
+			int radarDistance 	= Main.RADAR_OUT_OF_BOUND;
+			int previousRadar 	= Main.RADAR_OUT_OF_BOUND;
 			boolean continuer	= true;
 			int i 				= 0;
 			
-			ia.turnHere(-20);
+			this.ia.turnHere(-30);
 			
-			while(i < 4 && continuer){
-				radarDistance = radar.getRadarDistance();
+			while(i < 3 && continuer){
+				radarDistance = this.radar.getRadarDistance();
 				Main.printf("radar = " + radarDistance);
-				ia.turnHere(10);
+				this.ia.turnHere(30);
 				if(previousRadar < radarDistance){
 					continuer = false;
 				}
@@ -80,39 +80,38 @@ public class GoalGrabPessimist extends Goal {
 			}
 			
 			if(!continuer){ // on a trouver un plus grand, c'étais donc le pas d'avant
-				ia.turnHere(-10);
+				this.ia.turnHere(-30);
 			}
 	
-			Pose currentPose 	= pg.getPosition();
-			int distance 		= (int)currentPose.distanceTo(pallet);
-			radarDistance 	= radar.getRadarDistance();
+			Pose currentPose 	= this.pg.getPosition();
+			int distance 		= (int)currentPose.distanceTo(this.pallet);
+			radarDistance 		= this.radar.getRadarDistance();
 			
-			ia.setAllowInterrupt(true);
+			this.ia.setAllowInterrupt(true);
 			
-			if(radarDistance < Main.RADAR_MAX_RANGE  && Main.areApproximatlyEqual(radarDistance,distance,700) ){
-				ia.goForward(distance);
+			if(this.radar.checkSomething()){
+				this.ia.goForward(distance);
 				if(!tryGrab()){
 					failGrabHandler();
 				}
 			}
+			
+			this.ia.setAllowInterrupt(false);
 		}
+		this.ia.setResearchMode(false);
+		updateStatus();
 	}
 
 	protected void failGrabHandler() {
-		ia.goBackward(180);
-		ia.turnHere(15);
-		ia.goForward(180);
+		this.ia.goBackward(200);
+		this.ia.turnHere(15);
+		this.ia.goForward(225);
 		
 		if(!tryGrab()){
-			ia.goBackward(180);
-			ia.turnHere(-30);
-			ia.goForward(180);
+			this.ia.goBackward(225);
+			this.ia.turnHere(-30);
+			this.ia.goForward(250);
 			tryGrab();
 		}
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
 	}
 }

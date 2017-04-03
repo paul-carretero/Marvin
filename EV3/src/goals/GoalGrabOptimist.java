@@ -10,28 +10,36 @@ import lejos.robotics.navigation.Pose;
 import shared.IntPoint;
 
 public class GoalGrabOptimist extends GoalGrabPessimist {
+	
+	protected final GoalType		NAME = GoalType.GRAB_OPTIMISTE;
 
-	public GoalGrabOptimist(GoalFactory gf, Marvin ia, int timeout, Point pallet, PoseGiver pg, ItemGiver eom, DistanceGiver radar) {
-		super(gf, ia, timeout, pallet, pg, eom, radar);
+	public GoalGrabOptimist(GoalFactory gf, Marvin ia, Point pallet, PoseGiver pg, ItemGiver eom, DistanceGiver radar) {
+		super(gf, ia, pallet, pg, eom, radar);
 	}
 	
 	@Override
 	public void start() {
-		if(eom.checkPallet(new IntPoint(pallet))){
+		this.ia.setResearchMode(true);
+		if(this.eom.checkPallet(new IntPoint(this.pallet))){
 			correctPosition();
-	
-			int	radarDistance 	= radar.getRadarDistance();
-			Pose currentPose 	= pg.getPosition();
-			int distance 		= (int)currentPose.distanceTo(pallet);
 			
-			ia.setAllowInterrupt(true);
+			int	radarDistance 	= this.radar.getRadarDistance();
+			Pose currentPose 	= this.pg.getPosition();
+			int distance 		= (int)currentPose.distanceTo(this.pallet);
 			
-			if(radarDistance < Main.RADAR_MAX_RANGE && Main.areApproximatlyEqual(radarDistance,distance,700) ){
-				ia.goForward(distance);
-				if(!tryGrab()){
-					failGrabHandler();
-				}
+			this.ia.setAllowInterrupt(true);
+			
+			Main.printf("radarDistance = " + radarDistance);
+
+			this.ia.goForward(distance);
+			
+			if(!tryGrab()){
+				failGrabHandler();
 			}
+			
+			this.ia.setAllowInterrupt(false);
 		}
+		this.ia.setResearchMode(false);
+		updateStatus();
 	}
 }

@@ -6,13 +6,11 @@ import lejos.hardware.sensor.EV3TouchSensor;
 
 public class PressionSensor extends EV3TouchSensor
 {
-    public PressionSensor()
-    {
+    public PressionSensor(){
         super(LocalEV3.get().getPort(Main.TOUCH_SENSOR));
     }
 
-    public boolean isPressed()
-    {
+    public boolean isPressed(){
         float[] sample = new float[1];
         fetchSample(sample, 0);
         return sample[0] != 0;

@@ -2,30 +2,27 @@ package itemManager;
 
 import aiPlanner.Main;
 import interfaces.ItemGiver;
-import interfaces.ModeListener;
 import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
 import shared.IntPoint;
 import shared.Item;
-import shared.Mode;
 
-public class CentralIntelligenceService extends Thread implements ModeListener{
+public class CentralIntelligenceService extends Thread{
 	private ItemGiver			eom;
 	private PoseGiver 			pg;
 	private IntPoint			interceptionTarget;
 	private Item				firstContact;
 	private Item				confirmationContact;
-	private Mode				mode;
 	private volatile Object		notifyOnUptate;
 	private static final int	SIGNIFICATIVE_DISTANCE = 70; // 7cm
 	
 	public CentralIntelligenceService(ItemGiver eom, PoseGiver pg){
-		this.eom 					= eom;
 		this.pg						= pg;
 		this.interceptionTarget		= null;
 		this.firstContact 			= null;
 		this.confirmationContact	= null;
 		this.notifyOnUptate			= null;
+		this.eom					= eom;
 		Main.printf("[CIS]                   : Initialized");
 	}
 	
@@ -33,24 +30,24 @@ public class CentralIntelligenceService extends Thread implements ModeListener{
 	public void run(){
 		Main.printf("[CIS]                   : started");
 		this.setPriority(MIN_PRIORITY);
-		while(this.mode != Mode.END && !isInterrupted()){
+		while(!isInterrupted()){
 			
 			// si on a pas de premier contact alors on tente d'en repérer un.
-			if(firstContact == null){
+			if(this.firstContact == null){
 				updateInterceptionTarget(null);
-				firstContact = eom.getPossibleEnnemy();
+				this.firstContact = this.eom.getPossibleEnnemy();
 			}
 			else{
-				confirmationContact = eom.getPossibleEnnemy();
+				this.confirmationContact = this.eom.getPossibleEnnemy();
 				
 				// si le contact n'a pas bougé ou si il a disparu, on reset
-				if(confirmationContact != firstContact && confirmationContact != null){
+				if(this.confirmationContact != this.firstContact && this.confirmationContact != null){
 					
 					// on vérifie que la distance est significative pour pouvoir extrapoler à une droite
-					if(firstContact.getDistance(confirmationContact) > SIGNIFICATIVE_DISTANCE){
-						IntPoint intersection = confirmationContact.getIntersection(firstContact.computeVector(confirmationContact));
+					if(this.firstContact.getDistance(this.confirmationContact) > SIGNIFICATIVE_DISTANCE){
+						IntPoint intersection = this.confirmationContact.getIntersection(this.firstContact.computeVector(this.confirmationContact));
 						// on vérifie que l'ennemy avance vers l'intersection et que l'intersection est bien dans le terrain
-						if(intersection.x() > 0 && intersection.x() < 3000 && confirmationContact.getDistance(intersection) < firstContact.getDistance(intersection)){
+						if(intersection != null && intersection.x() > 0 && intersection.x() < 3000 && this.confirmationContact.getDistance(intersection) < this.firstContact.getDistance(intersection)){
 							updateInterceptionTarget(intersection);
 						}
 						else{
@@ -66,8 +63,8 @@ public class CentralIntelligenceService extends Thread implements ModeListener{
 				}
 				
 				// on réinitialise firstcontact à confirmationcontact (si il change de trajectoire ou autre)
-				firstContact = confirmationContact;
-				confirmationContact = null;
+				this.firstContact = this.confirmationContact;
+				this.confirmationContact = null;
 			}
 			syncWait();
 		}
@@ -75,7 +72,7 @@ public class CentralIntelligenceService extends Thread implements ModeListener{
 	}
 	
 	public void addEnnemyMoveNotifier(Object o){
-		notifyOnUptate = o;
+		this.notifyOnUptate = o;
 	}
 	
 	public void resetEnnemyMoveNotifier(){
@@ -84,41 +81,35 @@ public class CentralIntelligenceService extends Thread implements ModeListener{
 	
 	private void updateInterceptionTarget(IntPoint target){
 		if(target != null){
-			if(!target.equals(interceptionTarget)){
-				interceptionTarget = target;
-				if(notifyOnUptate != null){
-					synchronized (notifyOnUptate) {
-						notifyOnUptate.notify();
+			if(!target.equals(this.interceptionTarget)){
+				this.interceptionTarget = target;
+				if(this.notifyOnUptate != null){
+					synchronized (this.notifyOnUptate) {
+						this.notifyOnUptate.notifyAll();
 					}
 				}
 			}
 		}
 		else{
-			interceptionTarget = null;
+			this.interceptionTarget = null;
 		}
 	}
 	
-	private void syncWait(){
-		synchronized (this) {
-			try {
-				this.wait(800);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
-			}
+	synchronized private void syncWait(){
+		try {
+			this.wait(800);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 	}
 	
 	public Point getInterceptionLocation(){
-		Point ennemy = eom.getPossibleEnnemy().toLejosPoint();
-		if(interceptionTarget != null && ennemy != null){
-			if(pg.getPosition().distanceTo(interceptionTarget.toLejosPoint()) < ennemy.distance(interceptionTarget.toLejosPoint())){
-				return interceptionTarget.toLejosPoint();
-			}
+		Point ennemy = this.eom.getPossibleEnnemy().toLejosPoint();
+		if(this.interceptionTarget != null && ennemy != null
+			&& (this.pg.getPosition().distanceTo(this.interceptionTarget.toLejosPoint()) < ennemy.distance(this.interceptionTarget.toLejosPoint()))){
+			
+			return this.interceptionTarget.toLejosPoint();
 		}
 		return null;
-	}
-
-	public void setMode(Mode m) {
-		this.mode = m;
 	}
 }

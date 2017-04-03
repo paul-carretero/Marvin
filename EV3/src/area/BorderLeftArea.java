@@ -25,12 +25,12 @@ public class BorderLeftArea extends Area {
 	@Override
 	public boolean getConsistency(Pose p) {
 		return (p.getX() < (Main.X_YELLOW_LINE + MARGE_ERREUR) && 
-				p.getY() < (maxY + MARGE_ERREUR) && p.getY() > (minY + MARGE_ERREUR));
+				p.getY() < (this.maxY + MARGE_ERREUR) && p.getY() > (this.minY + MARGE_ERREUR));
 	}
 
 	@Override
 	public Area colorChange(Color color, Pose p) {
-		switch (ID) {
+		switch (this.id) {
 			case 1:
 				if(color == Color.WHITE && checkAmbiguousAngleHorizontal(p) ){
 					return Main.getArea(0);
@@ -79,9 +79,7 @@ public class BorderLeftArea extends Area {
 		if(color == Color.GREY){
 			return this;
 		}
-		else{
-			return Main.getArea(15); // default Area
-		}
+		return Main.getArea(15); // default Area
 	}
 
 	@Override
@@ -89,8 +87,8 @@ public class BorderLeftArea extends Area {
 		return new float[]{
 			0,
 			500,
-			minY,
-			maxY
+			this.minY,
+			this.maxY
 		};
 	}
 

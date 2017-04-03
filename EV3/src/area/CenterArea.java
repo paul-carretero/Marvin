@@ -31,9 +31,7 @@ public class CenterArea extends Area {
 				p.getY() < (Main.Y_BLUE_LINE - MARGE_ERREUR) && p.getY() > (Main.Y_GREEN_LINE + MARGE_ERREUR)){
 				return this;
 			}
-			else{
-				return Main.getArea(15);
-			}
+			return Main.getArea(15);
 		case RED:
 			if( checkAmbiguousAngleVertical(p) ){
 				if(p.getY() > (Main.Y_GREEN_LINE) && p.getY() < (Main.Y_BLACK_LINE)){
@@ -43,6 +41,7 @@ public class CenterArea extends Area {
 					return Main.getArea(7);
 				}
 			}
+			break;
 		case GREEN:
 			if( checkAmbiguousAngleHorizontal(p) ){
 				if(p.getX() < (Main.X_RED_LINE) && p.getX() > (Main.X_BLACK_LINE)){
@@ -52,6 +51,7 @@ public class CenterArea extends Area {
 					return Main.getArea(11);
 				}
 			}
+			break;
 		case BLUE:
 			if( checkAmbiguousAngleHorizontal(p) ){
 				if(p.getX() < (Main.X_RED_LINE) && p.getX() > (Main.X_BLACK_LINE)){
@@ -61,6 +61,7 @@ public class CenterArea extends Area {
 					return Main.getArea(2);
 				}
 			}
+			break;
 		case YELLOW:
 			if( checkAmbiguousAngleVertical(p) ){
 				if(p.getY() > (Main.Y_GREEN_LINE) && p.getY() < (Main.Y_BLACK_LINE)){
@@ -70,10 +71,11 @@ public class CenterArea extends Area {
 					return Main.getArea(5);
 				}
 			}
+			break;
 		default:
 			return Main.getArea(15);
 		}
-		
+		return Main.getArea(15);
 	}
 	
 	@Override

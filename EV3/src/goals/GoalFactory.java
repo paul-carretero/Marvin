@@ -28,39 +28,41 @@ public class GoalFactory {
 	
 	public Deque<Goal> initializeStartGoals(){
 		Deque<Goal> goals = new ArrayDeque<Goal>();
-		//goals.push(goalGrabAndDropPalet(30000));
-		//goals.push(goalGrabAndDropPalet(30000));
+		goals.push(goalGrabAndDropPalet());
+		goals.push(goalGrabAndDropPalet());
 		//goals.push(goalGoToPosition(30000, new Point(500,1500), OrderType.FORBIDEN));
 		//goals.push(goalGoToPosition(30000, new Point(1000,2100), OrderType.MANDATORY));
 		return goals;
 	}
 	
-	public Goal play(int timeout){
-		return new GoalPlay(this, ia, timeout);
+	public void setLastGrab(boolean b){
+		this.lastGrabOk = b;
 	}
 	
-	public Goal goalGoToPosition(int timeout, Point destination, OrderType backward){
-		return new GoalGoToPosition(this,ia,timeout,destination,backward,pg);
+	public Goal play(){
+		return new GoalPlay(this, this.ia);
 	}
 	
-	public Goal goalDrop(int timeout){
-		return new GoalDrop(this,ia,timeout,pg);
+	public Goal goalGoToPosition(Point destination, OrderType backward){
+		return new GoalGoToPosition(this,this.ia,destination,backward,this.pg);
 	}
 	
-	public Goal goalGrab(int timeout, Point palet){
-		if(lastGrabOk){
-			return new GoalGrabOptimist(this, ia, timeout, palet, pg, eom, radar);
+	public Goal goalDrop(){
+		return new GoalDrop(this,this.ia,this.pg);
+	}
+	
+	public Goal goalGrab(Point palet){
+		if(this.lastGrabOk){
+			return new GoalGrabOptimist(this, this.ia, palet, this.pg, this.eom, this.radar);
 		}
-		else{
-			return new GoalGrabPessimist(this, ia, timeout, palet, pg, eom, radar);
-		}
+		return new GoalGrabPessimist(this, this.ia, palet, this.pg, this.eom, this.radar);
 	}
 	
-	public Goal goalGrabAndDropPalet(int timeout){
-		return new GoalGrabAndDropPalet(this, ia, timeout, eom);
+	public Goal goalGrabAndDropPalet(){
+		return new GoalGrabAndDropPalet(this, this.ia, this.eom);
 	}
 	
-	public Goal goalRecalibrate(int timeout){
-		return new GoalRecalibrate(this, ia, timeout);
+	public Goal goalRecalibrate(){
+		return new GoalRecalibrate(this, this.ia, this.eom, this.pg);
 	}
 }
