@@ -1,6 +1,3 @@
-/*
- * TODO : convertir en objectif les opérations arbitraires
- */
 package aiPlanner;
 
 import java.net.DatagramPacket;
@@ -8,20 +5,27 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 import area.*;
+import lejos.hardware.Button;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.robotics.navigation.Pose;
 import shared.Color;
+import shared.IntPoint;
 import shared.Timer;
 
+@SuppressWarnings("javadoc")
+/**
+ * Classe utilitaire regroupant les informations initial du robot, son état, 
+ * les informations fixes sur l'environnement et le terrain et des informations fixes sur les capteurs
+ * Instancie et lance un Objet Marvin pour initialiser le programme
+ * @see Marvin
+ */
 public class Main{
 	
-	// POSITION EN MILIMETRE (oui c'est bête mais pour la "pose" ça évite des convertions multiples => librairie stupide).
-	
-	public static final int X_INITIAL 				= 1000;
+	public static final int X_INITIAL 				= 500;
 	public static final int Y_INITIAL 				= 2700;
 	public static final int H_INITIAL 				= -90;
 
-	
 	public static final int Y_OBJECTIVE_WHITE		= 300;
 	public static final int Y_DEFEND_WHITE 			= 2700;
 	
@@ -36,16 +40,21 @@ public class Main{
 	public static final int X_YELLOW_LINE 			= 500;
 	public static final int X_BLACK_LINE 			= 1000;
 	
-	public static final int PRESSION				= 0;
-	public static final int HAS_MOVED 				= 1;
-	public static final int HAND_OPEN 				= 2;
-	public static final int HAVE_PALET				= 3;
+	public volatile static boolean 	PRESSION		= false;
+	public volatile static boolean	HAS_MOVED 		= false;
+	public volatile static boolean	HAND_OPEN 		= true;
+	public volatile static boolean	HAVE_PALET		= false;
 	
-	// TODO calibrer sur terrain
-	public static final int RADAR_MAX_RANGE			= 580;
-	public static final int RADAR_MIN_RANGE			= 420;
-	public static final int	RADAR_DEFAULT_RANGE		= 500; // doit être fiable... (le reste pas trop)
-	public static final int RADAR_WALL_DETECT		= 250; // distance où on est sur de ne pas avoir de pallet...
+	public static final int RADAR_MAX_RANGE			= 1000;
+	public static final int RADAR_MIN_RANGE			= 400;
+	/**
+	 * doit être fiable +/- 100 ... (le reste pas trop)
+	 */
+	public static final int	RADAR_DEFAULT_RANGE		= 550;
+	/**
+	 *  distance où on est sur de ne pas avoir de palet, et suffisamant petite pour éviter les faux-positif
+	 */
+	public static final int RADAR_WALL_DETECT		= 200;
 	public static final int RADAR_OUT_OF_BOUND		= 9999;
 	
 	public static final String COLOR_SENSOR 		= "S2";
@@ -53,29 +62,44 @@ public class Main{
 	public static final String US_SENSOR    		= "S4";
 	
 	public static final float WHEEL_DIAMETER        = 55.3f;
-	public static final float DISTANCE_TO_CENTER    = 61.0f;
+	public static final float DISTANCE_TO_CENTER	= 62.5f;
+	public static final float DISTANCE_TO_CENTER_P	= 65f;
 	public static final String LEFT_WHEEL 			= "C";
 	public static final String RIGHT_WHEEL			= "B";
 	public static final String GRABER    			= "D";
 	public static final float LINEAR_ACCELERATION	= 10.0f;
 	
-	public static final int   ROTATION_SPEED		= 200;
-	public static final int   SEARCH_ROTATION_SPEED = 70;
+	public static final int   ROTATION_SPEED		= 240;
+	public static final int   SAFE_ROTATION_SPEED 	= 120;
 	
 	public static final int   RESEARCH_SPEED		= 120; // mm/s
 	public static final int   CRUISE_SPEED			= 240; // mm/s
 	public static final int   MAX_SPEED				= 360; // mm/s
 	
-	public static final int   GRABER_TIMER			= 1500;
+	public static final int   GRABER_TIMER			= 1300;
 	public static final int   GRABER_SPEED			= 800;
-	public static final int   DROP_DELAY			= 500;
 	
-	public static final String	IP					= "192.168.1.76";
-
-	public final static boolean[] GLOBALSTATE 		= new boolean[4]; // utiliser la méthode synchronisée pour ecriture
+	public static final String	IP					= "192.168.1.11";
+	public static final Timer 	TIMER 				= new Timer();
 	
-	public static final Timer TIMER 				= new Timer();
+	/**
+	 * Représente les positions initiales des 9 palet, notament utilisé pour calibrer la Map des item
+	 */
+	public static final IntPoint[] INITIAL_PALETS	= {
+		new IntPoint(500, 2100),
+		new IntPoint(1000, 2100),
+		new IntPoint(1500, 2100),
+		new IntPoint(500, 1500),
+		new IntPoint(1000, 1500),
+		new IntPoint(1500, 1500),
+		new IntPoint(500, 900),
+		new IntPoint(1000, 900),
+		new IntPoint(1500, 900)
+	};
 		
+	/**
+	 * tableau comprenant l'ensemble des 16 Area du terrain (séparée par les lignes de couleurs)
+	 */
 	public static final Area[] AREAS				= {
 		new TopArea(0),
 		new BorderLeftArea(1,Y_TOP_WHITE,Color.WHITE,Y_BLUE_LINE,Color.BLUE),
@@ -95,30 +119,48 @@ public class Main{
 		new DefaultArea(15)
 	};
 	
+	/**
+	 * @param id l'id de l'area dans le tableau (entre 0 et 15)
+	 * @return retourne l'Area ayant l'indice i dans le tableau
+	 */
 	public static Area getArea(final int id){
 		return AREAS[id];
 	}
 	
+	/**
+	 * Les capteurs de couleur notament étant légèrement en avant du point a partir duquel nous calculons la position, 
+	 * il est nécessaire de convertir les données lu par le capteur avant de les traiter 
+	 * @param p la pose représentant la pose réel du robot
+	 * @see Pose
+	 */
 	public static void poseRealToSensor(final Pose p){
-		p.moveUpdate(100);
+		p.moveUpdate(80);
 	}
 	
+	/**
+	 * Les capteurs de couleur notament étant légèrement en avant du point a partir duquel nous calculons la position, 
+	 * il est nécessaire de convertir les données lu par le capteur avant de les traiter 
+	 * @param p la pose représentant la pose calculé par le capteur du robot
+	 * @see Pose
+	 */
 	public static void poseSensorToReal(final Pose p){
-		p.moveUpdate(-100);
+		p.moveUpdate(-80);
 	}
 	
+	/**
+	 * @param x un entier quelconque
+	 * @param y un entier quelconque
+	 * @param marge la marge minimum au délà de laquelle x et y sont considéré comme différent
+	 * @return retourne vrai si x est environ égal à y, faux sinon
+	 */
 	public static boolean areApproximatlyEqual(final int x, final int y, final int marge){
 		return x < (y + marge) && x > (y - marge);
 	}
-	
-	synchronized public static void setState(final int i, final boolean state){
-		GLOBALSTATE[i] = state;
-	}
-	
-	public static boolean getState(int i){
-		return GLOBALSTATE[i];
-	}
 
+	/**
+	 * envoi un paquet UDP contenant la chaîne vers un affichage distant
+	 * @param s une chaine quelconque
+	 */
 	public static void printf(String s){
 		try {
 			String str = s + "#";
@@ -133,8 +175,31 @@ public class Main{
 			System.out.println("[ERREUR] : impossible d'envoyer les données");
 		}
 	}
+	
+	/**
+	 * envoi un paquet UDP contenant la chaîne vers un affichage distant. Utilisable pour débugguer
+	 * @param s une chaine quelconque
+	 */
+	public static void debug(String s){
+		try {
+			String str = s + "#";
+			DatagramSocket clientSocket = new DatagramSocket();
+			InetAddress IPAddress = InetAddress.getByName(IP);
+			byte[] sendData = new byte[256];
+			sendData = str.getBytes();
+			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 1337);
+			clientSocket.send(sendPacket);
+			clientSocket.close();
+		} catch (Exception e) {
+			System.out.println("[ERREUR] : impossible d'envoyer les données");
+		}
+	}
 
 
+	/**
+	 * Fonction de lancement du programme
+	 * @param args unused
+	 */
 	public static void main(String[] args) {
 		
 		LocalEV3.get().getLED().setPattern(2);
@@ -142,9 +207,18 @@ public class Main{
 		System.out.println(" _____/_o_\\_____");
 		System.out.println("(==(/_______\\)==)");
 		System.out.println(" \\==\\/     \\/==/");
+		
 		Marvin marvin = new Marvin();
 		
 		marvin.startThreads();
+		
+ 		System.out.println("MARVIN : STAND-BY");
+ 		System.out.println(" AWAITING ORDERS");
+ 		
+ 		LocalEV3.get().getLED().setPattern(1);
+ 		Button.ENTER.waitForPressAndRelease();
+ 		Sound.beep();
+ 		Main.TIMER.resetTimer();
 		
 		marvin.run();
 		

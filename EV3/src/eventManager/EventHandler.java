@@ -19,11 +19,12 @@ public class EventHandler extends Thread implements MoveListener{
 	private boolean 			currentEsc;
 	private int					lastPression;
 	private int					moveStarted;
-	private int					refreshRate			= 300;
+	private int					refreshRate			= 120;
 	private volatile boolean	checkWall			= false;
 	
 	private static final int	NO_MOVE 			= 9999;
 	private static final int	MAX_TIME_STALLED	= 12;
+	private static final int	PRESSION_DELAY		= 2;
 	
 	
 	public EventHandler(SignalListener marvin, VisionSensor radar){
@@ -66,25 +67,31 @@ public class EventHandler extends Thread implements MoveListener{
 	}
 	
 	private void checkPression(){
-		if(this.currentPression == SignalType.PRESSION_PUSHED && (this.pressSensor.isPressed() == false) && (Main.TIMER.getElapsedSec() - this.lastPression > 2)){
+		if(this.currentPression == SignalType.PRESSION_PUSHED && (this.pressSensor.isPressed() == false) && (Main.TIMER.getElapsedSec() - this.lastPression > PRESSION_DELAY)){
+			
 			this.currentPression = SignalType.PRESSION_RELEASED;
+			
 			sendSignal(SignalType.PRESSION_RELEASED);
-			Main.setState(Main.PRESSION, false);
+			
+			Main.PRESSION 		 = false;
+			
 		}
 		else{
 			if(this.currentPression == SignalType.PRESSION_RELEASED && this.pressSensor.isPressed()){
-				Main.printf("PRESSION HANDLER = " + Main.getState(Main.PRESSION));
+
 				this.currentPression = SignalType.PRESSION_PUSHED;
-				Main.setState(Main.PRESSION, true);
+				Main.PRESSION		 = true;
+				
 				sendSignal(SignalType.PRESSION_PUSHED);
-				this.lastPression = Main.TIMER.getElapsedSec();
+				
+				this.lastPression	 = Main.TIMER.getElapsedSec();
 				
 			}
 		}
 	}
 	
 	private void checkInfiniteMove(){
-		if(Main.TIMER.getElapsedSec() - this.moveStarted > MAX_TIME_STALLED && Main.getState(Main.HAS_MOVED)){
+		if(Main.TIMER.getElapsedSec() - this.moveStarted > MAX_TIME_STALLED && Main.HAS_MOVED){
 			sendSignal(SignalType.STALLED_ENGINE);
 		}
 	}
@@ -97,30 +104,15 @@ public class EventHandler extends Thread implements MoveListener{
 		}
 	}
 	
-	synchronized public void researchMode(boolean isSearching){
-		if(isSearching){
-			this.setPriority(NORM_PRIORITY);
-			this.refreshRate = 100;
-		}
-		else{
-			this.setPriority(MIN_PRIORITY);
-			this.refreshRate = 300;
-		}
-		this.notifyAll();
-	}
-	
 	public void setCheckWall(boolean b){
 		this.checkWall = b;
 	}
 
 	public void moveStarted(Move event, MoveProvider mp) {
-		Main.printf("[EVENTHANDLER]          : Move Started");
 		this.moveStarted = Main.TIMER.getElapsedSec();
-		
 	}
 
 	public void moveStopped(Move event, MoveProvider mp) {
-		Main.printf("[EVENTHANDLER]          : Move Ended");
 		this.moveStarted = NO_MOVE;
 	}
 	

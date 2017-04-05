@@ -20,13 +20,37 @@ public class Server extends Thread{
 	private DatagramPacket packet;
 	
 	private List<Item> lastPointsReceived;
-	private int lastReceivedTimer = 0;
-	private volatile boolean stop = false;
+	private int lastReceivedTimer	= 0;
+	private volatile boolean stop	= false;
 	private ServerListener eom;
+	
+	private static int		xOffset = 0;
+	private static int		yOffset = 0;
 
+	public Server(ServerListener sl){
+		this.eom 				= sl;
+		this.packet 			= new DatagramPacket(this.buffer, this.buffer.length);
+		this.lastPointsReceived	= new ArrayList<Item>();
+		
+		try {
+			this.dsocket = new DatagramSocket(this.port);
+		} catch (SocketException e1) {
+			Main.printf("[SERVER]                : Erreur, DatagramSocket non initialisé");
+			e1.printStackTrace();
+		}
+		
+		Main.printf("[SERVER]                : Initialized");
+	}
+	
+	public static void defineOffset(int x, int y){
+		xOffset = x;
+		yOffset = y;
+	}
+	
 	@Override
 	public void run() {
 		Main.printf("[SERVER]                : Started");
+		this.setPriority(Thread.NORM_PRIORITY);
 		int aJeter = 0;
 		while(! isInterrupted() && !this.stop){
 			try {
@@ -46,14 +70,14 @@ public class Server extends Thread{
 					if(coord.length == 3){
 			        	int x = Integer.parseInt(coord[1]);
 			        	int y = 300 - Integer.parseInt(coord[2]); // convertion en mode 'genius'
-			        	this.lastPointsReceived.add(new Item(x*10, y*10, this.lastReceivedTimer, ItemType.UNDEFINED));		        	
+			        	this.lastPointsReceived.add(new Item((x*10) + xOffset, (y*10) + yOffset, this.lastReceivedTimer, ItemType.UNDEFINED));		        	
 					}
 		        }
 				this.eom.receiveRawPoints(this.lastReceivedTimer,this.lastPointsReceived);
 				this.packet.setLength(this.buffer.length);
 			}
 			aJeter ++;
-			if(aJeter == 4){
+			if(aJeter == 3){
 				aJeter = 0;
 			}
 		}
@@ -64,21 +88,8 @@ public class Server extends Thread{
 	public void interrupt(){
 		this.dsocket.close();
 		this.stop = true;
+		//this.interrupt(); ???
 	}
-	
-	public Server(ServerListener sl){
-		this.eom 				= sl;
-		this.packet 			= new DatagramPacket(this.buffer, this.buffer.length);
-		this.lastPointsReceived	= new ArrayList<Item>();
-		
-		try {
-			this.dsocket = new DatagramSocket(this.port);
-		} catch (SocketException e1) {
-			Main.printf("[SERVER]                : Erreur, DatagramSocket non initialisé");
-			e1.printStackTrace();
-		}
-		
-		Main.printf("[SERVER]                : Initialized");
-	}
+
 }
       

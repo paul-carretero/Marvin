@@ -31,39 +31,43 @@ public class SoundManager extends Thread{
 				syncWait(200);
 			}
 			else{
-				syncWait(2000);
+				syncWait(0);
 			}
 			
 		}
 		Main.printf("[AUDIO]                 : Finished");
 	}
 	
-	public void addIntro(){
+	synchronized public void addIntro(){
 		this.audioList.add("lalalalala.wav");
+		this.notify();
 	}
 	
-	public void addVictoryTheme(){
+	synchronized public void addVictoryTheme(){
 		//AudioList.add("victory.wav");
+		this.notify();
 	}
 	
-	public void addTrololo(){
+	synchronized public void addTrololo(){
 		this.audioList.add("trollolol.wav");
+		this.notify();
 	}
 	
-	public void addOrder(){
+	synchronized public void addOrder(){
 		this.audioList.add("order66.wav");
+		this.notify();
 	}
 	
-	synchronized public void syncWait(final int t){
+	synchronized public void addBip() {
+		this.audioList.add("bip.wav");
+		this.notify();
+	}
+	
+	synchronized private void syncWait(final int t){
 		try {
 			this.wait(t);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
-	}
-
-	synchronized public void addBip() {
-			this.audioList.add("bip.wav");
-			this.notifyAll();
 	}
 }

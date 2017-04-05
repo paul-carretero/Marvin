@@ -22,11 +22,6 @@ public class GoalGoToPosition extends Goal {
 	}
 
 	@Override
-	protected void defineDefault() {
-		this.postConditions.add(Main.HAS_MOVED);
-	}
-
-	@Override
 	public void start() {
 		Pose currentPose = this.pg.getPosition();
 
@@ -34,8 +29,8 @@ public class GoalGoToPosition extends Goal {
 		
 		int distance = (int) currentPose.distanceTo(this.destinationPoint);
 		
-		System.out.println("angle = " + angle);
-		System.out.println("distance = " + distance);
+		//System.out.println("angle = " + angle);
+		//System.out.println("distance = " + distance);
 		
 		// si on doit aller en marche arrière ou si c'est plus rapide
 		if(this.backward == OrderType.MANDATORY || (Math.abs(angle) > 90 && this.backward != OrderType.FORBIDEN)){
@@ -46,5 +41,12 @@ public class GoalGoToPosition extends Goal {
 			this.ia.turnHere(angle);
 			this.ia.goForward(distance);
 		}
+		
+		Main.HAS_MOVED = true;
+	}
+	
+	@Override
+	public GoalType getName(){
+		return this.NAME;
 	}
 }

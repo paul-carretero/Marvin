@@ -14,18 +14,29 @@ public class GoalGrabAndDropPalet extends Goal {
 		super(gf, ia);
 		this.eom = eom;
 	}
-
+	
 	@Override
 	public void start() {
-		IntPoint palet = this.eom.getNearestPallet();
-		Main.printf("palet touve : " + palet);
+		IntPoint palet = this.eom.getNearestpalet();
+		
+		System.out.println("palet = " + palet);
 		
 		if(palet != null){
-			if(!Main.getState(Main.HAND_OPEN)){
-				this.ia.open();
-			}
 			this.ia.pushGoal(this.gf.goalDrop());
 			this.ia.pushGoal(this.gf.goalGrab(palet.toLejosPoint()));
 		}
+	}
+	
+	@Override
+	public GoalType getName(){
+		return this.NAME;
+	}
+
+	@Override
+	protected boolean checkPreConditions() {
+		if(!Main.HAND_OPEN){
+			this.ia.open();
+		}
+		return true;
 	}
 }

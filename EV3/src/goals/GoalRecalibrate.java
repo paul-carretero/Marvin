@@ -26,11 +26,6 @@ public class GoalRecalibrate extends Goal {
 	}
 
 	@Override
-	protected void defineDefault() {
-		// do nothing
-	}
-
-	@Override
 	public void start() {
 		this.ia.goForward(3000);
 		
@@ -75,5 +70,9 @@ public class GoalRecalibrate extends Goal {
 		}
 		return 0;
 	}
-
+	
+	@Override
+	public GoalType getName(){
+		return this.NAME;
+	}
 }

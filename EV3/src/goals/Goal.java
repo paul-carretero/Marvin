@@ -8,8 +8,6 @@ import aiPlanner.Marvin;
 
 public abstract class Goal {
 	
-	private final GoalType NAME = GoalType.DEFAULT;
-	
 	protected 	List<Integer>	preConditions;
 	protected 	List<Integer>	postConditions;
 	protected	Marvin 				ia;
@@ -26,43 +24,19 @@ public abstract class Goal {
 		this.postConditions	= new ArrayList<Integer>();
 		this.ia				= ia;
 		this.gf				= gf;
-		defineDefault();
 	}
 	
-	protected void defineDefault(){
-		/*
-		 * Void
-		 */
-	}
-	
-	public GoalType getName(){
-		return this.NAME;
-	}
+	public abstract GoalType getName();
 
+	@SuppressWarnings("static-method")
 	protected boolean checkPreConditions(){
-		boolean res = true;
-		for(int e : this.preConditions){
-			
-			if(e == Main.HAND_OPEN && !Main.getState(Main.HAND_OPEN)){
-				this.ia.open();
-			}
-			
-			res = res && Main.GLOBALSTATE[e];
-		}
-		return res;
-	}
-	
-	protected void setPostConditions(){
-		for(int e : this.postConditions){
-			Main.setState(e, true);			
-		}
+		return true;
 	}
 	
 	public void startWrapper(){
 		if(this.checkPreConditions()){
 			Main.printf("EXECUTE GOAL : " + getName());
 			this.start();
-			this.setPostConditions();
 		}
 		else{
 			Main.printf("FAIL EXECUTE GOAL : " + getName());

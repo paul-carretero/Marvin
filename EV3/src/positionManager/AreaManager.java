@@ -26,11 +26,13 @@ public class AreaManager extends Thread implements AreaGiver {
 	
 	@Override
 	public void run(){
+		Main.printf("[AREA MANAGER]          : Started");
+		this.setPriority(Thread.NORM_PRIORITY);
 		this.colorSensor.lightOn();
 		while(!isInterrupted()){
 			if(updateColor()){
 				this.currentArea = this.currentArea.colorChange(this.currentColor, this.pg.getPosition());
-				Main.printf("[AREA MANAGER]          : COLOR DETECTED = " + this.currentColor + "NEW AREA = " + this.currentArea.toString());
+				//Main.printf("[AREA MANAGER]          : COLOR DETECTED = " + this.currentColor + "NEW AREA = " + this.currentArea.toString());
 			}
 			syncWait();
 		}
@@ -38,7 +40,6 @@ public class AreaManager extends Thread implements AreaGiver {
 		Main.printf("[AREA MANAGER]          : Finished");
 	}
 	
-	@SuppressWarnings("incomplete-switch")
 	private boolean updateColor(){
 		Color checkColor = this.colorSensor.getCurrentColor();
 		if(checkColor != this.currentColor){
@@ -71,6 +72,9 @@ public class AreaManager extends Thread implements AreaGiver {
 					else{
 						this.pg.sendFixY(Main.Y_TOP_WHITE);
 					}
+					break;
+				default:
+					// nothing to do
 					break;
 			}
 			return true;

@@ -8,30 +8,30 @@ import goals.Goal.OrderType;
 import interfaces.DistanceGiver;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
+import itemManager.CentralIntelligenceService;
 import lejos.robotics.geometry.Point;
 
 public class GoalFactory {
 	
-	private	Marvin			ia;
-	private	PoseGiver		pg;
-	private	ItemGiver		eom;
-	private	boolean 		lastGrabOk;
-	private	DistanceGiver	radar;
+	private	Marvin						ia;
+	private	PoseGiver					pg;
+	private	ItemGiver					eom;
+	private	boolean 					lastGrabOk;
+	private	DistanceGiver				radar;
+	private CentralIntelligenceService	cis;
 	
-	public GoalFactory(Marvin ia, PoseGiver pg, ItemGiver eom, DistanceGiver radar){
+	public GoalFactory(Marvin ia, PoseGiver pg, ItemGiver eom, DistanceGiver radar, CentralIntelligenceService	cis){
 		this.ia			= ia;
 		this.pg			= pg;
 		this.eom		= eom;
 		this.lastGrabOk = true;
 		this.radar		= radar;
+		this.cis		= cis;
 	}
 	
 	public Deque<Goal> initializeStartGoals(){
 		Deque<Goal> goals = new ArrayDeque<Goal>();
-		goals.push(goalGrabAndDropPalet());
-		goals.push(goalGrabAndDropPalet());
-		//goals.push(goalGoToPosition(30000, new Point(500,1500), OrderType.FORBIDEN));
-		//goals.push(goalGoToPosition(30000, new Point(1000,2100), OrderType.MANDATORY));
+		goals.push(play());
 		return goals;
 	}
 	
@@ -64,5 +64,8 @@ public class GoalFactory {
 	
 	public Goal goalRecalibrate(){
 		return new GoalRecalibrate(this, this.ia, this.eom, this.pg);
+	}
+	public Goal goalIntercept(){
+		return new GoalIntercept(this,this.ia,cis,this.pg);
 	}
 }

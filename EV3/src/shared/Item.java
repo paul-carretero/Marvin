@@ -1,39 +1,108 @@
 package shared;
 
-public class Item extends TimedPoint{
-	
-	private ItemType	type;
-	private int			probability;
+import aiPlanner.Main;
 
+/**
+ * représente un objet sur le plateau, cet objet est représenté par son type, son emplacement et sa durée de vie
+ * @see IntPoint
+ *
+ */
+public class Item extends IntPoint{
+	
+	/**
+	 * Représente le type de l'item (UNDEFINED, ME ou PALET)
+	 * @see ItemType
+	 */
+	private ItemType	type;
+	
+	/**
+	 * représente le moment où l'objet à été "trouvé"
+	 */
+	private int 		createdTime;
+	
+	
+	/**
+	 * représente le moment où l'objet à été mis à jour ou (ou confirmé)
+	 */
+	private int 		referenceTime;
+
+	/**
+	 * @param x la position de l'item sur l'axe x
+	 * @param y la position de l'item sur l'axe y
+	 * @param currentTime le moment de référence ou l'item a été trouvé
+	 * @param t le type de l'objet
+	 */
 	public Item(int x, int y, int currentTime, ItemType t) {
-		super(x, y, currentTime);
+		super(x, y);
 		this.type 			= t;
-		this.probability 	= 100;
+		this.createdTime	= currentTime;
+		this.referenceTime	= currentTime;
 	}
 	
-	public Item(int x, int y, int currentTime) {
-		super(x, y, currentTime);
-		this.type			= ItemType.UNDEFINED;
-	}
-	
+	/**
+	 * @return retourne le type de l'item
+	 */
 	public ItemType getType() {
 		return this.type;
 	}
 	
+	/**
+	 * @param t défini le type de l'item
+	 */
 	public void setType(ItemType t){
 		this.type			= t;
 	}
 
 	@Override
 	public String toString(){
-		return "Item = [" + this.type.toString() + "] + POS : [" + this.x +"," + this.y + "] @ " + getReferenceTime();
+		return "Item = [" + this.type.toString() + "] + POS : [" + this.x +"," + this.y + "]";
 	}
 	
-	public int getProbability(){
-		return this.probability;
+	/**
+	 * @param x la nouvelle coordonné de l'item sur l'axe x
+	 * @param y la nouvelle coordonné de l'item sur l'axe y
+	 * @param currentTime le nouveau temps de référence de l'item (pas de sa création)
+	 */
+	public void update(int x, int y, int currentTime){
+		this.x				= x;
+		this.y				= y;
+		this.referenceTime	= currentTime;
 	}
 	
-	public void setProbability(int p){
-		this.probability	= Math.min(100, Math.max(0, p));
+	@Override
+	public void update(int x, int y){
+		this.x				= x;
+		this.y				= y;
+		this.referenceTime	= Main.TIMER.getElapsedMs();
+	}
+	
+	/**
+	 * @param x la nouvelle coordonné de l'item sur l'axe x
+	 * @param y la nouvelle coordonné de l'item sur l'axe y
+	 */
+	public void silentUpdate(int x, int y){
+		this.x = x;
+		this.y = y;
+	}
+	
+	/**
+	 * @param currentTime le nouveau temps de référence de l'item (pas de sa création)
+	 */
+	public void updateTimeStamp(int currentTime) {
+		this.referenceTime	= currentTime;
+	}
+
+	/**
+	 * @return le temps de référence de l'item
+	 */
+	public int getReferenceTime() {
+		return this.referenceTime;
+	}
+	
+	/**
+	 * @return la durée de vie de l'item (de sa création jusqu'a la dernière confirmation).
+	 */
+	public int getLifeTime(){
+		return this.referenceTime - this.createdTime;
 	}
 }

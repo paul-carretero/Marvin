@@ -20,25 +20,46 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	
 	private PoseGiver 				poseGiver;
 	private Map<IntPoint,Item> 		masterMap;
-	private	static final int		MAP_PRECISION 	= 50; // on arrondi au multiple de MAP_PRECISION
+	
+	private	static final int		MAP_PRECISION 	= 20; // on arrondi au multiple de MAP_PRECISION
 	private static final int		OUT_OF_RANGE	= 9999;
 	private static final int		MIN_LIFE		= 1500;
+	private static final int		MIN_PALET_MARGE	= 100;
 	
 	public EyeOfMarvin(PoseGiver pg) {
 		
 		this.poseGiver	= pg;
 		this.masterMap 	= new HashMap<IntPoint,Item>();
 		
-		putInHashMap(new Item(Main.X_INITIAL, Main.Y_INITIAL, Main.TIMER.getElapsedMs(), ItemType.ME));
-		
 		Main.printf("[EYE OF MARVIN]         : Initialized");
 	}
 	
-	public static void averagize(Item i){
+	public void calibrateSensor(){
+		int sensorMarge = 200;
+		int xTotal = 0;
+		int yTotal = 0;
+		int total = 0;
+		
+		for(IntPoint pFix : Main.INITIAL_PALETS){
+			IntPoint pSensor = getNearestItem(pFix);
+			if(pFix.getDistance(pSensor) < sensorMarge){
+				xTotal += pFix.x() - pSensor.x();
+				yTotal += pFix.y() - pSensor.y();
+				total++;
+			}
+			else{
+				Main.printf("[EYE OF MARVIN]         : Error, no item in the expected position : " + pFix);
+			}
+		}
+		
+		Server.defineOffset(xTotal/total, yTotal/total);
+	}
+	
+	private static void averagize(Item i){
 		i.silentUpdate((i.x()/MAP_PRECISION)*MAP_PRECISION,(i.y()/MAP_PRECISION)*MAP_PRECISION);
 	}
 	
-	public static void averagize(IntPoint i){
+	private static void averagize(IntPoint i){
 		i.update((i.x()/MAP_PRECISION)*MAP_PRECISION,(i.y()/MAP_PRECISION)*MAP_PRECISION);
 	}
 	
@@ -77,7 +98,6 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 			
 			if(posOnMap != null && this.masterMap.get(posOnMap) != null){
 				this.masterMap.get(posOnMap).setType(ItemType.ME);
-				this.masterMap.get(posOnMap).setProbability(100-(distance/2)); // 100 = 0cm, 0 = > 20cm
 			}
 		}
 	}
@@ -89,7 +109,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 				it.remove();
 			}
 			else if(entry.getValue().getLifeTime() > MIN_LIFE){
-				entry.getValue().setType(ItemType.PALLET);
+				entry.getValue().setType(ItemType.PALET);
 			}
 		}
 	}
@@ -103,13 +123,13 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		//printHashMap(masterMap);
 	}
 	
-	synchronized public Item getNearestPallet() {
+	synchronized public Item getNearestpalet() {
 		IntPoint myIntPose = new IntPoint(this.poseGiver.getPosition().getLocation());
 		int distance = OUT_OF_RANGE;
 		IntPoint res = null;
 		for (Entry<IntPoint, Item> entry : this.masterMap.entrySet()){
-			if((entry.getValue().getDistance(myIntPose) < distance) && entry.getValue().getType() == ItemType.PALLET
-					&& entry.getValue().y() > Main.Y_BOTTOM_WHITE + 50 && entry.getValue().y() < (Main.Y_TOP_WHITE - 50)){
+			if((entry.getValue().getDistance(myIntPose) < distance) && entry.getValue().getType() == ItemType.PALET
+					&& entry.getValue().y() > Main.Y_BOTTOM_WHITE + MIN_PALET_MARGE && entry.getValue().y() < (Main.Y_TOP_WHITE - MIN_PALET_MARGE)){
 				res = entry.getKey();
 				distance = entry.getValue().getDistance(myIntPose);
 			}
@@ -125,7 +145,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		IntPoint res = null;
 		for (Entry<IntPoint, Item> entry : this.masterMap.entrySet()){
 			if(searchPoint != null){
-				if((entry.getValue().getDistance(searchPoint) < distance) && entry.getValue().getType() != ItemType.ME){
+				if((entry.getValue().getDistance(searchPoint) < distance)){
 					res = entry.getKey();
 					distance = entry.getValue().getDistance(searchPoint);
 				}
@@ -144,7 +164,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		return null;
 	}
 	
-	synchronized public int count(ItemType type){
+	private int count(ItemType type){
 		int res = 0;
 		for (Item item : this.masterMap.values()){
 			if(item.getType() == type){
@@ -172,7 +192,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		List<IntPoint> resList = new LinkedList<IntPoint>();
 		for (IntPoint key : this.masterMap.keySet()){
 			if(key.x() < range || key.y() < range || key.x() > (2000 - range) || key.y() > (3000 - range)){
-				if(this.masterMap.get(key).getType() != ItemType.PALLET){
+				if(this.masterMap.get(key).getType() != ItemType.PALET){
 					resList.add(key);
 				}
 			}
@@ -183,7 +203,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	synchronized public List<IntPoint> searchPosition(IntPoint start, int minRange, int maxRange){
 		List<IntPoint> resList = new LinkedList<IntPoint>();
 		for (IntPoint key : this.masterMap.keySet()){
-			if(start.getDistance(key) < maxRange && start.getDistance(key) > minRange && this.masterMap.get(key).getType() != ItemType.PALLET ){
+			if(start.getDistance(key) < maxRange && start.getDistance(key) > minRange && this.masterMap.get(key).getType() != ItemType.PALET ){
 				resList.add(key);
 			}
 		}
@@ -206,9 +226,9 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		Main.printf("------------------------------------------------------");
 	}
 	
-	synchronized public boolean checkPallet(IntPoint position){
+	synchronized public boolean checkpalet(IntPoint position){
 		if(this.masterMap.containsKey(position)){
-			return this.masterMap.get(position).getType() == ItemType.PALLET;
+			return this.masterMap.get(position).getType() == ItemType.PALET;
 		}
 		return false;
 	}

@@ -12,13 +12,16 @@ public class GoalPlay extends Goal {
 	}
 
 	@Override
-	protected void defineDefault() {
-		this.preConditions.add(Main.HAND_OPEN);
-	}
-
-	@Override
 	public void start() {
+		
+		this.ia.pushGoal(this.gf.play());
+		this.ia.pushGoal(this.gf.goalGrabAndDropPalet());
+
 		Main.printf("This is the sort of thing you lifeforms enjoy, is it?");
 	}
-
+	
+	@Override
+	public GoalType getName(){
+		return this.NAME;
+	}
 }

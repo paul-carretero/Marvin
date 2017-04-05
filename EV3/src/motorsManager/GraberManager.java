@@ -19,16 +19,17 @@ public class GraberManager extends Thread{
 	@Override
 	public void run(){
 		Main.printf("[GRABER]                : Started");
+		this.setPriority(Thread.NORM_PRIORITY);
 		while(! isInterrupted()){
 			synchronized(this){
 				while(!this.actionList.isEmpty()){
 					Action todo = this.actionList.poll();
-					if(todo == Action.CLOSE && Main.getState(Main.HAND_OPEN)){
-						Main.setState(Main.HAND_OPEN,false);
+					if(todo == Action.CLOSE && Main.HAND_OPEN){
+						Main.HAND_OPEN = false;
 						this.graber.close();
 					}
-					else if(todo == Action.OPEN && !Main.getState(Main.HAND_OPEN)){
-						Main.setState(Main.HAND_OPEN,true);
+					else if(todo == Action.OPEN && !Main.HAND_OPEN){
+						Main.HAND_OPEN = true;
 						this.graber.open();
 					}
 				}
@@ -38,27 +39,35 @@ public class GraberManager extends Thread{
 		Main.printf("[GRABER]                : Finished");
 	}
 	
-	public void close(){
-		synchronized(this){
-			this.actionList.add(Action.CLOSE);
-			this.notifyAll();
-		}
+	synchronized public void close(){
+			if(this.actionList.isEmpty()){
+				this.actionList.add(Action.CLOSE);
+				this.notify();
+			}
+			else{
+				this.actionList.add(Action.CLOSE);
+			}
 	}
 	
 	synchronized public void open(){
-		this.actionList.add(Action.OPEN);
-		this.notifyAll();
+		if(this.actionList.isEmpty()){
+			this.actionList.add(Action.OPEN);
+			this.notify();
+		}
+		else{
+			this.actionList.add(Action.OPEN);
+		}
 	}
 	
 	synchronized public void stopGrab(){
 		this.graber.stop();
 		this.actionList.clear();
-		this.notifyAll();
+		this.notify();
 	}
 	
 	synchronized private void syncWait(){
 		try {
-			this.wait(2000);
+			this.wait(0);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}

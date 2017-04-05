@@ -10,35 +10,39 @@ import shared.IntPoint;
 import shared.SignalType;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.localization.OdometryPoseProvider;
+import lejos.robotics.navigation.Move;
+import lejos.robotics.navigation.MoveListener;
 import lejos.robotics.navigation.MoveProvider;
 import lejos.robotics.navigation.Pose;
 
-public class PositionCalculator extends Thread implements PoseGiver {
+public class PositionCalculator implements PoseGiver, MoveListener {
 
-	private static final float		MAP_PERCENT			= 0.2f;
-	private static final float		RADAR_PERCENT		= 0.05f;
-	private static final float		AREA_PERCENT		= 0.2f;
-	private static final int		MAX_SAMPLE_ERROR	= 180;
+	private static final float		MAP_PERCENT			= 0.5f;
+	private static final float		RADAR_PERCENT		= 0.1f; // le radar n'est pas assez souvent précis pour l'utiliser...
+	private static final float		AREA_PERCENT		= 0.5f;
+	private static final int		MAX_SAMPLE_ERROR	= 250;
 	
 	private DistanceGiver 			radar;
 	private OdometryPoseProvider 	odometryPoseProvider;
-	private DirectionCalculator 	directionCalculator;
 	private ItemGiver				eom;
 	private AreaGiver 				area;
 	private SignalListener			marvin;
-	private int 					refreshRate			= 400;
+	private int 					refreshRate			= 500;
 	private boolean					lost;
 	
-	public PositionCalculator(MoveProvider mp, DirectionCalculator directionCalculator, DistanceGiver radar, SignalListener ia){
+	public PositionCalculator(MoveProvider mp, DistanceGiver radar, SignalListener ia){
 		this.radar 					= radar;
 		this.odometryPoseProvider 	= new OdometryPoseProvider(mp);
-		this.directionCalculator	= directionCalculator;
 		this.marvin					= ia;
 		this.lost					= false;
 		
-		this.odometryPoseProvider.setPose(new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL));
+		initPose();
 		
 		Main.printf("[POSITION CALCULATOR]   : Initialized");
+	}
+	
+	public void initPose(){
+		this.odometryPoseProvider.setPose(new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL));
 	}
 	
 	public void addItemGiver(ItemGiver eom){
@@ -49,49 +53,12 @@ public class PositionCalculator extends Thread implements PoseGiver {
 		this.area = area;
 	}
 	
-	@Override
-	public void run() {
-		Main.printf("[POSITION CALCULATOR]   : Started");
-		this.setPriority(MAX_PRIORITY);
-		while(!isInterrupted()){
-			updatePose();
-			if(!checkConsistancy()){
-				if(!this.lost){
-					this.marvin.signal(SignalType.LOST);
-				}
-				this.lost = true;
-			}
-			else{
-				
-				/*
-				 *  si j'étais perdu et que je me suis retouvé alors je demande à l'ia de supprimer les objectif de recalibration.
-				 *  L'objectif éventuellement en cours se poursuivra de toute façon
-				 */
-				if(this.lost){
-					this.marvin.signal(SignalType.NO_LOST);
-				}
-				
-				this.lost = false;
-			}
-			Main.printf("[POSITION CALCULATOR]   : " + this.odometryPoseProvider.getPose().toString());
-			//Main.printf("[POSITION CALCULATOR]   : Radar : " + radar.getRadarDistance());
-			syncWait();
-		}
-		Main.printf("[POSITION CALCULATOR]   : Finished");
-		
-	}
-	
-	private void updatePose() {
+	synchronized private void updatePose() {
 		
 		// mise à jour de la position
-		radarPositionUpdate(); // 15%
-		mapPositionUpdate(); // 30%
-		AreaPositionUpdate(); // 30%
-		
-		// mise à jour de l'angle
-		Pose pose = this.odometryPoseProvider.getPose();
-		this.directionCalculator.updateAngle(pose);
-		this.odometryPoseProvider.setPose(pose);
+		radarPositionUpdate();
+		mapPositionUpdate();
+		AreaPositionUpdate();
 	}
 	
 	// radarDistance = différence entre le position carte et la position radar
@@ -136,23 +103,20 @@ public class PositionCalculator extends Thread implements PoseGiver {
 					
 					tempPose = this.odometryPoseProvider.getPose();
 					
-					// on ne corrige que de 15% parceque le radar n'est pas fiable, dans le direction de l'item detecté
 					return Math.abs(tempPose.distanceTo(bestMatch) - radarDistance) < MAX_SAMPLE_ERROR;
 				}
-				return true;
 			}
-			// il y avait un mur alors on ne sait pas
-			return true;
 		}
-		return false;
+		return true;
 	}
 
 	private boolean checkMapConsistancy() {
 		IntPoint me = this.eom.getMarvinPosition();
 		
-		// on vérifie si la distance entre le position de la map et celle de l'odomètre est bien infèrieur à 20cm
 		if(me != null){
+			Main.printf("me = " + me + " && MyPose = " + this.odometryPoseProvider.getPose());
 			return me.getDistance(new IntPoint(this.odometryPoseProvider.getPose())) < MAX_SAMPLE_ERROR;
+			
 		}
 		return false;
 	}
@@ -191,10 +155,15 @@ public class PositionCalculator extends Thread implements PoseGiver {
 		
 		Pose myPose = this.odometryPoseProvider.getPose();
 		
+		// Main.poseRealToSensor(myPose); // UNUSED (théoriquement utile si tout les capteurs étaient super précis...)
+		
 		float x = me.x() * (MAP_PERCENT) + myPose.getX() * (1 - MAP_PERCENT);
 		float y = me.y() * (MAP_PERCENT) + myPose.getY() * (1 - MAP_PERCENT);
 		
 		myPose.setLocation(x, y);
+		
+		//Main.poseSensorToReal(myPose); // UNUSED idem...
+		
 		this.odometryPoseProvider.setPose(myPose);
 	}
 
@@ -216,7 +185,7 @@ public class PositionCalculator extends Thread implements PoseGiver {
 		return this.odometryPoseProvider.getPose();
 	}
 
-	public void sendFixX(int x) {
+	synchronized public void sendFixX(int x) {
 		Pose tempPose = this.odometryPoseProvider.getPose();
 		
 		Main.poseRealToSensor(tempPose);
@@ -228,7 +197,7 @@ public class PositionCalculator extends Thread implements PoseGiver {
 		//odometryPoseProvider.setPose(tempPose);
 	}
 
-	public void sendFixY(int y) {
+	synchronized public void sendFixY(int y) {
 		Pose tempPose = this.odometryPoseProvider.getPose();
 		
 		Main.poseRealToSensor(tempPose);
@@ -240,7 +209,6 @@ public class PositionCalculator extends Thread implements PoseGiver {
 		//odometryPoseProvider.setPose(tempPose);
 	}
 	
-	//a appeler en premier car retourne le première pose
 	private void radarPositionUpdate(){
 		int radarDistance = this.radar.getRadarDistance();
 		if(radarDistance < Main.RADAR_MAX_RANGE && radarDistance > Main.RADAR_MIN_RANGE){
@@ -276,7 +244,32 @@ public class PositionCalculator extends Thread implements PoseGiver {
 		return this.area.getCurrentArea().getId();
 	}
 
-	public void setPose(Pose p) {
+	synchronized public void setPose(Pose p) {
 		this.odometryPoseProvider.setPose(p);
+	}
+
+	public void moveStarted(Move event, MoveProvider mp) {
+		// void
+	}
+
+	public void moveStopped(Move event, MoveProvider mp) {
+		updatePose();
+		
+		if(!checkConsistancy()){
+			if(!this.lost){
+				this.marvin.signal(SignalType.LOST);
+				this.lost = true;
+			}
+		}
+		else{
+			if(this.lost){
+				this.marvin.signal(SignalType.NO_LOST);
+				this.lost = false;
+			}
+		}
+		
+		//Main.printf("[POSITION CALCULATOR]   : " + this.odometryPoseProvider.getPose().toString());
+		//Main.printf("[POSITION CALCULATOR]   : Radar : " + this.radar.getRadarDistance());
+		
 	}
 }
