@@ -6,9 +6,18 @@ import java.util.Queue;
 
 import lejos.hardware.Sound;
 
+/**
+ * Classe charger de jouer des son en arrière plan
+ */
 public class SoundManager extends Thread{
+	/**
+	 * list FIFO contenant une liste de son à jouer (éventuellement vide)
+	 */
 	private Queue<String> audioList;
 	
+	/**
+	 * Retourne une nouvelle instance de la class SoundManager pour gérer les sons, initialise la liste.
+	 */
 	public SoundManager(){
 		this.audioList = new LinkedList<String>();
 		Main.printf("[AUDIO]                 : Initialized");
@@ -22,7 +31,7 @@ public class SoundManager extends Thread{
 			if(!this.audioList.isEmpty()){
 				try{
 					final File track = new File(this.audioList.poll());
-					Sound.playSample(track);
+					//Sound.playSample(track);
 				}
 				catch (Exception e) {
 					Main.printf("[AUDIO]                 : Impossible de lire le fichier");
@@ -38,31 +47,49 @@ public class SoundManager extends Thread{
 		Main.printf("[AUDIO]                 : Finished");
 	}
 	
+	/**
+	 * Ajoute le son Inro dans la liste
+	 */
 	synchronized public void addIntro(){
 		this.audioList.add("lalalalala.wav");
 		this.notify();
 	}
 	
+	/**
+	 * Ajoute le son VictoryTheme dans la liste
+	 */
 	synchronized public void addVictoryTheme(){
-		//AudioList.add("victory.wav");
+		this.audioList.add("victory.wav");
 		this.notify();
 	}
 	
+	/**
+	 * Ajoute le son Trololo dans la liste
+	 */
 	synchronized public void addTrololo(){
 		this.audioList.add("trollolol.wav");
 		this.notify();
 	}
 	
+	/**
+	 * Ajoute le son order66 dans la liste
+	 */
 	synchronized public void addOrder(){
 		this.audioList.add("order66.wav");
 		this.notify();
 	}
 	
+	/**
+	 * Ajoute le son Bip dans la liste
+	 */
 	synchronized public void addBip() {
 		this.audioList.add("bip.wav");
 		this.notify();
 	}
 	
+	/**
+	 * @param t durée en milliseconde pendant laquelle attendre, si t = 0 alors on attends jusqu'a être notifié
+	 */
 	synchronized private void syncWait(final int t){
 		try {
 			this.wait(t);

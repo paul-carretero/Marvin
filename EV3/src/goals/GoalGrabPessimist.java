@@ -63,13 +63,14 @@ public class GoalGrabPessimist extends Goal {
 		this.ia.setAllowInterrupt(true);
 		
 		if(this.radar.checkSomething()){
+			
 			this.ia.goForward(distance);
 			
-			if(!tryGrab()){
+			if(!tryGrab()){			
 				failGrabHandler();
 			}
 		}
-		
+				
 		this.ia.setAllowInterrupt(false);
 	}
 	

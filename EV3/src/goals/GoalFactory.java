@@ -32,6 +32,8 @@ public class GoalFactory {
 	public Deque<Goal> initializeStartGoals(){
 		Deque<Goal> goals = new ArrayDeque<Goal>();
 		goals.push(play());
+		//goals.push(goalGrabAndDropPalet());
+		//goals.push(goalGrabAndDropPalet());
 		return goals;
 	}
 	

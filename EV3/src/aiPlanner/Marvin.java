@@ -16,13 +16,20 @@ import positionManager.AreaManager;
 import positionManager.DirectionCalculator;
 import positionManager.PositionCalculator;
 import positionManager.VisionSensor;
-import shared.SignalType;
 
 import java.util.Iterator;
 import java.util.Deque;
 
+@SuppressWarnings("javadoc")
+/**
+ * Classe principale du programme de navigation et de Décision du robot, 
+ * gère les objectif à accomplir ainsi que les signaux envoyer par les différent gestionnaire d'évennement et de navigtion
+ */
 public class Marvin implements SignalListener, WaitProvider{
 	
+	/**
+	 * Pile d'objectif à accomplir
+	 */
 	private	final Deque<Goal> 					goals;
 	private	final EyeOfMarvin 					itemManager;
 	private	final EventHandler 					eventManager;
@@ -35,14 +42,14 @@ public class Marvin implements SignalListener, WaitProvider{
 	private final SoundManager					audio;
 	private final DirectionCalculator			directionCalculator;
 	private final CentralIntelligenceService	cis;
-	private VisionSensor						radar;
+	private final VisionSensor					radar;
 	
 	private boolean		allowMoreGoal		= true;
 	private int			linearSpeed			= Main.CRUISE_SPEED;
 	private boolean 	allowInterrupt 		= false;
 	
-	/*
-	 * @return initialise une instance complète du système de navigation Marvin
+	/**
+	 * initialise une instance complète du système de navigation et de décision de Marvin
 	 */
 	public Marvin(){
 		
@@ -62,12 +69,14 @@ public class Marvin implements SignalListener, WaitProvider{
 		
 		/**********************************************************/
 		
+		VisionSensor radar_temp 	= null;
 		try {
-			this.radar				= new VisionSensor();
+			radar_temp				= new VisionSensor();
 		} catch (Exception e) {
 			Main.printf(e.getMessage());
 			System.exit(1);
 		}
+		this.radar = radar_temp;
 		
 		this.engine 				= new Engine(this);
 		this.eventManager 			= new EventHandler(this,this.radar);
@@ -95,11 +104,6 @@ public class Marvin implements SignalListener, WaitProvider{
 		this.goals 					= this.GFactory.initializeStartGoals();
 		
 		/**********************************************************/
-		
-		this.eventManager.setCheckWall(true);
-		
-		Main.printf("[MARVIN]                : radar : " + this.radar.getRadarDistance());
-		Main.printf("[MARVIN]                : eom position : " + this.itemManager.getMarvinPosition());
 	}
 	
 	/**
@@ -130,6 +134,8 @@ public class Marvin implements SignalListener, WaitProvider{
 		}
 		
 		System.out.print("#");
+		Main.printf("[MARVIN]                : radar : " + this.radar.getRadarDistance());
+		Main.printf("[MARVIN]                : eom position : " + this.itemManager.getMarvinPosition());
 	}
 	
 	/**
@@ -140,13 +146,19 @@ public class Marvin implements SignalListener, WaitProvider{
 		
 		this.positionManager.initPose();
 		
-		while(!this.goals.isEmpty() && (Main.TIMER.getElapsedMin() < 5)){
+		/*while(!this.goals.isEmpty() && (Main.TIMER.getElapsedMin() < 5)){
 			this.goals.pop().startWrapper();
-		}
+		}*/
+		
+		goForward(3000);
 		
 		cleanUp();
 	}
 
+	/**
+	 * @param name nom d'un objectif
+	 * @return retourne vrai si aucun objectif de ce type n'est dans la pile, faux sinon
+	 */
 	private boolean noTypeOfGoal(final GoalType name){ 
 		for(Iterator<Goal> itr = this.goals.iterator() ; itr.hasNext() ; )  {
 			if(itr.next().getName().equals(name)){
@@ -156,7 +168,10 @@ public class Marvin implements SignalListener, WaitProvider{
 		return true;
 	}
 	
-	private void deleteGoals(final GoalType name){
+	/**
+	 * @param name nom d'un objectif à supprimer de la pile
+	 */
+	synchronized private void deleteGoals(final GoalType name){
 		for(Iterator<Goal> itr = this.goals.iterator() ; itr.hasNext() ; )  {
 			if(itr.next().getName().equals(name)){
 				itr.remove();
@@ -164,44 +179,49 @@ public class Marvin implements SignalListener, WaitProvider{
 		}
 	}
 	
-	public void tryInterruptEngine(){
+	/**
+	 * Tente d'interrompre les moteurs si l'action est autorisé par la variable allowInterrupt
+	 */
+	synchronized public void tryInterruptEngine(){
 		if(this.allowInterrupt){
 			this.engine.stop();
 			notifyAll();
 		}
 	}
 	
-	synchronized public void signal(final SignalType e) {
-		Main.printf("[MARVIN]                : Signal received : " + e.toString());
-		switch (e) {
-		case LOST:
-			if(noTypeOfGoal(GoalType.RECALIBRATE)){
-				//this.goals.push(this.GFactory.goalRecalibrate());
-			}
-			break;
-		case STALLED_ENGINE:
-			this.engine.stop();
-			goBackward(200);
-			this.notifyAll();
-			break;
-		case OBSTACLE:
-			/*this.engine.stop();
-			this.notifyAll();*/
-			break;
-		case PRESSION_PUSHED:
-			tryInterruptEngine();
-			break;
-		case NO_LOST:
-			this.deleteGoals(GoalType.RECALIBRATE);
-			break;
-		case STOP:
-			System.exit(2);
-			break;
-		default:
-			break;
+	synchronized public void signalLost(){
+		if(noTypeOfGoal(GoalType.RECALIBRATE)){
+			this.goals.push(this.GFactory.goalRecalibrate());
 		}
 	}
 	
+	public void signalNoLost(){
+		this.deleteGoals(GoalType.RECALIBRATE);
+	}
+	
+	synchronized public void signalStalled(){
+		this.engine.stop();
+		goBackward(200);
+		this.notifyAll();
+	}
+	
+	synchronized public void signalObstacle(){
+		Main.printf("Obstacle detected");
+		this.engine.stop();
+		this.notifyAll();
+	}
+	
+	public void signalPression(){
+		tryInterruptEngine();
+	}
+	
+	public void signalStop(){
+		System.exit(2);
+	}
+	
+	/**
+	 * Termine proprement les Threads de l'application et termine le programe
+	 */
 	synchronized private void cleanUp(){
 		this.allowMoreGoal = false;
 		LocalEV3.get().getLED().setPattern(3);
@@ -238,6 +258,10 @@ public class Marvin implements SignalListener, WaitProvider{
 		syncWait(1000);
 	}
 
+	/**
+	 * Ajoute un objectif au sommet de la pile
+	 * @param g un Goal à ajouter dans la pile si possible
+	 */
 	synchronized public void pushGoal(final Goal g){
 		//Main.printf("[MARVIN]                : Why should I want to make anything up? Life's bad enough as it is without wanting to invent any more of it.");
 		if(this.allowMoreGoal){
@@ -253,18 +277,36 @@ public class Marvin implements SignalListener, WaitProvider{
 		}
 	}
 	
+	/**
+	 * Fonction permettant de parcourir une distance donné vers l'avant (encapsule les traitement de navigation)
+	 * @param distance distance à parcourir
+	 */
 	public void goForward(final int distance){
 		if(distance > 0 && this.linearSpeed > 0){
 			
+			Main.printf("go forward 1111");
+			
 			this.directionCalculator.startLine();
+			this.positionManager.setIsMovingForward(true);
+			
+			Main.printf("go forward 2222");
 			
 			this.engine.goForward(distance, this.linearSpeed);
 			
+			Main.printf("go forward 3333");
+			
 			this.directionCalculator.reset();
+			this.positionManager.setIsMovingForward(false);
+			
+			Main.printf("go forward 4444");
 			
 		}
 	}
 	
+	/**
+	 * Fonction permettant de parcourir une distance donné vers l'arrière
+	 * @param distance distance à parcourir
+	 */
 	public void goBackward(final int distance){
 		if(distance > 0 && this.linearSpeed > 0){
 			
@@ -280,11 +322,15 @@ public class Marvin implements SignalListener, WaitProvider{
 		}
 	}
 	
+	/**
+	 * Permet de tourner sur place (encapsule les traitement de navigation, ainsi que la présence ou non du palet)
+	 * @param angle angle en degrès de rotation par rapport à la position courrante, compris entre -180 et 180
+	 */
 	public void turnHere(final int angle){
 		if(angle != 0){
 			this.engine.updateWheelOffset();
 			if(Main.HAVE_PALET){
-				this.engine.turnHere(angle, Main.ROTATION_SPEED);
+				this.engine.turnHere(angle, Main.SAFE_ROTATION_SPEED);
 			}
 			else{
 				this.engine.turnHere(angle, Main.ROTATION_SPEED);
@@ -292,19 +338,30 @@ public class Marvin implements SignalListener, WaitProvider{
 		}
 	}
 
+	/**
+	 * Ouvre les pinces du graber si possible, immédiatement si possible
+	 */
 	public void open() {
 		this.graber.open();
 	}
 
+	/**
+	 * Ferme les pinces du graber si possible, immédiatement si possible
+	 */
 	public void grab() {
 		this.graber.close();
-		syncWait(300);
 	}
 	
+	/**
+	 * @param value vrai si l'objectif autorise l'ia à interrompre un ordre moteur, faux sinon
+	 */
 	public void setAllowInterrupt(final boolean value){
 		this.allowInterrupt = value;
 	}
 
+	/**
+	 * @param speed nouvelle vitesse linéaire à utiliser
+	 */
 	public void setSpeed(int speed) {
 		this.linearSpeed = speed;
 	}

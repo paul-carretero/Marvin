@@ -21,7 +21,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	private PoseGiver 				poseGiver;
 	private Map<IntPoint,Item> 		masterMap;
 	
-	private	static final int		MAP_PRECISION 	= 20; // on arrondi au multiple de MAP_PRECISION
+	private	static final int		MAP_PRECISION 	= 40; // on arrondi au multiple de MAP_PRECISION
 	private static final int		OUT_OF_RANGE	= 9999;
 	private static final int		MIN_LIFE		= 1500;
 	private static final int		MIN_PALET_MARGE	= 100;
@@ -42,7 +42,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		
 		for(IntPoint pFix : Main.INITIAL_PALETS){
 			IntPoint pSensor = getNearestItem(pFix);
-			if(pFix.getDistance(pSensor) < sensorMarge){
+			if(pSensor != null && pFix.getDistance(pSensor) < sensorMarge){
 				xTotal += pFix.x() - pSensor.x();
 				yTotal += pFix.y() - pSensor.y();
 				total++;
@@ -52,7 +52,13 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 			}
 		}
 		
-		Server.defineOffset(xTotal/total, yTotal/total);
+		if(total > 0){
+			Server.defineOffset(xTotal/total, yTotal/total);
+		}
+		else{
+			Main.printf("[EYE OF MARVIN]         : Le serveur n'est probablement pas lancé...");
+		}
+		
 	}
 	
 	private static void averagize(Item i){

@@ -7,15 +7,55 @@ import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
 
+/**
+ * Vision Sensor permet d'abstraire la gestion du radar et offre quelque primitives de base pour le traitement des informations en provenance de celui ci.
+ */
 public class VisionSensor implements DistanceGiver{
+	
+	/**
+	 * Représentation du radar à ultra-son physique du robot
+	 */
 	private	EV3UltrasonicSensor radarUS			= null;
+	
+	/**
+	 * Représente la distance lu par le radar
+	 */
 	private	SampleProvider 		radar			= null;
+	
+	/**
+	 * Représente les données reçu sur la présence ou non de radar ennemi.
+	 */
 	private SampleProvider		spy				= null;
+	
+	/**
+	 * déplacement du radar par rapport au centre de position du robot, les données fournit seront fonction du centre de direcetion du robot
+	 */
 	private	static	final float	RADAR_OFFSET	= 100f;
+	
+	/**
+	 * fix de la position du radar en fonction des données obtenue à l'initialisation
+	 */
 	private	float				dynamicOffset	= 0;
+	
+	/**
+	 * Symbolise l'absence de données exploitable
+	 */
 	private static 	final int	OUT_OF_RANGE	= 9999;
+	
+	/**
+	 * Distance entre l'item en face du robot et son point de dépar au début.
+	 */
 	private static 	final int	START_DISTANCE	= 600;
 	
+	/**
+	 * Distance maximal au délà dela de laquelle on considère que le radar est en défaut (il faut redémarer...)
+	 */
+	private static 	final int	MAX_RADAR_BIAS	= 100;
+	
+	/**
+	 * Créé une nouvelle instance du controlleur du radar
+	 * Exception InvalidSensorMode soulevée aléatoirement par le bibliothèque Lejos, il suffit de redémarer le programme.
+	 */
 	public VisionSensor(){
 		Port port			= LocalEV3.get().getPort(Main.US_SENSOR);
 		this.radarUS		= new EV3UltrasonicSensor(port);
@@ -30,9 +70,14 @@ public class VisionSensor implements DistanceGiver{
 		Main.printf("[VISION SENSOR]         : Initialized");
 	}
 	
+	/**
+	 * Utilisé au démarrage afin de déterminé dynamiquement le biais de calibration du radar 
+	 * en fonction de la distance initiale connue du palet le plus proche.
+	 * Termine le programme si la distance n'est pas cohérente avec les données initiales.
+	 */
 	private void setDynamicOffset() {
 		int dist = getRadarDistance();
-		if(Main.areApproximatlyEqual(dist, START_DISTANCE, 100)){
+		if(Main.areApproximatlyEqual(dist, START_DISTANCE, MAX_RADAR_BIAS)){
 			this.dynamicOffset = START_DISTANCE - getRadarDistance();
 		}
 		else{
@@ -53,6 +98,9 @@ public class VisionSensor implements DistanceGiver{
 		return OUT_OF_RANGE;
 	}
 	
+	/**
+	 * @return vrai si le radar detecte un radar ennemi, faux sinon.
+	 */
 	synchronized public boolean checkEnnemyRadar(){
 		if(this.radarUS.isEnabled()){
 			float[] sample = new float[1];

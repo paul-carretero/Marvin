@@ -4,12 +4,30 @@ import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
 import shared.Color;
 
+/**
+ * Regroupe les différentes informations sur les "Area" du terrain (définies en annexes)
+ * Permet en autre de vérifier le cohérence des données de navigation
+ */
 public abstract class Area {
 
-	protected final int id;
-	protected final static int AMBIGUOUS_ANGLE = 10;
-	protected static final int MARGE_ERREUR = 30; // en mm
+	/**
+	 * ID de l'area
+	 */
+	protected final int 		id;
 	
+	/**
+	 * Angle par rapport à une ligne de couleur en dessous duquel on ne peut pas considérer être fiable pour un changement d'Area
+	 */
+	protected final static int 	AMBIGUOUS_ANGLE	= 10;
+	
+	/**
+	 * Marge d'erreur authorisé pour le calcul de cohérence, en mm
+	 */
+	protected static final int 	MARGE_ERREUR	= 30;
+	
+	/**
+	 * @param id ID de l'Area
+	 */
 	public Area(int id){
 		this.id = id;
 	}

@@ -7,26 +7,64 @@ import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
 import shared.Item;
 
+/**
+ * Classe permettant de calculer l'angle du robot (suivant les convention utilisées par LeJos)
+ * Se base sur les données de la carte (générer par la caméra et le serveur) au début et à la fin d'un déplacement pour calculer les angles.
+ */
 public class DirectionCalculator {
 	
+	/**
+	 * Point de départ pour un déplacement en ligne droite en avant
+	 */
 	private Point 		startPoint;
+	
+	/**
+	 * gestionnaire d'Item (gère la carte des Item)
+	 */
 	private ItemGiver 	eom;
+	
+	/**
+	 * Le gestionnaire de position fournissant une interface pour la mise à jour de la Pose actuelle.
+	 */
 	private PoseGiver	pg;
+	
+	/**
+	 * Symbolise le fait que l'on ai pas pu calculer l'angle
+	 */
 	private static final int NO_ANGLE_FOUND	= 9999;
+	
+	/**
+	 * Distance en dessous de laquelle on considère que l'on a pas suffisament d'information pour calculer une direction (pas assez précis)
+	 */
 	private static final int MIN_DISTANCE	= 200;
+	
+	/**
+	 * Distance (en mm) au délà de laquelle on considère la distance parcouru suffisament fiable pour avoir une calcul précis de l'angle.
+	 */
 	private static final int FIABLE_DIST	= 700;
 	
-	public DirectionCalculator(PositionCalculator pg){
+	/**
+	 * Créer une nouvelle instance du calculateur de Direction.
+	 * @param pg Le gestionnaire de position fournissant une interface pour la mise à jour de la Pose actuelle.
+	 */
+	public DirectionCalculator(PoseGiver pg){
 		this.startPoint	= null;
 		this.pg			= pg;
 		
 		Main.printf("[DIRECTION CALCULATOR]  : Initialized");
 	}
 	
+	/**
+	 * @param eom un gestionnaire d'Item (gère la carte des Item)
+	 */
 	public void addEom(ItemGiver eom){
 		this.eom = eom;
 	}
 	
+	/**
+	 * @param p un Point de la bibliothèque LeJos
+	 * @return l'angle entre le point initial et le point p.
+	 */
 	private float getAngle(Point p){
 		if(p != null){
 			if(this.startPoint.distance(p) > MIN_DISTANCE ){
@@ -37,7 +75,13 @@ public class DirectionCalculator {
 		return NO_ANGLE_FOUND;
 	}
 	
-	private void updateAngle(Pose p){
+	/**
+	 * Met à jour l'angle de la pose passé en paramètre avec l'angle calculé durant la trajectoire.
+	 * La mise à jour est plus importante si la distance parcouru est grande (plus fiable)
+	 * @param p une pose obtenue par le calculateur de position.
+	 * @return vrai si on a effectué une mise à jour sur l'angle
+	 */
+	private boolean updateAngle(Pose p){
 		if(p != null){
 			float calcAngle = getAngle(this.eom.getMarvinPosition().toLejosPoint());
 			if(calcAngle != NO_ANGLE_FOUND){
@@ -47,18 +91,26 @@ public class DirectionCalculator {
 				else{
 					p.setHeading((float) ((p.getHeading() * 0.2) + (calcAngle * 0.8)));
 				}
+				return true;
 			}
 		}
+		return false;
 	}
 	
+	/**
+	 * Utilisé par l'ia notament afin d'informer le calculateur de direction que le robot à terminé une ligne droite en avant.
+	 * calcul la direction durant ce trajet et met à jour le gestionnaire de position.
+	 */
 	public void reset(){
 		
 		// on tente de mettre à jour l'angle si possible avant de reset
 		
 		if(this.startPoint != null){
 			Pose myPose = this.pg.getPosition();
-			updateAngle(myPose);
-			this.pg.setPose(myPose);
+			if(updateAngle(myPose)){
+				this.pg.setPose(myPose);
+			}
+			Main.printf("nouveau angle pose = " + myPose);
 		}
 		
 		// reset
@@ -67,8 +119,9 @@ public class DirectionCalculator {
 	}
 	
 	
-	/*
-	 * always forward
+	/**
+	 * Utilisé par l'ia notament afin d'informer le calculateur de direction que le robot à commencé une ligne droite en avant.
+	 * Enregistre la position initiale à ce moment.
 	 */
 	public void startLine(){
 		if(this.eom != null){

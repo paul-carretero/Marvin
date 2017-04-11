@@ -6,21 +6,44 @@ import interfaces.AreaGiver;
 import interfaces.PoseGiver;
 import shared.Color;
 
+/**
+ * class gérant la position du robot sur les 15+1 zones du terrain en fonction des lignes de couleurs.
+ */
 public class AreaManager extends Thread implements AreaGiver {
 	
-	private Area currentArea;
-	private ColorSensor colorSensor;
-	private int refreshRate;
-	private Color currentColor;
-	private PoseGiver pg;
+	/**
+	 * Contient l'Area dans laquelle le robot se trouve
+	 */
+	private Area 		currentArea;
 	
+	/**
+	 * Capteur de couleur
+	 */
+	private ColorSensor	colorSensor;
+	
+	/**
+	 * représente la dernière couleur vu par le robot
+	 */
+	private Color		currentColor;
+	
+	/**
+	 * Interface donnant la position du robot
+	 */
+	private PoseGiver	pg;
+	
+	/**
+	 * durée entre deux vérification de couleur
+	 */
+	private static final int REFRESHRATE = 100;
+	
+	/**
+	 * @param pg L'interface du PoseGiver initialisé précédement
+	 */
 	public AreaManager(PoseGiver pg){
 		this.currentColor	= null;
 		this.colorSensor	= new ColorSensor();
-		this.refreshRate	= 100;
 		this.pg				= pg;
 		this.currentArea	= Area.getAreaWithPosition(pg.getPosition());
-		this.colorSensor.setCalibration();
 		Main.printf("[AREA MANAGER]          : Initialized");
 	}
 	
@@ -40,6 +63,11 @@ public class AreaManager extends Thread implements AreaGiver {
 		Main.printf("[AREA MANAGER]          : Finished");
 	}
 	
+	/**
+	 * Vérifie si la vouleur à changer par rapport à la dernière vérification.
+	 * A pour effet de bord d'informer le gestionnaire de position si une ligne est detecté (où l'on est sûr de ses coordonnées)
+	 * @return vrai si la couleur a changé, faux sinon.
+	 */
 	private boolean updateColor(){
 		Color checkColor = this.colorSensor.getCurrentColor();
 		if(checkColor != this.currentColor){
@@ -82,9 +110,12 @@ public class AreaManager extends Thread implements AreaGiver {
 		return false;
 	}
 	
+	/**
+	 * Attends pendant un temps déterminé
+	 */
 	synchronized private void syncWait(){
 		try {
-			this.wait(this.refreshRate);
+			this.wait(REFRESHRATE);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}

@@ -1,5 +1,6 @@
 package goals;
 
+import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.DistanceGiver;
 import interfaces.ItemGiver;
@@ -19,10 +20,8 @@ public class GoalGrabOptimist extends GoalGrabPessimist {
 	public void start() {
 		
 		if(this.eom.checkpalet(new IntPoint(this.palet))){
-			
 			correctPosition();
-			grabWrapper();
-			
+			grabWrapper();			
 		}
 		
 		updateStatus();

@@ -17,6 +17,10 @@ import lejos.robotics.Color;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
 
+@SuppressWarnings("javadoc")
+/**
+ * Classe utilitaire permettant de générer un fichier de calibration des couleurs.
+ */
 public class ColorCalibrator {
 	
 	public static final int COLOR_BLUE 		= 0;

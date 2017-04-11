@@ -22,7 +22,9 @@ import shared.Timer;
  */
 public class Main{
 	
-	public static final int X_INITIAL 				= 500;
+	public static final boolean	ARE_SENSORS_BUGGED	= true;
+	
+	public static final int X_INITIAL 				= 1000;
 	public static final int Y_INITIAL 				= 2700;
 	public static final int H_INITIAL 				= -90;
 
@@ -42,7 +44,7 @@ public class Main{
 	
 	public volatile static boolean 	PRESSION		= false;
 	public volatile static boolean	HAS_MOVED 		= false;
-	public volatile static boolean	HAND_OPEN 		= true;
+	public volatile static boolean	HAND_OPEN 		= false;
 	public volatile static boolean	HAVE_PALET		= false;
 	
 	public static final int RADAR_MAX_RANGE			= 1000;
@@ -54,7 +56,7 @@ public class Main{
 	/**
 	 *  distance où on est sur de ne pas avoir de palet, et suffisamant petite pour éviter les faux-positif
 	 */
-	public static final int RADAR_WALL_DETECT		= 200;
+	public static final int RADAR_WALL_DETECT		= 250;
 	public static final int RADAR_OUT_OF_BOUND		= 9999;
 	
 	public static final String COLOR_SENSOR 		= "S2";
@@ -72,14 +74,25 @@ public class Main{
 	public static final int   ROTATION_SPEED		= 240;
 	public static final int   SAFE_ROTATION_SPEED 	= 120;
 	
-	public static final int   RESEARCH_SPEED		= 120; // mm/s
-	public static final int   CRUISE_SPEED			= 240; // mm/s
-	public static final int   MAX_SPEED				= 360; // mm/s
+	/**
+	 * En mm/s
+	 */
+	public static final int   RESEARCH_SPEED		= 120;
 	
-	public static final int   GRABER_TIMER			= 1300;
+	/**
+	 * En mm/s
+	 */
+	public static final int   CRUISE_SPEED			= 240;
+	
+	/**
+	 * En mm/s
+	 */
+	public static final int   MAX_SPEED				= 360;
+	
+	public static final int   GRABER_TIMER			= 1200;
 	public static final int   GRABER_SPEED			= 800;
 	
-	public static final String	IP					= "192.168.1.11";
+	public static final String	IP					= "192.168.0.10";
 	public static final Timer 	TIMER 				= new Timer();
 	
 	/**

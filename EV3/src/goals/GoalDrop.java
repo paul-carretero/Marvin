@@ -61,6 +61,7 @@ public class GoalDrop extends Goal{
 			// on lance l'ordre de lacher le palet
 			
 			this.ia.open();
+			Main.HAVE_PALET = false;
 			
 			//this.ia.syncWait(Main.DROP_DELAY);
 			

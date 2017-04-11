@@ -17,10 +17,7 @@ public class GoalGrabAndDropPalet extends Goal {
 	
 	@Override
 	public void start() {
-		IntPoint palet = this.eom.getNearestpalet();
-		
-		System.out.println("palet = " + palet);
-		
+		IntPoint palet = this.eom.getNearestpalet();		
 		if(palet != null){
 			this.ia.pushGoal(this.gf.goalDrop());
 			this.ia.pushGoal(this.gf.goalGrab(palet.toLejosPoint()));

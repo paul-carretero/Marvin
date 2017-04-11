@@ -12,8 +12,13 @@ import lejos.robotics.Color;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
 
+@SuppressWarnings("javadoc")
+/**
+ * Classe représentant le capteur de couleur du robot.
+ * Principalement utilisé pour obtenir la couleur "vue" par le robot.
+ */
 public class ColorSensor {
-	
+
 	public static final int COLOR_BLUE 				= 0;
 	public static final int COLOR_BLACK 			= 1;
 	public static final int COLOR_WHITE 			= 2;
@@ -22,35 +27,52 @@ public class ColorSensor {
 	public static final int COLOR_RED 				= 5;
 	public static final int COLOR_GREEN 			= 6;
 	
-	private float[][] colors;
-	private Port port;
-	private EV3ColorSensor colorSensor;
-	private SampleProvider average;
+	/**
+	 * Tableau contenant l'indice de la couleur ainsi qu'un échantillon des valeurs couleurs récupérés
+	 */
+	private float[][]		colors;
 	
+	/**
+	 * Capteur de couleur physique du robot.
+	 */
+	private EV3ColorSensor	colorSensor;
+	
+	/**
+	 * représnte les données fournit par le capteur de couleur sous forme standard
+	 */
+	private SampleProvider	average;
+	
+	/**
+	 * Créer une nouvelle instance du capteur de couleur et initialize le SampleProvider et charge le fichier de configuration
+	 */
 	public ColorSensor(){
-		this.port        = LocalEV3.get().getPort(Main.COLOR_SENSOR);
-		this.colorSensor = new EV3ColorSensor(this.port);
-		this.colors      = new float[16][0];
+		Port port        = LocalEV3.get().getPort(Main.COLOR_SENSOR);
+		this.colorSensor = new EV3ColorSensor(port);
 		this.average	 = new MeanFilter(this.colorSensor.getRGBMode(), 1);
+		
+		setCalibration();
 		
 		Main.printf("[COLOR SENSOR]          : Initialized");
 	}
 	
+	/**
+	 * Allume le capteur de couleur
+	 */
 	public void lightOn(){
 		this.colorSensor.setFloodlight(Color.WHITE);
 	}
 	
+	/**
+	 * Termine le capteur de couleur
+	 */
 	public void lightOff(){
 		this.colorSensor.setFloodlight(false);
 	}
 
 	/**
 	 * Renvoie la couleur connue la plus proche.
-	 * Pour que cette fonction ne renvoie pas -1 il conviens de calibrer les 
-	 * couleurs en amont.
 	 * 
-	 * @return la couleur (Color.EXAMPLE) ou -1 si aucune couleur n'a Ã©tÃ©
-	 * calibrÃ©e
+	 * @return la couleur (Color.EXAMPLE)
 	 */
 	public shared.Color getCurrentColor(){
 		float[]        sample  = new float[this.average.sampleSize()];
@@ -71,6 +93,11 @@ public class ColorSensor {
 		return getRealColor(color);
 	}
 	
+	/**
+	 * Effectue la convertion entre l'indice dans le tableau de couleur et la couleur sous forme d'Enum pour le reste du programme
+	 * @param color un entier associé à une couleur
+	 * @return Color.COLOR la couleur associé à l'entier en entrée
+	 */
 	private static shared.Color getRealColor(int color) {
 		switch (color) {
 		case COLOR_BLACK:
@@ -104,7 +131,10 @@ public class ColorSensor {
 				Math.pow(v1[2] - v2[2], 2.0));
 	}
 	
-	public void setCalibration(){
+	/**
+	 * Tente de lire et charger le fichier de calibration.
+	 */
+	private void setCalibration(){
 		try{
 			File fichierRead =  new File("conf.txt") ;
 			ObjectInputStream ois =  new ObjectInputStream(new FileInputStream(fichierRead)) ;
