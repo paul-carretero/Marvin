@@ -83,6 +83,9 @@ public class EventHandler extends Thread implements MoveListener{
 		this.currentEsc = false;
 	}
 	
+	/**
+	 * 
+	 */
 	private void checkWall(){
 		if(this.radar.getRadarDistance() < Main.RADAR_WALL_DETECT && this.radar.getRadarDistance() > 0 && (Main.TIMER.getElapsedSec() - this.lastWall) > WALL_DELAY){
 			this.aiPlanner.signalObstacle();
@@ -90,6 +93,10 @@ public class EventHandler extends Thread implements MoveListener{
 		}
 	}
 	
+	/**
+	 * Vérifie la pression de capteur de pression.
+	 * Informe l'ia si une pression est détectée et met à jour les variable d'état (Main)
+	 */
 	private void checkPression(){
 		if(this.currentPression && (this.pressSensor.isPressed() == false) && (Main.TIMER.getElapsedSec() - this.lastPression > PRESSION_DELAY)){
 			
@@ -109,12 +116,19 @@ public class EventHandler extends Thread implements MoveListener{
 		}
 	}
 	
+	/**
+	 * Vérifie si un mouvement semble s'éxécuter pendant une durée infinie
+	 * Informe l'ia si oui
+	 */
 	private void checkInfiniteMove(){
 		if(Main.TIMER.getElapsedSec() - this.moveStarted > MAX_TIME_STALLED && Main.HAS_MOVED){
 			this.aiPlanner.signalStalled();
 		}
 	}
 	
+	/**
+	 * Attends de manière synchronisé pensant la durée REFRESH_RATE
+	 */
 	synchronized private void syncWait(){
 		try {
 			this.wait(REFRESH_RATE);

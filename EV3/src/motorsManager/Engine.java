@@ -74,7 +74,7 @@ public class Engine{
 	
 	//DISTANCE EN MM
 	public void goBackward(float distance, float speed){
-		int waitTime = (int) ((distance * 1000f)/speed);
+		final int waitTime = (int) ((distance * 1000f)/speed);
 		this.pilot.setLinearSpeed(speed);
 		this.pilot.backward();
 		syncWait(waitTime);

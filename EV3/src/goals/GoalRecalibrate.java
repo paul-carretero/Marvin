@@ -3,11 +3,13 @@ package goals;
 import java.util.LinkedList;
 import java.util.List;
 
+import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
+import shared.Color;
 import shared.Couple;
 import shared.IntPoint;
 
@@ -18,6 +20,12 @@ public class GoalRecalibrate extends Goal {
 	private ItemGiver 		eom;
 	private PoseGiver 		pg;
 
+	/**
+	 * @param gf
+	 * @param ia
+	 * @param eom
+	 * @param pg
+	 */
 	public GoalRecalibrate(GoalFactory gf, Marvin ia, ItemGiver eom, PoseGiver pg) {
 		super(gf, ia);
 		this.eom	= eom;
@@ -26,42 +34,65 @@ public class GoalRecalibrate extends Goal {
 	}
 
 	@Override
+	// si ligne blanche = demi tour
 	public void start() {
-		this.ia.goForward(3000);
+		this.ia.addMeWakeUpOnColor();
 		
-		List<IntPoint> initialList = this.eom.searchPosition(200);
+		this.ia.setSpeed(Main.RESEARCH_SPEED);
 		
-		if(initialList.isEmpty()){
+		this.ia.goForward(2000);
+		this.ia.goBackward(5);
+		
+		Color color = this.ia.getColor();
+		
+		if(color == Color.WHITE){
 			this.ia.turnHere(180);
 			this.ia.pushGoal(this.gf.goalRecalibrate());
 		}
-		else{
-
-			this.ia.goBackward(800);
-			
-			List<Couple> couples = new LinkedList<Couple>();
-			
-			for(IntPoint startPoint : initialList){
-				List<IntPoint> finalList = this.eom.searchPosition(startPoint,300, 900);
-				
-				for(IntPoint finalp : finalList){
-					couples.add(new Couple(startPoint,finalp));
-				}
-				
-			}
-
-			if(couples.size() == 1){
-				float h = getAngle(couples.get(0).getfirst().toLejosPoint(),couples.get(0).getsecond().toLejosPoint());
-				float x = couples.get(0).getsecond().x();
-				float y = couples.get(0).getsecond().y();
-				
-				this.pg.setPose(new Pose(x,y,h));
-			}
-			else{
-				this.ia.turnHere(180);
-				this.ia.pushGoal(this.gf.goalRecalibrate());
-			}
+		else if(color == Color.GREY || color == Color.BLACK){
+			this.ia.pushGoal(this.gf.goalRecalibrate());
 		}
+		else{
+			
+			List<IntPoint> initialList = this.eom.searchPosition(color);
+			
+			this.ia.turnHere(180);
+			
+			this.ia.goForward(300);
+			
+			List<IntPoint> finalList = this.eom.searchPosition(color);
+			
+			IntPoint start	= null;
+			boolean error	= false;
+			
+			for(IntPoint p : initialList){
+				if(!finalList.contains(p)){
+					if(start != null){
+						error = true;
+					}
+					start = p;
+				}
+			}
+			
+			// si il n'y en a eu qu'un qui est supprimé de la ligne
+			if(!error && start != null){
+				List<IntPoint> resList = this.eom.searchPosition(start, 200, 400);
+				
+				if(resList.size() == 1){
+					IntPoint me = resList.get(0);
+					float angle = getAngle(start.toLejosPoint(), me.toLejosPoint());
+					
+					Pose myPose = new Pose(me.x(), me.y(), angle);
+					
+					this.pg.setPose(myPose);
+					Main.printf("calculated pose = " + myPose);
+				}
+			}
+			
+		}
+		
+		this.ia.setSpeed(Main.CRUISE_SPEED);
+		this.ia.removeMeWakeUpOnColor();
 	}
 	
 	public static float getAngle(Point start, Point end){

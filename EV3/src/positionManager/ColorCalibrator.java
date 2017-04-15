@@ -16,6 +16,7 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.robotics.Color;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
+import lejos.utility.Delay;
 
 @SuppressWarnings("javadoc")
 /**
@@ -45,17 +46,23 @@ public class ColorCalibrator {
 		average.fetchSample(blue, 0);
 		colors[COLOR_BLUE] = blue;
 		
+		Delay.msDelay(500);
+		
 		System.out.println("Press enter to calibrate red...");
 		Button.ENTER.waitForPressAndRelease();
 		float[] red = new float[average.sampleSize()];
 		average.fetchSample(red, 0);
 		colors[COLOR_RED] = red;
 		
+		Delay.msDelay(500);
+		
 		System.out.println("Press enter to calibrate green...");
 		Button.ENTER.waitForPressAndRelease();
 		float[] green = new float[average.sampleSize()];
 		average.fetchSample(green, 0);
 		colors[COLOR_GREEN] = green;
+		
+		Delay.msDelay(500);
 
 		System.out.println("Press enter to calibrate black...");
 		Button.ENTER.waitForPressAndRelease();
@@ -63,17 +70,23 @@ public class ColorCalibrator {
 		average.fetchSample(black, 0);
 		colors[COLOR_BLACK] = black;
 		
+		Delay.msDelay(500);
+		
 		System.out.println("Press enter to calibrate grey...");
 		Button.ENTER.waitForPressAndRelease();
 		float[] grey = new float[average.sampleSize()];
 		average.fetchSample(grey, 0);
 		colors[COLOR_GREY] = grey;
 		
+		Delay.msDelay(500);
+		
 		System.out.println("Press enter to calibrate white...");
 		Button.ENTER.waitForPressAndRelease();
 		float[] white = new float[average.sampleSize()];
 		average.fetchSample(white, 0);
 		colors[COLOR_WHITE] = white;
+		
+		Delay.msDelay(500);
 		
 		System.out.println("Press enter to calibrate yellow...");
 		Button.ENTER.waitForPressAndRelease();
@@ -157,6 +170,7 @@ public class ColorCalibrator {
 				colorSensor.setFloodlight(false);
 				again = false;
 			}
+			Delay.msDelay(500);
 		}
 		colorSensor.close();
 	}

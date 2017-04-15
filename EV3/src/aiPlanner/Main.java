@@ -44,7 +44,7 @@ public class Main{
 	
 	public volatile static boolean 	PRESSION		= false;
 	public volatile static boolean	HAS_MOVED 		= false;
-	public volatile static boolean	HAND_OPEN 		= false;
+	public volatile static boolean	HAND_OPEN 		= true;
 	public volatile static boolean	HAVE_PALET		= false;
 	
 	public static final int RADAR_MAX_RANGE			= 1000;
@@ -133,6 +133,30 @@ public class Main{
 	};
 	
 	/**
+	 * CHOO CHOO
+	 */
+	public static final String[] CHOO_CHOO = new String[]{
+			"\n\n\n\n\n=================",
+			"\n\n\n\n}\n\\================",
+			"\n\nO\nY\n|}\n\\\\===============",
+			"\n\n O\n_Y\n_|}\nO\\\\==============",
+			"\n\n  O\n__Y\n__|}\nOO\\\\=============",
+			"\n O\n   O\n'__Y\n|__|}\nOOO\\\\============",
+			"\n  O\n    O\n_'__Y\n_|__|}\n-OOO\\\\===========",
+			"\nO  O\n_    O\n|_'__Y\n|_|__|}\n--OOO\\\\==========",
+			"\n O  O\n__    O\n]|_'__Y\n_|_|__|}\no--OOO\\\\=========",
+			"\n  O  O\n___    O\n[]|_'__Y\n__|_|__|}\noo--OOO\\\\========",
+			"\no  O  O\n____    O\n|[]|_'__Y\n|__|_|__|}\n=oo--OOO\\=======",
+			"\n o  O  O\n ____    O\n_|[]|_'__Y\n_|__|_|__|}\n==oo--OOO\\\\======",
+			"\n  o  O  O\n  ____    O\n\\_|[]|_'__Y\n__|__|_|__|}\no==oo--OOO\\\\=====",
+			"\no  o  O  O\n_  ____    O\n \\_|[]|_'__Y\n___|__|_|__|}\noo==oo--OOO\\\\====",
+			"\n o  o  O  O\n__  ____    O\nN \\_|[]|_'__Y\n____|__|_|__|}\n-oo==oo--OOO\\\\===",
+			"\n  o  o  O  O\n___  ____    O\nMN \\_|[]|_'__Y\n_____|__|_|__|}\n--oo==oo--OOO\\\\==",
+			"\n   o  o  O  O\n____  ____    O\n MN \\_|[]|_'__Y\n______|__|_|__|}\no--oo==oo--OOO\\\\=",
+			"\n    o  o  O  O\n,____  ____    O\n| MN \\_|[]|_'__Y\n|______|__|_|__|}\noo--oo==oo--OOO\\\\"
+	};
+	
+	/**
 	 * @param id l'id de l'area dans le tableau (entre 0 et 15)
 	 * @return retourne l'Area ayant l'indice i dans le tableau
 	 */
@@ -188,25 +212,6 @@ public class Main{
 			System.out.println("[ERREUR] : impossible d'envoyer les données");
 		}
 	}
-	
-	/**
-	 * envoi un paquet UDP contenant la chaîne vers un affichage distant. Utilisable pour débugguer
-	 * @param s une chaine quelconque
-	 */
-	public static void debug(String s){
-		try {
-			String str = s + "#";
-			DatagramSocket clientSocket = new DatagramSocket();
-			InetAddress IPAddress = InetAddress.getByName(IP);
-			byte[] sendData = new byte[256];
-			sendData = str.getBytes();
-			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 1337);
-			clientSocket.send(sendPacket);
-			clientSocket.close();
-		} catch (Exception e) {
-			System.out.println("[ERREUR] : impossible d'envoyer les données");
-		}
-	}
 
 
 	/**
@@ -216,11 +221,8 @@ public class Main{
 	public static void main(String[] args) {
 		
 		LocalEV3.get().getLED().setPattern(2);
-		System.out.println("       ___");
-		System.out.println(" _____/_o_\\_____");
-		System.out.println("(==(/_______\\)==)");
-		System.out.println(" \\==\\/     \\/==/");
-		
+		System.out.println(CHOO_CHOO[0]);
+
 		Marvin marvin = new Marvin();
 		
 		marvin.startThreads();

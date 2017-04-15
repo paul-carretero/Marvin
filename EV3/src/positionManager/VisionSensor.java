@@ -50,7 +50,7 @@ public class VisionSensor implements DistanceGiver{
 	/**
 	 * Distance maximal au délà dela de laquelle on considère que le radar est en défaut (il faut redémarer...)
 	 */
-	private static 	final int	MAX_RADAR_BIAS	= 100;
+	private static 	final int	MAX_RADAR_BIAS	= 9999;
 	
 	/**
 	 * Créé une nouvelle instance du controlleur du radar
@@ -112,6 +112,6 @@ public class VisionSensor implements DistanceGiver{
 	
 	synchronized public boolean checkSomething(){
 		int dist = getRadarDistance();
-		return (dist < Main.RADAR_MAX_RANGE && dist > Main.RADAR_MIN_RANGE);
+		return dist < Main.RADAR_MAX_RANGE && dist > Main.RADAR_MIN_RANGE;
 	}
 }

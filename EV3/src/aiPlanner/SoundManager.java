@@ -28,21 +28,30 @@ public class SoundManager extends Thread{
 		Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 		Main.printf("[AUDIO]                 : Started");
 		while(!isInterrupted()){
-			if(!this.audioList.isEmpty()){
-				try{
-					final File track = new File(this.audioList.poll());
-					//Sound.playSample(track);
+			synchronized (this) {
+				if(!this.audioList.isEmpty()){
+					try{
+						final File track = new File(this.audioList.poll());
+						//Sound.playSample(track);
+					}
+					catch (Exception e) {
+						Main.printf("[AUDIO]                 : Impossible de lire le fichier");
+						Main.printf("[AUDIO]                 : Erreur : " + e.toString());
+					}
+					try {
+						this.wait(200);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
 				}
-				catch (Exception e) {
-					Main.printf("[AUDIO]                 : Impossible de lire le fichier");
-					Main.printf("[AUDIO]                 : Erreur : " + e.toString());
+				else{
+					try {
+						this.wait(0);
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+					}
 				}
-				syncWait(200);
 			}
-			else{
-				syncWait(0);
-			}
-			
 		}
 		Main.printf("[AUDIO]                 : Finished");
 	}
@@ -85,16 +94,5 @@ public class SoundManager extends Thread{
 	synchronized public void addBip() {
 		this.audioList.add("bip.wav");
 		this.notify();
-	}
-	
-	/**
-	 * @param t durée en milliseconde pendant laquelle attendre, si t = 0 alors on attends jusqu'a être notifié
-	 */
-	synchronized private void syncWait(final int t){
-		try {
-			this.wait(t);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
 	}
 }

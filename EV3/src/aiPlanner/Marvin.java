@@ -1,6 +1,7 @@
 package aiPlanner;
 
 import eventManager.EventHandler;
+import shared.Color;
 import goals.Goal;
 import goals.GoalFactory;
 import goals.GoalType;
@@ -18,6 +19,7 @@ import positionManager.PositionCalculator;
 import positionManager.VisionSensor;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Deque;
 
 @SuppressWarnings("javadoc")
@@ -69,14 +71,14 @@ public class Marvin implements SignalListener, WaitProvider{
 		
 		/**********************************************************/
 		
-		VisionSensor radar_temp 	= null;
+		VisionSensor radarTemp 		= null;
 		try {
-			radar_temp				= new VisionSensor();
+			radarTemp				= new VisionSensor();
 		} catch (Exception e) {
 			Main.printf(e.getMessage());
 			System.exit(1);
 		}
-		this.radar = radar_temp;
+		this.radar = radarTemp;
 		
 		this.engine 				= new Engine(this);
 		this.eventManager 			= new EventHandler(this,this.radar);
@@ -108,9 +110,11 @@ public class Marvin implements SignalListener, WaitProvider{
 	
 	/**
 	 * Lance tout les Threads utilitaires. 
-	 * Attends un peu plus de 2 seconde afin de récupérer les données du serveur, les calibrer et les marquer comme palet.
+	 * Attends un peu plus de 2 seconde afin de récupérer les données du serveur, 
+	 * les calibrer et les marquer comme palet.
 	 */
 	public void startThreads(){
+		this.positionManager.start();
 		this.eventManager.start();
 		this.graber.start();
 		this.server.start();
@@ -122,18 +126,18 @@ public class Marvin implements SignalListener, WaitProvider{
 		
 		LocalEV3.get().getLED().setPattern(3);
 		for(int i = 0; i< 6; i++){
-			System.out.print("#");
+			System.out.print(Main.CHOO_CHOO[i]);
 			syncWait(180);
 		}
 		
-		this.itemManager.calibrateSensor();
+		//this.itemManager.calibrateSensor();
 		
 		for(int i = 0; i< 10; i++){
-			System.out.print("#");
+			System.out.println(Main.CHOO_CHOO[i+6]);
 			syncWait(180);
 		}
 		
-		System.out.print("#");
+		System.out.print(Main.CHOO_CHOO[17]);
 		Main.printf("[MARVIN]                : radar : " + this.radar.getRadarDistance());
 		Main.printf("[MARVIN]                : eom position : " + this.itemManager.getMarvinPosition());
 	}
@@ -146,11 +150,9 @@ public class Marvin implements SignalListener, WaitProvider{
 		
 		this.positionManager.initPose();
 		
-		/*while(!this.goals.isEmpty() && (Main.TIMER.getElapsedMin() < 5)){
+		while(!this.goals.isEmpty() && (Main.TIMER.getElapsedMin() < 5)){
 			this.goals.pop().startWrapper();
-		}*/
-		
-		goForward(3000);
+		}
 		
 		cleanUp();
 	}
@@ -216,6 +218,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	}
 	
 	public void signalStop(){
+		debug();
 		System.exit(2);
 	}
 	
@@ -251,6 +254,9 @@ public class Marvin implements SignalListener, WaitProvider{
 			this.cis.interrupt();
 			this.cis.join();
 			
+			this.positionManager.interrupt();
+			this.positionManager.join();
+			
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
@@ -282,24 +288,14 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * @param distance distance à parcourir
 	 */
 	public void goForward(final int distance){
-		if(distance > 0 && this.linearSpeed > 0){
-			
-			Main.printf("go forward 1111");
-			
+		if(distance > 0 && this.linearSpeed > 0){			
 			this.directionCalculator.startLine();
 			this.positionManager.setIsMovingForward(true);
 			
-			Main.printf("go forward 2222");
-			
 			this.engine.goForward(distance, this.linearSpeed);
-			
-			Main.printf("go forward 3333");
-			
+
 			this.directionCalculator.reset();
 			this.positionManager.setIsMovingForward(false);
-			
-			Main.printf("go forward 4444");
-			
 		}
 	}
 	
@@ -364,5 +360,34 @@ public class Marvin implements SignalListener, WaitProvider{
 	 */
 	public void setSpeed(int speed) {
 		this.linearSpeed = speed;
+	}
+	
+	public void addMeWakeUpOnColor(){
+		this.areaManager.addWakeUp(this);
+	}
+	
+	public void removeMeWakeUpOnColor(){
+		this.areaManager.removeWakeUp();
+	}
+	
+	/**
+	 * Affiche les stackTraces des différent Threads
+	 */
+	private static void debug() {
+		System.err.println("-------- START of StackLog --------");
+	    Map<Thread, StackTraceElement[]> liveThreads = Thread.getAllStackTraces();
+	    for (Iterator<Thread> i = liveThreads.keySet().iterator(); i.hasNext(); ) {
+	      Thread key = i.next();
+	      System.err.println("Thread " + key.getName());
+	        StackTraceElement[] trace = liveThreads.get(key);
+	        for (int j = 0; j < trace.length; j++) {
+	        	System.err.println("\tat " + trace[j]);
+	        }
+	    }
+	    System.err.println("--------- END of StackLog ---------");
+	}
+
+	public Color getColor() {
+		return this.areaManager.getColor();
 	}
 }

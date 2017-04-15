@@ -12,6 +12,7 @@ import shared.Item;
 import shared.ItemType;
 import shared.IntPoint;
 
+import shared.Color;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -25,6 +26,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	private static final int		OUT_OF_RANGE	= 9999;
 	private static final int		MIN_LIFE		= 1500;
 	private static final int		MIN_PALET_MARGE	= 100;
+	private static final int		MAX_SEARCH	= 100;
 	
 	public EyeOfMarvin(PoseGiver pg) {
 		
@@ -152,8 +154,8 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		for (Entry<IntPoint, Item> entry : this.masterMap.entrySet()){
 			if(searchPoint != null){
 				if((entry.getValue().getDistance(searchPoint) < distance)){
-					res = entry.getKey();
-					distance = entry.getValue().getDistance(searchPoint);
+					res			= entry.getKey();
+					distance	= entry.getValue().getDistance(searchPoint);
 				}
 			}
 		}
@@ -184,7 +186,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * @return null si plusieurs ou non trouvé
 	 */
 	synchronized public Item getPossibleEnnemy(){
-		if( count(ItemType.UNDEFINED) == 1 ){
+		if(count(ItemType.UNDEFINED) == 1 ){
 			for (Item item : this.masterMap.values()){
 				if(item.getType() == ItemType.UNDEFINED){
 					return item;
@@ -194,24 +196,48 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		return null;
 	}
 	
-	synchronized public List<IntPoint> searchPosition(int range){
+	synchronized public List<IntPoint> searchPosition(Color color){
 		List<IntPoint> resList = new LinkedList<IntPoint>();
-		for (IntPoint key : this.masterMap.keySet()){
-			if(key.x() < range || key.y() < range || key.x() > (2000 - range) || key.y() > (3000 - range)){
-				if(this.masterMap.get(key).getType() != ItemType.PALET){
-					resList.add(key);
+		
+		if(color == Color.YELLOW || color == Color.RED){
+			// x fixé
+			int x = 0;
+			
+			if(color == Color.YELLOW){
+				x = Main.X_YELLOW_LINE;
+			}
+			else{
+				x = Main.X_RED_LINE;
+			}
+			
+			for (IntPoint key : this.masterMap.keySet()){
+				if(Main.areApproximatlyEqual(key.x(), x, MAX_SEARCH)){
+					if(this.masterMap.get(key).getType() != ItemType.PALET){
+						resList.add(key);
+					}
 				}
 			}
+			
 		}
-		return resList;
-	}
-	
-	synchronized public List<IntPoint> searchPosition(IntPoint start, int minRange, int maxRange){
-		List<IntPoint> resList = new LinkedList<IntPoint>();
-		for (IntPoint key : this.masterMap.keySet()){
-			if(start.getDistance(key) < maxRange && start.getDistance(key) > minRange && this.masterMap.get(key).getType() != ItemType.PALET ){
-				resList.add(key);
+		else if(color == Color.BLUE || color == Color.GREEN){
+			
+			int y = 0;
+			
+			if(color == Color.BLUE){
+				y = Main.Y_BLUE_LINE;
 			}
+			else{
+				y = Main.Y_GREEN_LINE;
+			}
+			
+			for (IntPoint key : this.masterMap.keySet()){
+				if(Main.areApproximatlyEqual(key.y(), y, MAX_SEARCH)){
+					if(this.masterMap.get(key).getType() != ItemType.PALET){
+						resList.add(key);
+					}
+				}
+			}
+			
 		}
 		return resList;
 	}
@@ -237,5 +263,15 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 			return this.masterMap.get(position).getType() == ItemType.PALET;
 		}
 		return false;
+	}
+	
+	synchronized public List<IntPoint> searchPosition(IntPoint start, int minRange, int maxRange){
+		List<IntPoint> resList = new LinkedList<IntPoint>();
+		for (IntPoint key : this.masterMap.keySet()){
+			if(start.getDistance(key) < maxRange && start.getDistance(key) > minRange && this.masterMap.get(key).getType() != ItemType.PALET ){
+				resList.add(key);
+			}
+		}
+		return resList;
 	}
 }

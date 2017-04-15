@@ -5,11 +5,26 @@ import aiPlanner.Marvin;
 import interfaces.ItemGiver;
 import shared.IntPoint;
 
+/**
+ * Objectif permettant de rechercher un palet et d'ajouter les objectif de grab et de drop sur ce palet.
+ */
 public class GoalGrabAndDropPalet extends Goal {
 	
+	/**
+	 * Nom de l'objectif
+	 */
 	protected final GoalType NAME = GoalType.GRAB_AND_DROP;
+	
+	/**
+	 * EyeOfMarvin, permet de fournir les position
+	 */
 	private ItemGiver 		 eom;
 
+	/**
+	 * @param gf le GoalFactory
+	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
+	 * @param eom EyeOfMarvin, permet de fournir les position
+	 */
 	public GoalGrabAndDropPalet(GoalFactory gf,  Marvin ia, ItemGiver eom) {
 		super(gf, ia);
 		this.eom = eom;

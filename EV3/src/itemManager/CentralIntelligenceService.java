@@ -13,7 +13,6 @@ public class CentralIntelligenceService extends Thread{
 	private IntPoint			interceptionTarget;
 	private Item				firstContact;
 	private Item				confirmationContact;
-	private volatile Object		notifyOnUptate;
 	private static final int	SIGNIFICATIVE_DISTANCE = 70; // 7cm
 	
 	public CentralIntelligenceService(ItemGiver eom, PoseGiver pg){
@@ -21,7 +20,6 @@ public class CentralIntelligenceService extends Thread{
 		this.interceptionTarget		= null;
 		this.firstContact 			= null;
 		this.confirmationContact	= null;
-		this.notifyOnUptate			= null;
 		this.eom					= eom;
 		Main.printf("[CIS]                   : Initialized");
 	}
@@ -71,28 +69,8 @@ public class CentralIntelligenceService extends Thread{
 		Main.printf("[CIS]                   : Finished");
 	}
 	
-	public void addEnnemyMoveNotifier(Object o){
-		this.notifyOnUptate = o;
-	}
-	
-	public void resetEnnemyMoveNotifier(){
-		this.notifyOnUptate = null;
-	}
-	
-	private void updateInterceptionTarget(IntPoint target){
-		if(target != null){
-			if(!target.equals(this.interceptionTarget)){
-				this.interceptionTarget = target;
-				if(this.notifyOnUptate != null){
-					synchronized (this.notifyOnUptate) {
-						this.notifyOnUptate.notifyAll();
-					}
-				}
-			}
-		}
-		else{
-			this.interceptionTarget = null;
-		}
+	synchronized private void updateInterceptionTarget(IntPoint target){
+		this.interceptionTarget = target;
 	}
 	
 	synchronized private void syncWait(){
@@ -103,11 +81,12 @@ public class CentralIntelligenceService extends Thread{
 		}
 	}
 	
-	public Point getInterceptionLocation(){
+	synchronized public Point getInterceptionLocation(){
 		Point ennemy = this.eom.getPossibleEnnemy().toLejosPoint();
-		if(this.interceptionTarget != null && ennemy != null
-			&& (this.pg.getPosition().distanceTo(this.interceptionTarget.toLejosPoint()) < ennemy.distance(this.interceptionTarget.toLejosPoint()))){
-			
+		if(this.interceptionTarget != null 
+				&& ennemy != null
+				&& (this.pg.getPosition().distanceTo(this.interceptionTarget.toLejosPoint()) < ennemy.distance(this.interceptionTarget.toLejosPoint()))
+		){	
 			return this.interceptionTarget.toLejosPoint();
 		}
 		return null;

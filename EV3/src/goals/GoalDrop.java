@@ -6,13 +6,31 @@ import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
 
+/**
+ * Objectif de drop d'un palet (ne s'éxécutera que si l'on dispose d'un palet)
+ */
 public class GoalDrop extends Goal{
 	
+	/**
+	 * Nom de l'objectif
+	 */
 	protected final GoalType NAME = GoalType.DROP;
 	
+	/**
+	 * PoseGiver permettant de retourner une pose du robot
+	 */
 	protected	PoseGiver	poseGiver;
+	
+	/**
+	 * autorise ou non le rédémarrage de l'objectif si il n'a pas pu être terminé
+	 */
 	protected	boolean		restart;
 
+	/**
+	 * @param gf le GoalFactory
+	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
+	 * @param pg PoseGiver permettant de retourner une pose du robot
+	 */
 	public GoalDrop(GoalFactory gf, Marvin ia, PoseGiver pg) {
 		super(gf, ia);
 		this.poseGiver = pg;

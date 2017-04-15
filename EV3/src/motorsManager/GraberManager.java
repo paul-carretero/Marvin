@@ -4,14 +4,20 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import aiPlanner.Main;
+import interfaces.WaitProvider;
 
-public class GraberManager extends Thread{
+public class GraberManager extends Thread implements WaitProvider{
+	
+	private enum Action {
+	    OPEN,
+	    CLOSE
+	}
 	
 	private final Graber graber;
 	private final Queue<Action> actionList;
 	
 	public GraberManager(){
-		this.graber		= new Graber();
+		this.graber		= new Graber(this);
 		this.actionList = new LinkedList<Action>();
 		Main.printf("[GRABER]                : Initialized");
 	}
@@ -34,7 +40,7 @@ public class GraberManager extends Thread{
 					}
 				}
 			}
-			syncWait();
+			syncWait(0);
 		}
 		Main.printf("[GRABER]                : Finished");
 	}
@@ -42,7 +48,7 @@ public class GraberManager extends Thread{
 	synchronized public void close(){
 			if(this.actionList.isEmpty()){
 				this.actionList.add(Action.CLOSE);
-				this.notify();
+				this.notifyAll();
 			}
 			else{
 				this.actionList.add(Action.CLOSE);
@@ -52,22 +58,26 @@ public class GraberManager extends Thread{
 	synchronized public void open(){
 		if(this.actionList.isEmpty()){
 			this.actionList.add(Action.OPEN);
-			this.notify();
+			this.notifyAll();
 		}
 		else{
 			this.actionList.add(Action.OPEN);
 		}
 	}
 	
+	/**
+	 * Arrête l'action du grabber et supprimes les éventuelles actions en attente
+	 * Peut rendre l'état du grabber inconsistant (non fermé et non ouvert)
+	 */
 	synchronized public void stopGrab(){
 		this.graber.stop();
 		this.actionList.clear();
-		this.notify();
+		this.notifyAll();
 	}
 	
-	synchronized private void syncWait(){
+	synchronized public void syncWait(int t){
 		try {
-			this.wait(0);
+			this.wait(t);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}

@@ -126,14 +126,14 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	/**
 	 * @param eom un ItemGiver fournissant les données reçue par le serveur
 	 */
-	public void addItemGiver(ItemGiver eom){
+	synchronized public void addItemGiver(ItemGiver eom){
 		this.eom = eom;
 	}
 	
 	/**
 	 * @param area le gestionnaire des Area
 	 */
-	public void addAreaManager(AreaGiver area){
+	synchronized public void addAreaManager(AreaGiver area){
 		this.area = area;
 	}
 	
@@ -141,9 +141,6 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	 * Tente de mettre à jour la pose (position seulement) du robot en fonction des informations reçue
 	 */
 	private void updatePose() {
-		
-		// mise à jour de la position
-		radarPositionUpdate();
 		mapPositionUpdate(MAP_PERCENT);
 		AreaPositionUpdate();
 	}
@@ -156,6 +153,7 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 		int nCorrect = 1;
 				
 		// radar pas super fiable
+		// surtout pour l'angle
 		if(checkRadarConsistancy()){
 			nCorrect += 1;
 		}
@@ -256,7 +254,7 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	 * Mets à jour la position en fonction des données de l'item le plus proche sur la map.
 	 * @param percent pourcentage de correction de la pose donnée par l'odomètre
 	 */
-	private void mapPositionUpdate(float percent) {
+	synchronized private void mapPositionUpdate(float percent) {
 		IntPoint me = this.eom.getMarvinPosition();
 		
 		Pose myPose = this.odometryPoseProvider.getPose();
@@ -277,7 +275,7 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	}
 
 	/**
-	 * Permet d'attendre pendant une durée définit.
+	 * Permet d'attendre pendant une durée définie.
 	 */
 	synchronized private void syncWait(){
 		try {
@@ -314,62 +312,26 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	synchronized public void sendFixX(int x) {
 		Pose tempPose = this.odometryPoseProvider.getPose();
 		
-		Main.poseRealToSensor(tempPose);
-		
-		tempPose.setLocation(x, tempPose.getY());
-		
-		Main.poseSensorToReal(tempPose);
-		
-		this.odometryPoseProvider.setPose(tempPose);
+		if(Math.abs(x - tempPose.getX()) < MAX_SAMPLE_ERROR){
+			Main.poseRealToSensor(tempPose);
+			tempPose.setLocation(x, tempPose.getY());
+			Main.poseSensorToReal(tempPose);
+			this.odometryPoseProvider.setPose(tempPose);
+		}
 	}
 
 	synchronized public void sendFixY(int y) {
 		Pose tempPose = this.odometryPoseProvider.getPose();
 		
-		Main.poseRealToSensor(tempPose);
-		
-		tempPose.setLocation(tempPose.getX(), y);
-		
-		Main.poseSensorToReal(tempPose);
-		
-		this.odometryPoseProvider.setPose(tempPose);
-	}
-	
-	/**
-	 * Mets à jour la position en fonction des données radar (et de la map).
-	 */
-	private void radarPositionUpdate(){
-		int radarDistance = this.radar.getRadarDistance();
-		if(radarDistance < Main.RADAR_MAX_RANGE && radarDistance > Main.RADAR_MIN_RANGE){
-		
-			Pose tempPose = this.odometryPoseProvider.getPose();
-			tempPose.moveUpdate(radarDistance);
-			
-			// si on a pas detecter un mur... avec 3 cm de marge d'erreur
-			if(tempPose.getX() > 30 && tempPose.getX() < 1970 && tempPose.getY() < 2970 && tempPose.getY() > 30){
-				IntPoint nearest = this.eom.getNearestItem(new IntPoint(tempPose.getLocation()));
-				
-				if(nearest != null){
-					Point bestMatch = nearest.toLejosPoint();
-					
-					tempPose = this.odometryPoseProvider.getPose();
-					
-					float realHeading = tempPose.getHeading();
-					float headingToBestMatch = tempPose.angleTo(bestMatch);
-					tempPose.setHeading(headingToBestMatch);
-					
-					// on ne corrige que de 5% parceque le radar n'est pas fiable, dans le direction de l'item detecté
-					tempPose.moveUpdate((tempPose.distanceTo(bestMatch) - radarDistance) * (RADAR_PERCENT));
-					
-					tempPose.setHeading(realHeading);
-					
-					this.odometryPoseProvider.setPose(tempPose);
-				}
-			}
+		if(Math.abs(y - tempPose.getY()) < MAX_SAMPLE_ERROR){
+			Main.poseRealToSensor(tempPose);
+			tempPose.setLocation(tempPose.getX(), y);
+			Main.poseSensorToReal(tempPose);
+			this.odometryPoseProvider.setPose(tempPose);
 		}
 	}
 
-	public int getAreaId() {
+	synchronized public int getAreaId() {
 		return this.area.getCurrentArea().getId();
 	}
 
@@ -409,5 +371,41 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	 */
 	public void setIsMovingForward(boolean b) {
 		this.isMovingForward = b;
+	}
+	
+	/**
+	 * Mets à jour la position en fonction des données radar (et de la map).
+	 * @Deprecated Redondant avec la vérification de la map et moins fiable
+	 */
+	@SuppressWarnings("unused")
+	@Deprecated
+	private void radarPositionUpdate(){
+		int radarDistance = this.radar.getRadarDistance();
+		if(radarDistance < Main.RADAR_MAX_RANGE && radarDistance > Main.RADAR_MIN_RANGE){
+		
+			Pose tempPose = this.odometryPoseProvider.getPose();
+			tempPose.moveUpdate(radarDistance);
+			
+			// si on a pas detecter un mur... avec 3 cm de marge d'erreur
+			if(tempPose.getX() > 30 && tempPose.getX() < 1970 && tempPose.getY() < 2970 && tempPose.getY() > 30){
+				IntPoint nearest = this.eom.getNearestItem(new IntPoint(tempPose.getLocation()));
+				
+				if(nearest != null){
+					Point bestMatch = nearest.toLejosPoint();
+					
+					tempPose = this.odometryPoseProvider.getPose();
+					
+					float realHeading = tempPose.getHeading();
+					float headingToBestMatch = tempPose.angleTo(bestMatch);
+					tempPose.setHeading(headingToBestMatch);
+					
+					tempPose.moveUpdate((tempPose.distanceTo(bestMatch) - radarDistance) * (RADAR_PERCENT));
+					
+					tempPose.setHeading(realHeading);
+					
+					this.odometryPoseProvider.setPose(tempPose);
+				}
+			}
+		}
 	}
 }

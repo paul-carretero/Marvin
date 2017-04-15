@@ -3,10 +3,20 @@ package goals;
 import aiPlanner.Main;
 import aiPlanner.Marvin;
 
+/**
+ * Encapsule la gestion de la partie, va ajouter les goal grabAndDrop par exemple.
+ */
 public class GoalPlay extends Goal {
 	
+	/**
+	 * Nom de l'objectif
+	 */
 	protected final GoalType NAME = GoalType.PLAY;
 
+	/**
+	 * @param gf le GoalFactory
+	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
+	 */
 	public GoalPlay(GoalFactory gf, Marvin ia) {
 		super(gf, ia);
 	}

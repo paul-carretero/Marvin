@@ -32,6 +32,11 @@ public class AreaManager extends Thread implements AreaGiver {
 	private PoseGiver	pg;
 	
 	/**
+	 * Objet sur lequelle notifier un thread en attente lorsque l'on detecte une couleur significative
+	 */
+	private Object		wakeUp;
+	
+	/**
 	 * durée entre deux vérification de couleur
 	 */
 	private static final int REFRESHRATE = 100;
@@ -54,13 +59,31 @@ public class AreaManager extends Thread implements AreaGiver {
 		this.colorSensor.lightOn();
 		while(!isInterrupted()){
 			if(updateColor()){
+				synchronized(this){
 				this.currentArea = this.currentArea.colorChange(this.currentColor, this.pg.getPosition());
 				//Main.printf("[AREA MANAGER]          : COLOR DETECTED = " + this.currentColor + "NEW AREA = " + this.currentArea.toString());
+			
+				}
+				wakeUpOnColor();
 			}
 			syncWait();
 		}
 		this.colorSensor.lightOff();
 		Main.printf("[AREA MANAGER]          : Finished");
+	}
+	
+	/**
+	 * @param w un objet moniteur
+	 */
+	public void addWakeUp(Object w){
+		this.wakeUp = w;
+	}
+	
+	/**
+	 * supprime le moniteur
+	 */
+	public void removeWakeUp(){
+		this.wakeUp = null;
 	}
 	
 	/**
@@ -111,6 +134,17 @@ public class AreaManager extends Thread implements AreaGiver {
 	}
 	
 	/**
+	 * réveille un thread ayant demander à être réveiller si l'on passe sur une couleur significative
+	 */
+	private void wakeUpOnColor(){
+		if(this.currentColor != Color.GREY && this.currentColor != Color.BLACK && this.wakeUp != null){
+			synchronized (this.wakeUp) {
+				this.wakeUp.notify();
+			}
+		}
+	}
+	
+	/**
 	 * Attends pendant un temps déterminé
 	 */
 	synchronized private void syncWait(){
@@ -121,11 +155,18 @@ public class AreaManager extends Thread implements AreaGiver {
 		}
 	}
 
-	public Area getCurrentArea() {
+	synchronized public Area getCurrentArea() {
 		return this.currentArea;
 	}
 
-	public void updateArea() {
+	synchronized public void updateArea() {
 		this.currentArea = Area.getAreaWithPosition(this.pg.getPosition());
+	}
+
+	/**
+	 * @return la couleur courrante (sur la ou l'on est)
+	 */
+	public Color getColor() {
+		return this.currentColor;
 	}
 }
