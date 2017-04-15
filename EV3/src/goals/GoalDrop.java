@@ -24,7 +24,12 @@ public class GoalDrop extends Goal{
 	/**
 	 * autorise ou non le rédémarrage de l'objectif si il n'a pas pu être terminé
 	 */
-	protected	boolean		restart;
+	protected	int			tryCount;
+	
+	/**
+	 * Nombre maximum de tentative avant d'abandonner le palet
+	 */
+	private static final int MAX_TRY = 3;
 
 	/**
 	 * @param gf le GoalFactory
@@ -33,71 +38,66 @@ public class GoalDrop extends Goal{
 	 */
 	public GoalDrop(GoalFactory gf, Marvin ia, PoseGiver pg) {
 		super(gf, ia);
-		this.poseGiver = pg;
+		this.poseGiver	= pg;
+		this.tryCount	= 0;
 	}
 
 	@Override
 	protected boolean checkPreConditions() {
 		return Main.HAVE_PALET;
 	}
-
+	
+	/**
+	 * Procedure pour lacher un palet et s'en écarter en marche arrière de 20 cm
+	 */
+	private void drop(){
+		this.ia.open();
+		Main.HAVE_PALET = false;
+		this.ia.goBackward(200);
+	}
+	
+	/**
+	 * Tente de faire déplacer le robot jusqu'a la zone de drop des palet (but adverse).
+	 * @param currentPose la pose actuelle du robot
+	 */
 	@SuppressWarnings("unused")
+	private void goToDropZone(Pose currentPose){
+		Point destination;
+		
+		if(Main.Y_OBJECTIVE_WHITE < 1500){
+			destination = new Point(currentPose.getX(), (Main.Y_OBJECTIVE_WHITE - 50) );
+		}
+		else{
+			destination = new Point(currentPose.getX(), (Main.Y_OBJECTIVE_WHITE + 50) );
+		}
+		
+		this.ia.pushGoal(this);
+		this.ia.pushGoal(this.gf.goalGoToPosition(destination));
+		
+		this.tryCount++;
+	}
+
+
 	@Override
 	protected void start() {
 		
 		Pose currentPose = this.poseGiver.getPosition();
 		
-		if((currentPose.getY() > Main.Y_OBJECTIVE_WHITE && Main.Y_OBJECTIVE_WHITE < 1500) || (currentPose.getY() < Main.Y_OBJECTIVE_WHITE && Main.Y_OBJECTIVE_WHITE > 1500)){
-			
-			Point destination;
-			
-			if(Main.Y_OBJECTIVE_WHITE < 1500){
-				destination = new Point(currentPose.getX(), (Main.Y_OBJECTIVE_WHITE - 50) );
-			}
-			else{
-				destination = new Point(currentPose.getX(), (Main.Y_OBJECTIVE_WHITE + 50) );
-			}
-			
-			this.ia.pushGoal(this);
-			this.ia.pushGoal(this.gf.goalGoToPosition(destination, OrderType.FORBIDEN));
-		}
-		else if(this.poseGiver.getAreaId() == 15 || this.poseGiver.getAreaId() == 0 || this.poseGiver.getAreaId() == 14){
-			
-			// on se place perpendiculairement au mur si ce n'est pas déjà fait
-			
-			Point wall ;
-			if(Main.Y_OBJECTIVE_WHITE < 1500){
-				wall = new Point(currentPose.getX(), 0 );
-			}
-			else{
-				wall = new Point(currentPose.getX(), 3000 );
-			}
-			int angle = (int) currentPose.relativeBearing(wall);
-			
-			this.ia.turnHere(angle);
-			
-			// on lance l'ordre de lacher le palet
-			
-			this.ia.open();
-			Main.HAVE_PALET = false;
-			
-			//this.ia.syncWait(Main.DROP_DELAY);
-			
-			// on recule de 20cm
-			
-			this.ia.goBackward(200);
-			
-			// on a finit
+		if((currentPose.getY() < Main.Y_OBJECTIVE_WHITE && Main.Y_OBJECTIVE_WHITE < 1500) || (currentPose.getY() > Main.Y_OBJECTIVE_WHITE && Main.Y_OBJECTIVE_WHITE > 1500)){
+			drop();
 		}
 		else{
-			if(this.restart){
-				this.restart = false;
-				this.ia.pushGoal(this);
+			if(this.tryCount == 0){
+				goToDropZone(currentPose);
+			}
+			else if(this.tryCount < MAX_TRY){
+				this.ia.turnHere(90);
+				this.ia.goForward(200);
+				this.ia.turnHere(-90);
+				goToDropZone(currentPose);
 			}
 			else{
-				this.ia.open();
-				this.ia.goBackward(200);
-				Main.HAVE_PALET = false;
+				drop();
 			}
 		}
 	}

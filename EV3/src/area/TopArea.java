@@ -4,11 +4,18 @@ import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
 import shared.Color;
 
+/**
+ * Représente l'area en "haut" (Y entre 2700 et 3000) du terrain.
+ * Les ID possible sont 0
+ */
+
 public class TopArea extends Area{
 	
+	/**
+	 * @param id de l'area (14)
+	 */
 	public TopArea(int id) {
 		super(id);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override

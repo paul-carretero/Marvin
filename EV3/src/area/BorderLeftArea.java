@@ -4,14 +4,38 @@ import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
 import shared.Color;
 
+/**
+ * Représente des Area en bordure gauche du Terrain
+ */
 public class BorderLeftArea extends Area {
 	
-	protected int maxY;
-	protected Color maxYColor;
+	/**
+	 * borne Y maximum
+	 */
+	protected final int maxY;
 	
-	protected int minY;
-	protected Color minYColor;
+	/**
+	 * Couleur de la ligne Y de la borne maximum
+	 */
+	protected final Color maxYColor;
+	
+	/**
+	 * borne Y minimum
+	 */
+	protected final int minY;
+	
+	/**
+	 * Couleur de la ligne Y de la borne minimum 
+	 */
+	protected final Color minYColor;
 
+	/**
+	 * @param id ID de l'area
+	 * @param maxY borne Y maximum
+	 * @param maxYColor Couleur de la ligne Y de la borne maximum
+	 * @param minY borne Y minimum
+	 * @param minYColor Couleur de la ligne Y de la borne minimum 
+	 */
 	public BorderLeftArea(int id, int maxY , Color maxYColor , int minY , Color minYColor ){
 		super(id);
 
@@ -74,6 +98,9 @@ public class BorderLeftArea extends Area {
 				if(color == Color.YELLOW && checkAmbiguousAngleVertical(p) ){
 					return Main.getArea(11);
 				}
+				break;
+			default:
+				System.err.println("Unsupproted ID on BorderLeft Area, ID = " + this.id);
 				break;
 		}
 		if(color == Color.GREY){

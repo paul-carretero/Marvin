@@ -18,24 +18,6 @@ public abstract class Goal {
 	protected	GoalFactory			gf;
 	
 	/**
-	 * Type d'ordre pour la marche arrière
-	 */
-	public enum OrderType {
-		/**
-		 * autorise l'action
-		 */
-		ALLOWED,
-		/**
-		 * Oblige l'action
-		 */
-		MANDATORY,
-		/**
-		 * Interdit l'action
-		 */
-		FORBIDEN;
-	}
-	
-	/**
 	 * @param gf le GoalFactory
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
 	 */
@@ -52,7 +34,6 @@ public abstract class Goal {
 	/**
 	 * @return vrai si les précondition sont vérifié, faux sinon
 	 */
-	@SuppressWarnings("static-method")
 	protected boolean checkPreConditions(){
 		return true;
 	}

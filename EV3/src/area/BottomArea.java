@@ -4,8 +4,15 @@ import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
 import shared.Color;
 
+/**
+ * Représente l'area en "bas" (Y entre 0 et 300) du terrain.
+ * Les ID possible sont 14
+ */
 public class BottomArea extends Area{
 	
+	/**
+	 * @param id ID de l'area
+	 */
 	public BottomArea(int id) {
 		super(id);
 	}

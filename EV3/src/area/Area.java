@@ -32,6 +32,10 @@ public abstract class Area {
 		this.id = id;
 	}
 	
+	/**
+	 * @param p la position actuelle du robot.
+	 * @return l'area associé a cette position.
+	 */
 	public static Area getAreaWithPosition(Pose p){
 		if(p.getY() > (Main.Y_TOP_WHITE)){
 			return Main.getArea(0);
@@ -103,21 +107,46 @@ public abstract class Area {
 		return "A"+this.id;
 	}
 	
+	/**
+	 * @return l'ID de l'area
+	 */
 	public int getId(){
 		return this.id;
 	}
 	
+	/**
+	 * @param p une position du robot
+	 * @return vrai si il est possible que la pose soit comprise dans cette area, faux sinon
+	 */
 	public abstract boolean getConsistency(Pose p);
 	
+	/**
+	 * @return un tableau contenant les borne minimal et maximal de l'area
+	 */
 	public abstract float[] getBorder();
 	
+	/**
+	 * @param currentColor la couleur que l'on vient de détecter
+	 * @param p la pose du robot
+	 * @return l'area associée ce changement de couleur
+	 */
 	public abstract Area colorChange(Color currentColor, Pose p);
 	
+	/**
+	 * Vérifie si l'angle est succeptible d'entrainer un doute lorsque l'on rencontre une ligne Verticale
+	 * @param p la pose du robot
+	 * @return vrai si l'angle ne perttra pas de définir avec précision la nouvelle area en fonction d'une couleur, faux sinon
+	 */
 	public static boolean checkAmbiguousAngleVertical(Pose p){
 		return Math.abs(p.getHeading()) > (90 + AMBIGUOUS_ANGLE) || 
 				Math.abs(p.getHeading()) < (90 - AMBIGUOUS_ANGLE);
 	}
 	
+	/**
+	 * Vérifie si l'angle est succeptible d'entrainer un doute lorsque l'on rencontre une ligne horizontale
+	 * @param p la pose du robot
+	 * @return vrai si l'angle ne perttra pas de définir avec précision la nouvelle area en fonction d'une couleur, faux sinon
+	 */
 	public static boolean checkAmbiguousAngleHorizontal(Pose p){
 		return Math.abs(p.getHeading()) > (0 + AMBIGUOUS_ANGLE) || 
 				Math.abs(p.getHeading()) < (180 - AMBIGUOUS_ANGLE);

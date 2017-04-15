@@ -50,7 +50,7 @@ public class VisionSensor implements DistanceGiver{
 	/**
 	 * Distance maximal au délà dela de laquelle on considère que le radar est en défaut (il faut redémarer...)
 	 */
-	private static 	final int	MAX_RADAR_BIAS	= 9999;
+	private static 	final int	MAX_RADAR_BIAS	= 300;
 	
 	/**
 	 * Créé une nouvelle instance du controlleur du radar
@@ -77,7 +77,7 @@ public class VisionSensor implements DistanceGiver{
 	 */
 	private void setDynamicOffset() {
 		int dist = getRadarDistance();
-		if(Main.areApproximatlyEqual(dist, START_DISTANCE, MAX_RADAR_BIAS)){
+		if(Main.areApproximatelyEqual(dist, START_DISTANCE, MAX_RADAR_BIAS)){
 			this.dynamicOffset = START_DISTANCE - getRadarDistance();
 		}
 		else{
@@ -91,7 +91,7 @@ public class VisionSensor implements DistanceGiver{
 			float[] sample = new float[1];
 			this.radar.fetchSample(sample, 0);
 			float res = (sample[0] * 1000f) + RADAR_OFFSET;
-			if(res >= 100 && res <= Main.RADAR_MAX_RANGE){
+			if(res >= RADAR_OFFSET && res <= Main.RADAR_MAX_RANGE){
 				return (int) Math.round(0.94f * res + 29.6 + this.dynamicOffset);
 			}
 		}

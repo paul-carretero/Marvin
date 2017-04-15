@@ -4,20 +4,59 @@ import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
 import shared.Color;
 
+/**
+ * Représente une Area interne (entouré d'autre area).
+ * Les ID possible sont 2,3,11 et 12
+ */
 public class InnerArea extends Area {
-	protected int maxX;
-	protected Color maxXColor;
+	/**
+	 * borne X maximum
+	 */
+	protected final int maxX;
+	/**
+	 * Couleur de la ligne X de la borne maximum
+	 */
+	protected final Color maxXColor;
 	
-	protected int maxY;
-	protected Color maxYColor;
+	/**
+	 * borne Y maximum
+	 */
+	protected final int maxY;
+	/**
+	 * Couleur de la ligne Y de la borne maximum
+	 */
+	protected final Color maxYColor;
 	
-	protected int minX;
-	protected Color minXColor;
+	/**
+	 * borne X minimum
+	 */
+	protected final int minX;
+	/**
+	 * Couleur de la ligne X de la borne minimum 
+	 */
+	protected final Color minXColor;
 	
-	protected int minY;
-	protected Color minYColor;
+	/**
+	 * borne Y minimum
+	 */
+	protected final int minY;
+	/**
+	 * Couleur de la ligne Y de la borne minimum 
+	 */
+	protected final Color minYColor;
 	
 	
+	/**
+	 * @param id ID de l'area
+	 * @param maxX borne X maximum
+	 * @param maxXColor Couleur de la ligne X de la borne maximum
+	 * @param minX borne X minimum
+	 * @param minXColor Couleur de la ligne X de la borne minimum 
+	 * @param maxY borne Y maximum
+	 * @param maxYColor Couleur de la ligne Y de la borne maximum
+	 * @param minY borne Y minimum
+	 * @param minYColor Couleur de la ligne Y de la borne minimum 
+	 */
 	public InnerArea(int id, int maxX , Color maxXColor , int minX , Color minXColor , int maxY , Color maxYColor , int minY , Color minYColor ){
 		super(id);
 		
@@ -97,6 +136,9 @@ public class InnerArea extends Area {
 					return Main.getArea(13);
 				}
 				break;
+		default:
+			System.err.println("Unsupproted ID on InnerArea, ID = " + this.id);
+			break;
 		}
 		if(color == Color.GREY){
 			return this;

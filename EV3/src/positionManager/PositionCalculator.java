@@ -13,6 +13,7 @@ import lejos.robotics.navigation.Move;
 import lejos.robotics.navigation.MoveListener;
 import lejos.robotics.navigation.MoveProvider;
 import lejos.robotics.navigation.Pose;
+import lejos.robotics.navigation.Move.MoveType;
 
 /**
  * Class principale centralisant les informations de position. reçoit ou les informations de déplacement et calcule la cohérence en fonction des capteurs
@@ -22,7 +23,7 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	/**
 	 * Pourcentage de la position de la carte qui sera utilisé pour calculer la position final une fois le mouvement arrété
 	 */
-	private static final float		MAP_PERCENT			= 0.7f;
+	private static final float		MAP_PERCENT			= 0.5f;
 	
 	/**
 	 * Pourcentage de la position de la carte qui sera utilisé pour calculer la position final lorsque le mouvement est en cours
@@ -30,14 +31,9 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	private static final float		CONTINUOUS_PERCENT	= 0.2f;
 	
 	/**
-	 * Pourcentage de la position basé sur les données radar qui sera utilisé pour calculer la position final une fois le mouvement arrété
-	 */
-	private static final float		RADAR_PERCENT		= 0.1f; // le radar n'est pas assez souvent précis pour l'utiliser...
-	
-	/**
 	 *  Pourcentage de la position du areaManager qui sera utilisé pour calculer la position final une fois le mouvement arrété
 	 */
-	private static final float		AREA_PERCENT		= 0.7f;
+	private static final float		AREA_PERCENT		= 0.5f;
 	
 	/**
 	 * Distance maximum entre le point donné et le point calculé (en mm) avant qu'un gestionnaire de position se déclare en état de "lost".
@@ -47,7 +43,12 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	/**
 	 * Temps entre deux mise à jour du mouvmeent en cours
 	 */
-	private static final int 		REFRESHRATE			= 400;
+	private static final int 		REFRESHRATE			= 500;
+	
+	/**
+	 * Temps entre deux mise à jour du mouvmeent en cours
+	 */
+	private static final int 		MIN_DIST_CONS_CHECK	= 230;
 	
 	/**
 	 * Instance du radar permettant de retourne la distance vers un objet situé devant le robot
@@ -79,7 +80,6 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	 */
 	private boolean					lost;
 	
-	
 	/**
 	 * Vrai si le robot avance en ligne droite en avant, faux sinon.
 	 */
@@ -108,9 +108,11 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 		Main.printf("[POSITION CALCULATOR]   : Started");
 		this.setPriority(MAX_PRIORITY);
 		while(!isInterrupted()){
+			
 			if(this.isMovingForward){
 				mapPositionUpdate(CONTINUOUS_PERCENT);
 			}
+			
 			syncWait();
 		}
 		Main.printf("[POSITION CALCULATOR]   : FInished");
@@ -138,7 +140,7 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	}
 	
 	/**
-	 * Tente de mettre à jour la pose (position seulement) du robot en fonction des informations reçue
+	 * Tente de mettre à jour la pose (position seulement) du robot en fonction des informations reçues
 	 */
 	private void updatePose() {
 		mapPositionUpdate(MAP_PERCENT);
@@ -292,7 +294,6 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	synchronized public void swap(){
 		Pose current = this.odometryPoseProvider.getPose();
 		float currentHeading = current.getHeading();
-		
 		if(currentHeading > 0){
 			currentHeading = currentHeading - 180;
 		}
@@ -301,7 +302,6 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 		}
 		
 		current.setHeading(currentHeading);
-		
 		this.odometryPoseProvider.setPose(current);
 	}
 
@@ -345,20 +345,29 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 
 	synchronized public void moveStopped(Move event, MoveProvider mp) {
 		
-		updatePose();
+		// on ne met à jour le position que si l'on a effectué un déplacement de type TRAVEL (linéaire)
+		if (event.getMoveType() == MoveType.TRAVEL){
+			
+			updatePose();
+			
+			// si on a parcouru une distance pas trop petite alors on vérifie si on est toujours consistent avec notre position
+			
+			if(event.getDistanceTraveled() > MIN_DIST_CONS_CHECK){
+				if (!checkConsistancy()){
+					if(!this.lost){
+						this.marvin.signalLost();
+						this.lost = true;
+					}
+				}
+				else if(this.lost){
+					this.marvin.signalNoLost();
+					this.lost = false;
+				}
+			}
+		}
+		
 				
-		if(!checkConsistancy()){
-			if(!this.lost){
-				this.marvin.signalLost();
-				this.lost = true;
-			}
-		}
-		else{
-			if(this.lost){
-				this.marvin.signalNoLost();
-				this.lost = false;
-			}
-		}
+		
 				
 		//Main.printf("[POSITION CALCULATOR]   : " + this.odometryPoseProvider.getPose().toString());
 		//Main.printf("[POSITION CALCULATOR]   : Radar : " + this.radar.getRadarDistance());
@@ -371,41 +380,5 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	 */
 	public void setIsMovingForward(boolean b) {
 		this.isMovingForward = b;
-	}
-	
-	/**
-	 * Mets à jour la position en fonction des données radar (et de la map).
-	 * @Deprecated Redondant avec la vérification de la map et moins fiable
-	 */
-	@SuppressWarnings("unused")
-	@Deprecated
-	private void radarPositionUpdate(){
-		int radarDistance = this.radar.getRadarDistance();
-		if(radarDistance < Main.RADAR_MAX_RANGE && radarDistance > Main.RADAR_MIN_RANGE){
-		
-			Pose tempPose = this.odometryPoseProvider.getPose();
-			tempPose.moveUpdate(radarDistance);
-			
-			// si on a pas detecter un mur... avec 3 cm de marge d'erreur
-			if(tempPose.getX() > 30 && tempPose.getX() < 1970 && tempPose.getY() < 2970 && tempPose.getY() > 30){
-				IntPoint nearest = this.eom.getNearestItem(new IntPoint(tempPose.getLocation()));
-				
-				if(nearest != null){
-					Point bestMatch = nearest.toLejosPoint();
-					
-					tempPose = this.odometryPoseProvider.getPose();
-					
-					float realHeading = tempPose.getHeading();
-					float headingToBestMatch = tempPose.angleTo(bestMatch);
-					tempPose.setHeading(headingToBestMatch);
-					
-					tempPose.moveUpdate((tempPose.distanceTo(bestMatch) - radarDistance) * (RADAR_PERCENT));
-					
-					tempPose.setHeading(realHeading);
-					
-					this.odometryPoseProvider.setPose(tempPose);
-				}
-			}
-		}
 	}
 }

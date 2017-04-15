@@ -6,16 +6,39 @@ import java.util.Queue;
 import aiPlanner.Main;
 import interfaces.WaitProvider;
 
+/**
+ * Manager du Graber, permet d'ajouter des opérations a affectuer par les pinces du robot de manière asynchrone.
+ * @see Graber
+ */
 public class GraberManager extends Thread implements WaitProvider{
 	
+	/**
+	 * représente une action (ordre) du graber
+	 */
 	private enum Action {
+	    /**
+	     * Instruction pour ouvrir les pinces
+	     */
 	    OPEN,
+	    /**
+	     * Instruction pour fermer les pinces
+	     */
 	    CLOSE
 	}
 	
+	/**
+	 * Objet fournissant les primitives pour l'utilisation d'un graber
+	 */
 	private final Graber graber;
+	
+	/**
+	 * File (FIFO) des actions à faire effectuer par le graber
+	 */
 	private final Queue<Action> actionList;
 	
+	/**
+	 * Initialise un graberManager permettant d'ajouter et d'effectuer des opérations de grab de manière asynchrone
+	 */
 	public GraberManager(){
 		this.graber		= new Graber(this);
 		this.actionList = new LinkedList<Action>();
@@ -45,6 +68,9 @@ public class GraberManager extends Thread implements WaitProvider{
 		Main.printf("[GRABER]                : Finished");
 	}
 	
+	/**
+	 * Ajoute un ordre de fermeture des pinces dans la file d'action à effectuer.
+	 */
 	synchronized public void close(){
 			if(this.actionList.isEmpty()){
 				this.actionList.add(Action.CLOSE);
@@ -55,6 +81,9 @@ public class GraberManager extends Thread implements WaitProvider{
 			}
 	}
 	
+	/**
+	 * Ajoute un ordre d'ouverture des pinces dans la file d'action à effectuer.
+	 */
 	synchronized public void open(){
 		if(this.actionList.isEmpty()){
 			this.actionList.add(Action.OPEN);

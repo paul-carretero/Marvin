@@ -28,7 +28,7 @@ public class Main{
 	public static final int Y_INITIAL 				= 2700;
 	public static final int H_INITIAL 				= -90;
 
-	public static final int Y_OBJECTIVE_WHITE		= 300;
+	public static final int Y_OBJECTIVE_WHITE		= 1400; // 300
 	public static final int Y_DEFEND_WHITE 			= 2700;
 	
 	public static final int Y_BOTTOM_WHITE			= 300;
@@ -44,7 +44,7 @@ public class Main{
 	
 	public volatile static boolean 	PRESSION		= false;
 	public volatile static boolean	HAS_MOVED 		= false;
-	public volatile static boolean	HAND_OPEN 		= true;
+	public volatile static boolean	HAND_OPEN 		= false;
 	public volatile static boolean	HAVE_PALET		= false;
 	
 	public static final int RADAR_MAX_RANGE			= 1000;
@@ -92,7 +92,7 @@ public class Main{
 	public static final int   GRABER_TIMER			= 1200;
 	public static final int   GRABER_SPEED			= 800;
 	
-	public static final String	IP					= "192.168.0.10";
+	public static final String	IP					= "192.168.0.9";
 	public static final Timer 	TIMER 				= new Timer();
 	
 	/**
@@ -136,24 +136,24 @@ public class Main{
 	 * CHOO CHOO
 	 */
 	public static final String[] CHOO_CHOO = new String[]{
-			"\n\n\n\n\n=================",
-			"\n\n\n\n}\n\\================",
-			"\n\nO\nY\n|}\n\\\\===============",
-			"\n\n O\n_Y\n_|}\nO\\\\==============",
-			"\n\n  O\n__Y\n__|}\nOO\\\\=============",
-			"\n O\n   O\n'__Y\n|__|}\nOOO\\\\============",
-			"\n  O\n    O\n_'__Y\n_|__|}\n-OOO\\\\===========",
-			"\nO  O\n_    O\n|_'__Y\n|_|__|}\n--OOO\\\\==========",
-			"\n O  O\n__    O\n]|_'__Y\n_|_|__|}\no--OOO\\\\=========",
-			"\n  O  O\n___    O\n[]|_'__Y\n__|_|__|}\noo--OOO\\\\========",
-			"\no  O  O\n____    O\n|[]|_'__Y\n|__|_|__|}\n=oo--OOO\\=======",
-			"\n o  O  O\n ____    O\n_|[]|_'__Y\n_|__|_|__|}\n==oo--OOO\\\\======",
-			"\n  o  O  O\n  ____    O\n\\_|[]|_'__Y\n__|__|_|__|}\no==oo--OOO\\\\=====",
-			"\no  o  O  O\n_  ____    O\n \\_|[]|_'__Y\n___|__|_|__|}\noo==oo--OOO\\\\====",
-			"\n o  o  O  O\n__  ____    O\nN \\_|[]|_'__Y\n____|__|_|__|}\n-oo==oo--OOO\\\\===",
-			"\n  o  o  O  O\n___  ____    O\nMN \\_|[]|_'__Y\n_____|__|_|__|}\n--oo==oo--OOO\\\\==",
-			"\n   o  o  O  O\n____  ____    O\n MN \\_|[]|_'__Y\n______|__|_|__|}\no--oo==oo--OOO\\\\=",
-			"\n    o  o  O  O\n,____  ____    O\n| MN \\_|[]|_'__Y\n|______|__|_|__|}\noo--oo==oo--OOO\\\\"
+			"\n\n\n\n=================",
+			"\n\n\n\n\n}\n\\================\n\n\n\n",
+			"\n\nO\nY\n|}\n\\\\===============\n\n\n\n",
+			"\n\n O\n_Y\n_|}\nO\\\\==============\n\n\n\n",
+			"\nO\n  O\n__Y\n__|}\nOO\\\\=============\n\n\n\n",
+			"\n O\n   O\n'__Y\n|__|}\nOOO\\\\============\n\n\n\n",
+			"\n  O\n    O\n_'__Y\n_|__|}\n-OOO\\\\===========\n\n\n",
+			"\nO  O\n_    O\n|_'__Y\n|_|__|}\n--OOO\\\\==========\n\n\n",
+			"\n O  O\n__    O\n]|_'__Y\n_|_|__|}\no--OOO\\\\=========\n\n\n",
+			"\n  O  O\n___    O\n[]|_'__Y\n__|_|__|}\noo--OOO\\\\========\n\n\n",
+			"\no  O  O\n____    O\n|[]|_'__Y\n|__|_|__|}\n=oo--OOO\\\\=======\n\n\n",
+			"\n o  O  O\n ____    O\n_|[]|_'__Y\n_|__|_|__|}\n==oo--OOO\\\\======\n\n\n",
+			"\n  o  O  O\n  ____    O\n\\_|[]|_'__Y\n__|__|_|__|}\no==oo--OOO\\\\=====\n\n\n",
+			"\no  o  O  O\n_  ____    O\n \\_|[]|_'__Y\n___|__|_|__|}\noo==oo--OOO\\\\====\n\n\n",
+			"\n o  o  O  O\n__  ____    O\nN \\_|[]|_'__Y\n____|__|_|__|}\n-oo==oo--OOO\\\\===\n\n\n",
+			"\n  o  o  O  O\n___  ____    O\nMN \\_|[]|_'__Y\n_____|__|_|__|}\n--oo==oo--OOO\\\\==\n\n\n",
+			"\n   o  o  O  O\n____  ____    O\n MN \\_|[]|_'__Y\n______|__|_|__|}\no--oo==oo--OOO\\\\=\n\n\n",
+			"\n    o  o  O  O\n,____  ____    O\n| MN \\_|[]|_'__Y\n|______|__|_|__|}\noo--oo==oo--OOO\\\\\n\nMARVIN : STAND-BY\n"
 	};
 	
 	/**
@@ -190,7 +190,7 @@ public class Main{
 	 * @param marge la marge minimum au délà de laquelle x et y sont considéré comme différent
 	 * @return retourne vrai si x est environ égal à y, faux sinon
 	 */
-	public static boolean areApproximatlyEqual(final int x, final int y, final int marge){
+	public static boolean areApproximatelyEqual(final int x, final int y, final int marge){
 		return x < (y + marge) && x > (y - marge);
 	}
 
@@ -209,7 +209,7 @@ public class Main{
 			clientSocket.send(sendPacket);
 			clientSocket.close();
 		} catch (Exception e) {
-			System.out.println("[ERREUR] : impossible d'envoyer les données");
+			System.out.println("[ERREUR] : impossible d'envoyer les données : " + e.getMessage());
 		}
 	}
 
@@ -226,16 +226,27 @@ public class Main{
 		Marvin marvin = new Marvin();
 		
 		marvin.startThreads();
-		
- 		System.out.println("MARVIN : STAND-BY");
- 		System.out.println(" AWAITING ORDERS");
  		
  		LocalEV3.get().getLED().setPattern(1);
- 		Button.ENTER.waitForPressAndRelease();
- 		Sound.beep();
- 		Main.TIMER.resetTimer();
-		
-		marvin.run();
+ 		
+ 		
+ 		int pressButton = Button.waitForAnyPress();
+ 		
+ 		if(pressButton == Button.ID_DOWN){
+ 			HAND_OPEN = false;
+ 			Sound.beep();
+ 			Sound.beep();
+ 			
+ 			Main.TIMER.resetTimer();
+ 			marvin.run();
+ 		}
+ 		else if(pressButton == Button.ID_UP){
+ 			HAND_OPEN = true;
+ 			Sound.beep();
+ 			
+ 			Main.TIMER.resetTimer();
+ 			marvin.run();
+ 		}		
 		
 		printf("@@@ The first ten million years were the worst. And the second ten million: they were the worst, too. The third ten million I didn't enjoy at all. After that, I went into a bit of a decline. @@@");
 	}

@@ -1,10 +1,9 @@
 package goals;
 
-import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 import aiPlanner.Marvin;
-import goals.Goal.OrderType;
 import interfaces.DistanceGiver;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
@@ -61,10 +60,10 @@ public class GoalFactory {
 	 * @return une pile d'objectif initialisé avec les objectif de départ
 	 */
 	public Deque<Goal> initializeStartGoals(){
-		Deque<Goal> goals = new ArrayDeque<Goal>();
+		Deque<Goal> goals = new ConcurrentLinkedDeque<Goal>();
 		//goals.push(play());
-		goals.push(goalRecalibrate());
-		//goals.push(goalGrabAndDropPalet());
+		//goals.push(goalRecalibrate());
+		goals.push(goalGrabAndDropPalet());
 		return goals;
 	}
 	
@@ -85,11 +84,10 @@ public class GoalFactory {
 	
 	/**
 	 * @param destination un point de destination
-	 * @param backward Ordre sur la nécéssité de se déplacer en marche arrière
 	 * @return un objectif de type GoToPosition
 	 */
-	public Goal goalGoToPosition(Point destination, OrderType backward){
-		return new GoalGoToPosition(this,this.ia,destination,backward,this.pg);
+	public Goal goalGoToPosition(Point destination){
+		return new GoalGoToPosition(this,this.ia,destination,this.pg);
 	}
 	
 	/**

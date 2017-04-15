@@ -17,17 +17,53 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+/**
+ * gestionnaire de la mastermap des items du terrain.
+ * Définit et permet d'accéder aux Item de type ME (le robot) ou Palet.
+ * @see Item
+ */
 public class EyeOfMarvin implements ServerListener, ItemGiver {
 	
-	private PoseGiver 				poseGiver;
-	private Map<IntPoint,Item> 		masterMap;
+	/**
+	 * Un poseGiver permettant d'obtenir la position du robot (entre autre)
+	 */
+	private final PoseGiver 			poseGiver;
+	/**
+	 * Map principace regroupant les différent Item du terrain.
+	 * Cette carte est mise à jour par le serveur et est utilisée pour récupérer la position des items.
+	 */
+	private final Map<IntPoint,Item>	masterMap;
 	
-	private	static final int		MAP_PRECISION 	= 40; // on arrondi au multiple de MAP_PRECISION
-	private static final int		OUT_OF_RANGE	= 9999;
-	private static final int		MIN_LIFE		= 1500;
-	private static final int		MIN_PALET_MARGE	= 100;
-	private static final int		MAX_SEARCH	= 100;
+	/**
+	 * Précision de la carte (permet d'arrondir les position obtenues)
+	 * Permet également de minimiser le bruit dans la reception des données
+	 */
+	private	static final int			MAP_PRECISION 	= 40; // on arrondi au multiple de MAP_PRECISION
 	
+	/**
+	 * représente une distance infinie
+	 */
+	private static final int			OUT_OF_RANGE	= 9999;
+	
+	/**
+	 * Durée minimum pour qu'un item n'ayant pas bougé soit considéré comme un palet
+	 */
+	private static final int			MIN_LIFE		= 1500;
+	
+	/**
+	 * Distance minium en bordure des lignes blanches où l'on ne cherchera pas de palet a attraper
+	 */
+	private static final int			MIN_PALET_MARGE	= 100;
+	
+	/**
+	 * marge de tolérance lors de la recherche d'un item
+	 */
+	private static final int			MAX_SEARCH		= 100;
+	
+	/**
+	 * Créer une nouvelle instance du gestionnaire de la mastermap des items du terrain
+	 * @param pg Un poseGiver permettant d'obtenir la position du robot (entre autre)
+	 */
 	public EyeOfMarvin(PoseGiver pg) {
 		
 		this.poseGiver	= pg;
@@ -36,6 +72,10 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		Main.printf("[EYE OF MARVIN]         : Initialized");
 	}
 	
+	/**
+	 * Calcul la différences moyennes des coordonnées fournies par le serveur avec les coordonnées connues de départ des palets.
+	 * Définit les écart moyen en X et en Y directement à la reception serveur afin d'obtenir une carte plus précise des palet.
+	 */
 	public void calibrateSensor(){
 		int sensorMarge = 200;
 		int xTotal = 0;
@@ -63,15 +103,27 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		
 	}
 	
+	/**
+	 * Arrondi la postion d'un Item, sans mettre à jour son temps de référence
+	 * @param i un Item a arrondir
+	 */
 	private static void averagize(Item i){
 		i.silentUpdate((i.x()/MAP_PRECISION)*MAP_PRECISION,(i.y()/MAP_PRECISION)*MAP_PRECISION);
 	}
 	
+	/**
+	 * Arrondi la postion d'un Intpoint
+	 * @param i un Intpoint a arrondir
+	 */
 	private static void averagize(IntPoint i){
 		i.update((i.x()/MAP_PRECISION)*MAP_PRECISION,(i.y()/MAP_PRECISION)*MAP_PRECISION);
 	}
 	
-	private void putInHashMap(Item i){
+	/**
+	 * Ajoute un nouvel item dans la mastermap ou met à jour le temps de référence de celui ci ainsi que son type (si définit).
+	 * @param i un item a ajouter dans la mastermap
+	 */
+	synchronized private void putInHashMap(Item i){
 		averagize(i);
 		IntPoint key = new IntPoint(i.x(), i.y());
 		if(this.masterMap.containsKey(key)){
@@ -85,7 +137,10 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		}
 	}
 	
-	private void defineMe(){
+	/**
+	 * Définit un unique item comme le robot si un item est suffisament proche de la position théorique de celui ci.
+	 */
+	synchronized private void defineMe(){
 		Pose p = this.poseGiver.getPosition();
 		Main.poseRealToSensor(p);
 		IntPoint myPosition = new IntPoint(p);
@@ -104,13 +159,17 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 				}
 			}
 			
-			if(posOnMap != null && this.masterMap.get(posOnMap) != null){
+			if(posOnMap != null && this.masterMap.get(posOnMap) != null && this.masterMap.get(posOnMap).getDistance(myPosition) < MAX_SEARCH){
 				this.masterMap.get(posOnMap).setType(ItemType.ME);
 			}
 		}
 	}
 	
-	private void cleanHashMap(int timeout) {
+	/**
+	 * supprime les référence obsolète de la mastermap
+	 * @param timeout temps au dessous duquel on supprime les référence de la map
+	 */
+	synchronized private void cleanHashMap(int timeout) {
 		for(Iterator<Map.Entry<IntPoint, Item>> it = this.masterMap.entrySet().iterator(); it.hasNext(); ) {
 			Entry<IntPoint, Item> entry = it.next();
 			if(entry.getValue().getReferenceTime() < timeout){
@@ -172,7 +231,11 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		return null;
 	}
 	
-	private int count(ItemType type){
+	/**
+	 * @param type Type d'un item a compter
+	 * @return le nombre d'item dans la mastermap ayant le type type.
+	 */
+	synchronized private int count(ItemType type){
 		int res = 0;
 		for (Item item : this.masterMap.values()){
 			if(item.getType() == type){
@@ -182,8 +245,8 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		return res;
 	}
 	
-	/*
-	 * @return null si plusieurs ou non trouvé
+	/**
+	 * @return la position d'un ennemy éventuel ou null si plusieurs ennemie possible ou non trouvé
 	 */
 	synchronized public Item getPossibleEnnemy(){
 		if(count(ItemType.UNDEFINED) == 1 ){
@@ -211,7 +274,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 			}
 			
 			for (IntPoint key : this.masterMap.keySet()){
-				if(Main.areApproximatlyEqual(key.x(), x, MAX_SEARCH)){
+				if(Main.areApproximatelyEqual(key.x(), x, MAX_SEARCH)){
 					if(this.masterMap.get(key).getType() != ItemType.PALET){
 						resList.add(key);
 					}
@@ -231,7 +294,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 			}
 			
 			for (IntPoint key : this.masterMap.keySet()){
-				if(Main.areApproximatlyEqual(key.y(), y, MAX_SEARCH)){
+				if(Main.areApproximatelyEqual(key.y(), y, MAX_SEARCH)){
 					if(this.masterMap.get(key).getType() != ItemType.PALET){
 						resList.add(key);
 					}
@@ -242,14 +305,10 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		return resList;
 	}
 	
-	public static void printList(List<Item> list){
-		Main.printf("--------------------------------------");
-		for(Item i : list){
-			Main.printf("[EYE OF MARVIN]         : " + i.toString());
-		}
-		Main.printf("======================================");
-	}
-
+	/**
+	 * Affiche la map passée en paramètre
+	 * @param map une map d'item
+	 */
 	public static void printHashMap(Map<IntPoint,Item> map){
 		Main.printf("--------------------------------" + map.size() + "Elements");
 		for(Item item : map.values()) {

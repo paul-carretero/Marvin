@@ -4,8 +4,14 @@ import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
 import shared.Color;
 
+/**
+ * Founi une représentation de l'Area centrale du terrain, délimitée par les 4 lignes rouge, verte, jaune et bleu
+ */
 public class CenterArea extends Area {
 
+	/**
+	 * @param id ID de l'area (6)
+	 */
 	public CenterArea(int id) {
 		super(id);
 	}

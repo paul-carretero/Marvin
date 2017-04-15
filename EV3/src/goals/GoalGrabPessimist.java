@@ -50,7 +50,7 @@ public class GoalGrabPessimist extends Goal {
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
 	 * @param palet une position d'un palet possible
 	 * @param pg PoseGiver permettant de retourner une pose du robot
-	 * @param eom EyeOfMarvin, permet de fournir les position
+	 * @param eom EyeOfMarvin, permet de fournir les positions des items
 	 * @param radar un DistanceGiver permettant de donner des distance radar
 	 * @see Pose
 	 */

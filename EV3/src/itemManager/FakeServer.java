@@ -9,6 +9,7 @@ import lejos.utility.Delay;
 import shared.Item;
 import shared.ItemType;
 
+@SuppressWarnings("javadoc")
 public class FakeServer extends Thread{
 	
 	private List<Item> lastPointsReceived;
@@ -21,7 +22,7 @@ public class FakeServer extends Thread{
 		Main.printf("[FAKE SERVER]           : Started");
 		int currentY = 2700;
 		while(! isInterrupted() && !this.stop){
-			String rawData = "0;1000;"+currentY+"\n1;700;1300\n2;300;1000\n";
+			String rawData = "0;1000;2700\n1;1000;2100\n";
 			this.lastReceivedTimer = Main.TIMER.getElapsedMs();
 			String[] items = rawData.split("\n");
 			this.lastPointsReceived = new ArrayList<Item>();

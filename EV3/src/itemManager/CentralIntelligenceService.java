@@ -7,19 +7,44 @@ import lejos.robotics.geometry.Point;
 import shared.IntPoint;
 import shared.Item;
 
+/**
+ * Thread analysant les position des items de type undefined. Si un seul Item de ce type existe alors il s'agit probablement du robot ennemi.
+ * En capturant deux positions de robot ennemi alors on peut estimer une possibilité de point d'interception.
+ */
 public class CentralIntelligenceService extends Thread{
-	private ItemGiver			eom;
-	private PoseGiver 			pg;
-	private IntPoint			interceptionTarget;
-	private Item				firstContact;
-	private Item				confirmationContact;
-	private static final int	SIGNIFICATIVE_DISTANCE = 70; // 7cm
 	
+	/**
+	 * EyeOfMarvin, permet de fournir les positions des items
+	 */
+	private final ItemGiver		eom;
+	
+	/**
+	 * PoseGiver permettant de retourner une pose du robot
+	 */
+	private final PoseGiver 	pg;
+	
+	/**
+	 * Point où il est éventuellement possible d'intercepter un robot ennemi (avant qu'il n'atteigne notre camps)
+	 */
+	private IntPoint			interceptionTarget;
+	
+	/**
+	 * Distance minimum qu'un robot ennemi doit avoir parcouru (en millimètre) entre deux vérification pour être considété comme "en mouvement"
+	 */
+	private static final int	SIGNIFICATIVE_DISTANCE	= 70;
+	
+	/**
+	 * Durée entre deux vérification de la carte
+	 */
+	private static final int	REFRESH_RATE			= 800;
+	
+	/**
+	 * @param eom EyeOfMarvin, permet de fournir les positions des items
+	 * @param pg PoseGiver permettant de retourner une pose du robot
+	 */
 	public CentralIntelligenceService(ItemGiver eom, PoseGiver pg){
 		this.pg						= pg;
 		this.interceptionTarget		= null;
-		this.firstContact 			= null;
-		this.confirmationContact	= null;
 		this.eom					= eom;
 		Main.printf("[CIS]                   : Initialized");
 	}
@@ -28,24 +53,28 @@ public class CentralIntelligenceService extends Thread{
 	public void run(){
 		Main.printf("[CIS]                   : started");
 		this.setPriority(MIN_PRIORITY);
+		
+		Item firstContact			= null;
+		Item confirmationContact	= null;
+
 		while(!isInterrupted()){
 			
 			// si on a pas de premier contact alors on tente d'en repérer un.
-			if(this.firstContact == null){
+			if(firstContact == null){
 				updateInterceptionTarget(null);
-				this.firstContact = this.eom.getPossibleEnnemy();
+				firstContact = this.eom.getPossibleEnnemy();
 			}
 			else{
-				this.confirmationContact = this.eom.getPossibleEnnemy();
+				confirmationContact = this.eom.getPossibleEnnemy();
 				
 				// si le contact n'a pas bougé ou si il a disparu, on reset
-				if(this.confirmationContact != this.firstContact && this.confirmationContact != null){
+				if(confirmationContact != firstContact && confirmationContact != null){
 					
 					// on vérifie que la distance est significative pour pouvoir extrapoler à une droite
-					if(this.firstContact.getDistance(this.confirmationContact) > SIGNIFICATIVE_DISTANCE){
-						IntPoint intersection = this.confirmationContact.getIntersection(this.firstContact.computeVector(this.confirmationContact));
+					if(firstContact.getDistance(confirmationContact) > SIGNIFICATIVE_DISTANCE){
+						IntPoint intersection = confirmationContact.getIntersection(firstContact.computeVector(confirmationContact));
 						// on vérifie que l'ennemy avance vers l'intersection et que l'intersection est bien dans le terrain
-						if(intersection != null && intersection.x() > 0 && intersection.x() < 3000 && this.confirmationContact.getDistance(intersection) < this.firstContact.getDistance(intersection)){
+						if(intersection != null && intersection.x() > 0 && intersection.x() < 3000 && confirmationContact.getDistance(intersection) < firstContact.getDistance(intersection)){
 							updateInterceptionTarget(intersection);
 						}
 						else{
@@ -61,26 +90,35 @@ public class CentralIntelligenceService extends Thread{
 				}
 				
 				// on réinitialise firstcontact à confirmationcontact (si il change de trajectoire ou autre)
-				this.firstContact = this.confirmationContact;
-				this.confirmationContact = null;
+				firstContact = confirmationContact;
+				confirmationContact = null;
 			}
 			syncWait();
 		}
 		Main.printf("[CIS]                   : Finished");
 	}
 	
+	/**
+	 * @param target une nouveaux point d'interception calculé
+	 */
 	synchronized private void updateInterceptionTarget(IntPoint target){
 		this.interceptionTarget = target;
 	}
 	
+	/**
+	 * Attends pendant une durée définie (le Thread reste interruptible)
+	 */
 	synchronized private void syncWait(){
 		try {
-			this.wait(800);
+			this.wait(REFRESH_RATE);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
 	}
 	
+	/**
+	 * @return un Point (Lejos) où il est possible qu'un ennemi se rende (passe par) prochainement (basé sur ses derniers mouvements). Retourne null si l'ennemi est plus proche de ce point que nous.
+	 */
 	synchronized public Point getInterceptionLocation(){
 		Point ennemy = this.eom.getPossibleEnnemy().toLejosPoint();
 		if(this.interceptionTarget != null 

@@ -74,7 +74,7 @@ public class GoalIntercept extends Goal {
 			
 			if(this.interceptPoint != null){
 				this.ia.pushGoal(this);
-				this.ia.pushGoal(this.gf.goalGoToPosition(this.interceptPoint, OrderType.ALLOWED));
+				this.ia.pushGoal(this.gf.goalGoToPosition(this.interceptPoint));
 				this.ia.setSpeed(Main.MAX_SPEED);
 			}
 		}

@@ -28,20 +28,62 @@ public class EventHandler extends Thread implements MoveListener{
 	 * vrai si la dernière pression enregistré est push, faux sinon
 	 */
 	private boolean 			currentPression;
+	
+	/**
+	 * Fournit des primitives pour l'utilisation du radar du robot
+	 */
 	private VisionSensor 		radar;
 	
+	/**
+	 * vrai si la touche echap est appuyée, faux sinon
+	 */
 	private boolean 			currentEsc;
+	
+	/**
+	 * Temps de la dernière detection de pression (d'un palet)
+	 */
 	private int					lastPression;
+	
+	/**
+	 * Temps de la dernière detection d'un mur
+	 */
 	private int					lastWall;
+	
+	/**
+	 * Temps ou le mouvement a commencé
+	 */
 	private int					moveStarted;
 	
+	/**
+	 * Symbolise un manque d'information pour movestarted par exemple
+	 */
 	private static final int	NO_DATA 			= 9999;
+	
+	/**
+	 * Temps maximum en seconde de voyage avant declanchement de la procedure d'annulation d'un mouvement infini
+	 */
 	private static final int	MAX_TIME_STALLED	= 12;
+	
+	/**
+	 * Temps minimum en seconde avant que l'on considère que l'on a plus de pression palet (depuis la dernière vérification positive)
+	 */
 	private static final int	PRESSION_DELAY		= 2;
+	
+	/**
+	 * Temps minimum en seconde avant de vérifier à nouveau si l'on est bloqué par un obstacle
+	 */
 	private static final int	WALL_DELAY			= 4;
+	
+	/**
+	 * Temps entre chaque cycle de vérifications
+	 */
 	private static final int	REFRESH_RATE		= 120;
 	
 	
+	/**
+	 * @param marvin ia permettant de traiter les signaux génrés
+	 * @param radar Fournit des primitives pour l'utilisation du radar du robot
+	 */
 	public EventHandler(SignalListener marvin, VisionSensor radar){
 		this.pressSensor 		= new PressionSensor();
 		
@@ -75,6 +117,9 @@ public class EventHandler extends Thread implements MoveListener{
 		Main.printf("[EVENTHANDLER]          : Finished");
 	}
 	
+	/**
+	 * Vérifie si la touche echap est appuyée, si oui alors génère un signal à l'ia
+	 */
 	private void checkEscPressed(){
 		if(Button.ESCAPE.isDown() && !this.currentEsc){
 			this.currentEsc = true;
@@ -84,7 +129,7 @@ public class EventHandler extends Thread implements MoveListener{
 	}
 	
 	/**
-	 * 
+	 * Vérifie si le robot est face à un mur, si oui alors génère un signal à l'ia (ne peut pas se déclanché en continu)
 	 */
 	private void checkWall(){
 		if(this.radar.getRadarDistance() < Main.RADAR_WALL_DETECT && this.radar.getRadarDistance() > 0 && (Main.TIMER.getElapsedSec() - this.lastWall) > WALL_DELAY){

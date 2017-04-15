@@ -1,6 +1,5 @@
 package goals;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import aiPlanner.Main;
@@ -10,27 +9,48 @@ import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
 import shared.Color;
-import shared.Couple;
 import shared.IntPoint;
 
+/**
+ * Objectif de recalibration de la pose du robot
+ * Recalibre la position et l'angle en recherchant une ligne significative a exploiter.
+ * @see Pose
+ */
 public class GoalRecalibrate extends Goal {
 	
+	/**
+	 * Nom de l'objectif
+	 */
 	protected final GoalType NAME = GoalType.RECALIBRATE;
 	
+	/**
+	 * EyeOfMarvin, permet de fournir les positions des items
+	 */
 	private ItemGiver 		eom;
+	/**
+	 * 
+	 */
 	private PoseGiver 		pg;
 
 	/**
-	 * @param gf
-	 * @param ia
-	 * @param eom
-	 * @param pg
+	 * @param gf le GoalFactory
+	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
+	 * @param eom EyeOfMarvin, permet de fournir les positions des items
+	 * @param pg PoseGiver permettant de retourner une pose du robot
 	 */
 	public GoalRecalibrate(GoalFactory gf, Marvin ia, ItemGiver eom, PoseGiver pg) {
 		super(gf, ia);
 		this.eom	= eom;
 		this.pg		= pg;
 		// TODO Auto-generated constructor stub
+	}
+	
+	/**
+	 * Effectue un demi-tour et ajoute un objectif de recalibreation dans la pile d'objectif pour tenter à nouveau de se recalibrer
+	 */
+	private void tryAgain(){
+		this.ia.turnHere(180);
+		this.ia.pushGoal(this.gf.goalRecalibrate());
 	}
 
 	@Override
@@ -46,8 +66,7 @@ public class GoalRecalibrate extends Goal {
 		Color color = this.ia.getColor();
 		
 		if(color == Color.WHITE){
-			this.ia.turnHere(180);
-			this.ia.pushGoal(this.gf.goalRecalibrate());
+			tryAgain();
 		}
 		else if(color == Color.GREY || color == Color.BLACK){
 			this.ia.pushGoal(this.gf.goalRecalibrate());
@@ -87,6 +106,12 @@ public class GoalRecalibrate extends Goal {
 					this.pg.setPose(myPose);
 					Main.printf("calculated pose = " + myPose);
 				}
+				else{
+					tryAgain();
+				}
+			}
+			else{
+				tryAgain();
 			}
 			
 		}
@@ -95,7 +120,12 @@ public class GoalRecalibrate extends Goal {
 		this.ia.removeMeWakeUpOnColor();
 	}
 	
-	public static float getAngle(Point start, Point end){
+	/**
+	 * @param start point de départ
+	 * @param end point d'arrivé
+	 * @return l'angle (convention Lejos) entre les point start et end.
+	 */
+	private static float getAngle(Point start, Point end){
 		if(start != null && end != null){
 			return start.angleTo(end);
 		}
