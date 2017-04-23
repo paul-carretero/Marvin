@@ -13,17 +13,17 @@ public class BottomArea extends Area{
 	/**
 	 * @param id ID de l'area
 	 */
-	public BottomArea(int id) {
+	public BottomArea(final int id) {
 		super(id);
 	}
 
 	@Override
-	public boolean getConsistency(Pose p) {
+	public boolean getConsistency(final Pose p) {
 		return (p.getY() < (Main.Y_BOTTOM_WHITE + MARGE_ERREUR));
 	}
 
 	@Override
-	public Area colorChange(Color color, Pose p) {
+	public Area colorChange(final Color color, final Pose p) {
 		if(color == Color.GREY){
 			return this;
 		}

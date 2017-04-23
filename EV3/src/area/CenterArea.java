@@ -12,12 +12,12 @@ public class CenterArea extends Area {
 	/**
 	 * @param id ID de l'area (6)
 	 */
-	public CenterArea(int id) {
+	public CenterArea(final int id) {
 		super(id);
 	}
 
 	@Override
-	public boolean getConsistency(Pose p) {
+	public boolean getConsistency(final Pose p) {
 		return (
 				p.getX() < (Main.X_RED_LINE + MARGE_ERREUR) && 
 				p.getX() > (Main.X_YELLOW_LINE - MARGE_ERREUR) &&
@@ -27,7 +27,7 @@ public class CenterArea extends Area {
 	}
 
 	@Override
-	public Area colorChange(Color color, Pose p) {
+	public Area colorChange(final Color color, final Pose p) {
 		switch (color) {
 		case GREY:
 			return this;

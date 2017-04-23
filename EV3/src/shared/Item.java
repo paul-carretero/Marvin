@@ -18,7 +18,7 @@ public class Item extends IntPoint{
 	/**
 	 * représente le moment où l'objet à été "trouvé"
 	 */
-	private int 		createdTime;
+	private final int 	createdTime;
 	
 	
 	/**
@@ -32,7 +32,7 @@ public class Item extends IntPoint{
 	 * @param currentTime le moment de référence ou l'item a été trouvé
 	 * @param t le type de l'objet
 	 */
-	public Item(int x, int y, int currentTime, ItemType t) {
+	public Item(final int x, final int y, final int currentTime, final ItemType t) {
 		super(x, y);
 		this.type 			= t;
 		this.createdTime	= currentTime;
@@ -49,7 +49,7 @@ public class Item extends IntPoint{
 	/**
 	 * @param t défini le type de l'item
 	 */
-	public void setType(ItemType t){
+	public void setType(final ItemType t){
 		this.type			= t;
 	}
 
@@ -63,24 +63,33 @@ public class Item extends IntPoint{
 	 * @param y la nouvelle coordonné de l'item sur l'axe y
 	 * @param currentTime le nouveau temps de référence de l'item (pas de sa création)
 	 */
-	public void update(int x, int y, int currentTime){
+	public void update(final int x, final int y, final int currentTime){
 		this.x				= x;
 		this.y				= y;
 		this.referenceTime	= currentTime;
 	}
 	
 	@Override
-	public void update(int x, int y){
+	public void update(final int x, final int y){
 		this.x				= x;
 		this.y				= y;
 		this.referenceTime	= Main.TIMER.getElapsedMs();
+	}
+	
+	@Override
+	public boolean equals(final Object  o){
+		if (!(o instanceof IntPoint)) {
+	        return false;
+	    }
+		Item p = (Item)o;
+		return (y() == p.y() && x() == p.x()) && this.type == p.getType() && this.referenceTime == p.getReferenceTime();
 	}
 	
 	/**
 	 * @param x la nouvelle coordonné de l'item sur l'axe x
 	 * @param y la nouvelle coordonné de l'item sur l'axe y
 	 */
-	public void silentUpdate(int x, int y){
+	public void silentUpdate(final int x, final int y){
 		this.x = x;
 		this.y = y;
 	}
@@ -88,7 +97,7 @@ public class Item extends IntPoint{
 	/**
 	 * @param currentTime le nouveau temps de référence de l'item (pas de sa création)
 	 */
-	public void updateTimeStamp(int currentTime) {
+	public void updateTimeStamp(final int currentTime) {
 		this.referenceTime	= currentTime;
 	}
 

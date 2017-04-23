@@ -36,7 +36,7 @@ public class BorderLeftArea extends Area {
 	 * @param minY borne Y minimum
 	 * @param minYColor Couleur de la ligne Y de la borne minimum 
 	 */
-	public BorderLeftArea(int id, int maxY , Color maxYColor , int minY , Color minYColor ){
+	public BorderLeftArea(final int id, final int maxY , final Color maxYColor , final int minY , final Color minYColor ){
 		super(id);
 
 		this.maxY = maxY;
@@ -47,13 +47,13 @@ public class BorderLeftArea extends Area {
 	}
 
 	@Override
-	public boolean getConsistency(Pose p) {
+	public boolean getConsistency(final Pose p) {
 		return (p.getX() < (Main.X_YELLOW_LINE + MARGE_ERREUR) && 
 				p.getY() < (this.maxY + MARGE_ERREUR) && p.getY() > (this.minY + MARGE_ERREUR));
 	}
 
 	@Override
-	public Area colorChange(Color color, Pose p) {
+	public Area colorChange(final Color color, final Pose p) {
 		switch (this.id) {
 			case 1:
 				if(color == Color.WHITE && checkAmbiguousAngleHorizontal(p) ){

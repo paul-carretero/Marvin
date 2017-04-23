@@ -15,27 +15,28 @@ public class VisionSensor implements DistanceGiver{
 	/**
 	 * Représentation du radar à ultra-son physique du robot
 	 */
-	private	EV3UltrasonicSensor radarUS			= null;
+	private	final EV3UltrasonicSensor	radarUS;
 	
 	/**
 	 * Représente la distance lu par le radar
 	 */
-	private	SampleProvider 		radar			= null;
+	private	final SampleProvider		radar;
 	
 	/**
 	 * Représente les données reçu sur la présence ou non de radar ennemi.
 	 */
-	private SampleProvider		spy				= null;
+	private final SampleProvider		spy;
 	
-	/**
-	 * déplacement du radar par rapport au centre de position du robot, les données fournit seront fonction du centre de direcetion du robot
-	 */
-	private	static	final float	RADAR_OFFSET	= 100f;
 	
 	/**
 	 * fix de la position du radar en fonction des données obtenue à l'initialisation
 	 */
 	private	float				dynamicOffset	= 0;
+	
+	/**
+	 * déplacement du radar par rapport au centre de position du robot, les données fournit seront fonction du centre de direcetion du robot
+	 */
+	private	static final float	RADAR_OFFSET	= 100f;
 	
 	/**
 	 * Symbolise l'absence de données exploitable
@@ -75,7 +76,7 @@ public class VisionSensor implements DistanceGiver{
 	 * en fonction de la distance initiale connue du palet le plus proche.
 	 * Termine le programme si la distance n'est pas cohérente avec les données initiales.
 	 */
-	private void setDynamicOffset() {
+	synchronized private void setDynamicOffset() {
 		int dist = getRadarDistance();
 		if(Main.areApproximatelyEqual(dist, START_DISTANCE, MAX_RADAR_BIAS)){
 			this.dynamicOffset = START_DISTANCE - getRadarDistance();

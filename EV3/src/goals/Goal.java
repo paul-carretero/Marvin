@@ -11,19 +11,19 @@ public abstract class Goal {
 	/**
 	 * instance de Marvin, gestionnaire de l'ia et des moteurs
 	 */
-	protected	Marvin 				ia;
+	protected final Marvin		ia;
 	/**
 	 * le GoalFactory
 	 */
-	protected	GoalFactory			gf;
+	protected final	GoalFactory	gf;
 	
 	/**
 	 * @param gf le GoalFactory
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
 	 */
-	protected Goal(GoalFactory gf, Marvin ia) {
-		this.ia				= ia;
-		this.gf				= gf;
+	protected Goal(final GoalFactory gf, final Marvin ia) {
+		this.ia	= ia;
+		this.gf	= gf;
 	}
 	
 	/**

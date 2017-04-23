@@ -16,17 +16,17 @@ public class DirectionCalculator {
 	/**
 	 * Point de départ pour un déplacement en ligne droite en avant
 	 */
-	private Point 		startPoint;
+	private Point 			 startPoint;
 	
 	/**
 	 * gestionnaire d'Item (gère la carte des Item)
 	 */
-	private ItemGiver 	eom;
+	private final ItemGiver  eom;
 	
 	/**
 	 * Le gestionnaire de position fournissant une interface pour la mise à jour de la Pose actuelle.
 	 */
-	private PoseGiver	pg;
+	private final PoseGiver	 pg;
 	
 	/**
 	 * Symbolise le fait que l'on ai pas pu calculer l'angle
@@ -46,19 +46,14 @@ public class DirectionCalculator {
 	/**
 	 * Créer une nouvelle instance du calculateur de Direction.
 	 * @param pg Le gestionnaire de position fournissant une interface pour la mise à jour de la Pose actuelle.
+	 * @param eom EyeOfMarvin un ItemGiver fournissant les données reçue par le serveur
 	 */
-	public DirectionCalculator(PoseGiver pg){
+	public DirectionCalculator(PoseGiver pg, ItemGiver eom){
 		this.startPoint	= null;
 		this.pg			= pg;
+		this.eom 		= eom;
 		
 		Main.printf("[DIRECTION CALCULATOR]  : Initialized");
-	}
-	
-	/**
-	 * @param eom un gestionnaire d'Item (gère la carte des Item)
-	 */
-	public void addEom(ItemGiver eom){
-		this.eom = eom;
 	}
 	
 	/**
@@ -81,7 +76,7 @@ public class DirectionCalculator {
 	 * @param p une pose obtenue par le calculateur de position.
 	 * @return vrai si on a effectué une mise à jour sur l'angle
 	 */
-	private boolean updateAngle(Pose p){
+	private boolean updateAngle(final Pose p){
 		if(p != null){
 			float calcAngle = getAngle(this.eom.getMarvinPosition().toLejosPoint());
 			if(calcAngle != NO_ANGLE_FOUND){

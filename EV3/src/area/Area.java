@@ -28,7 +28,7 @@ public abstract class Area {
 	/**
 	 * @param id ID de l'Area
 	 */
-	public Area(int id){
+	public Area(final int id){
 		this.id = id;
 	}
 	
@@ -36,7 +36,7 @@ public abstract class Area {
 	 * @param p la position actuelle du robot.
 	 * @return l'area associé a cette position.
 	 */
-	public static Area getAreaWithPosition(Pose p){
+	public static Area getAreaWithPosition(final Pose p){
 		if(p.getY() > (Main.Y_TOP_WHITE)){
 			return Main.getArea(0);
 		}
@@ -137,7 +137,7 @@ public abstract class Area {
 	 * @param p la pose du robot
 	 * @return vrai si l'angle ne perttra pas de définir avec précision la nouvelle area en fonction d'une couleur, faux sinon
 	 */
-	public static boolean checkAmbiguousAngleVertical(Pose p){
+	public static boolean checkAmbiguousAngleVertical(final Pose p){
 		return Math.abs(p.getHeading()) > (90 + AMBIGUOUS_ANGLE) || 
 				Math.abs(p.getHeading()) < (90 - AMBIGUOUS_ANGLE);
 	}
@@ -147,7 +147,7 @@ public abstract class Area {
 	 * @param p la pose du robot
 	 * @return vrai si l'angle ne perttra pas de définir avec précision la nouvelle area en fonction d'une couleur, faux sinon
 	 */
-	public static boolean checkAmbiguousAngleHorizontal(Pose p){
+	public static boolean checkAmbiguousAngleHorizontal(final Pose p){
 		return Math.abs(p.getHeading()) > (0 + AMBIGUOUS_ANGLE) || 
 				Math.abs(p.getHeading()) < (180 - AMBIGUOUS_ANGLE);
 	}

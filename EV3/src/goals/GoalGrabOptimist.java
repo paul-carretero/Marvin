@@ -17,7 +17,7 @@ public class GoalGrabOptimist extends GoalGrabPessimist {
 	/**
 	 * Nom du Goal
 	 */
-	protected final GoalType		NAME = GoalType.GRAB_OPTIMISTE;
+	protected final GoalType	NAME = GoalType.GRAB_OPTIMISTE;
 
 	/**
 	 * @param gf le GoalFactory
@@ -28,7 +28,7 @@ public class GoalGrabOptimist extends GoalGrabPessimist {
 	 * @param radar un DistanceGiver permettant de donner des distance radar
 	 * @see Pose
 	 */
-	public GoalGrabOptimist(GoalFactory gf, Marvin ia, Point palet, PoseGiver pg, ItemGiver eom, DistanceGiver radar) {
+	public GoalGrabOptimist(final GoalFactory gf, final Marvin ia, final Point palet, final PoseGiver pg, final ItemGiver eom, final DistanceGiver radar) {
 		super(gf, ia, palet, pg, eom, radar);
 	}
 	

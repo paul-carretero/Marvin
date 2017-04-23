@@ -40,6 +40,7 @@ public class GraberManager extends Thread implements WaitProvider{
 	 * Initialise un graberManager permettant d'ajouter et d'effectuer des opérations de grab de manière asynchrone
 	 */
 	public GraberManager(){
+		super("GraberManager");
 		this.graber		= new Graber(this);
 		this.actionList = new LinkedList<Action>();
 		Main.printf("[GRABER]                : Initialized");

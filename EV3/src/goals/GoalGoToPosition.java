@@ -7,24 +7,24 @@ import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
 
 /**
- * Objectif de déplacement à un point donné
+ * Objectif de déplacement à un point donné a la vitesse maximal
  */
 public class GoalGoToPosition extends Goal {
 	
 	/**
 	 * Nom de l'objectif
 	 */
-	protected final GoalType NAME = GoalType.GO_TO_POSITION;
+	protected final GoalType 	NAME = GoalType.GO_TO_POSITION;
 	
 	/**
 	 * Un point (lejos) de destination
 	 */
-	protected Point 		destinationPoint;
+	protected final Point 		destinationPoint;
 	
 	/**
 	 * PoseGiver permettant de retourner une pose du robot
 	 */
-	protected PoseGiver		pg;
+	protected final PoseGiver	pg;
 
 	/**
 	 * @param gf le GoalFactory
@@ -32,7 +32,7 @@ public class GoalGoToPosition extends Goal {
 	 * @param p Un point de destination
 	 * @param pg PoseGiver permettant de retourner une pose du robot
 	 */
-	public GoalGoToPosition(GoalFactory gf, Marvin ia, Point p, PoseGiver pg) {
+	public GoalGoToPosition(final GoalFactory gf, final Marvin ia, final Point p, final PoseGiver pg) {
 		super(gf, ia);
 		this.destinationPoint = p;
 		this.pg = pg;
@@ -46,9 +46,11 @@ public class GoalGoToPosition extends Goal {
 		int distance = (int) currentPose.distanceTo(this.destinationPoint);
 		
 		this.ia.turnHere(angle);
-		this.ia.goForward(distance);
 		
-		Main.HAS_MOVED = true;
+		this.ia.setSpeed(Main.MAX_SPEED);
+		this.ia.goForward(distance);
+		this.ia.setSpeed(Main.CRUISE_SPEED);
+		
 	}
 	
 	@Override

@@ -74,6 +74,7 @@ public class Server extends Thread{
 	 * @param sl un objet (EyeOfMarvin dans ce cas) permettant de traiter la reception de la liste de points.
 	 */
 	public Server(ServerListener sl){
+		super("Server");
 		this.eom 				= sl;
 		this.packet 			= new DatagramPacket(this.buffer, this.buffer.length);
 		this.lastPointsReceived	= new ArrayList<Item>();

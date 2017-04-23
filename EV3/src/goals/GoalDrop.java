@@ -17,26 +17,26 @@ public class GoalDrop extends Goal{
 	protected final GoalType NAME = GoalType.DROP;
 	
 	/**
+	 * Nombre maximum de tentative avant d'abandonner le palet
+	 */
+	private static final int MAX_TRY = 3;
+	
+	/**
 	 * PoseGiver permettant de retourner une pose du robot
 	 */
-	protected	PoseGiver	poseGiver;
+	protected final PoseGiver poseGiver;
 	
 	/**
 	 * autorise ou non le rédémarrage de l'objectif si il n'a pas pu être terminé
 	 */
 	protected	int			tryCount;
-	
-	/**
-	 * Nombre maximum de tentative avant d'abandonner le palet
-	 */
-	private static final int MAX_TRY = 3;
 
 	/**
 	 * @param gf le GoalFactory
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
 	 * @param pg PoseGiver permettant de retourner une pose du robot
 	 */
-	public GoalDrop(GoalFactory gf, Marvin ia, PoseGiver pg) {
+	public GoalDrop(final GoalFactory gf, final Marvin ia, final PoseGiver pg) {
 		super(gf, ia);
 		this.poseGiver	= pg;
 		this.tryCount	= 0;
@@ -60,8 +60,7 @@ public class GoalDrop extends Goal{
 	 * Tente de faire déplacer le robot jusqu'a la zone de drop des palet (but adverse).
 	 * @param currentPose la pose actuelle du robot
 	 */
-	@SuppressWarnings("unused")
-	private void goToDropZone(Pose currentPose){
+	private void goToDropZone(final Pose currentPose){
 		Point destination;
 		
 		if(Main.Y_OBJECTIVE_WHITE < 1500){

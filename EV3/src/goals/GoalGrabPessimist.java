@@ -23,22 +23,22 @@ public class GoalGrabPessimist extends Goal {
 	/**
 	 * palet une position d'un palet possible
 	 */
-	protected 		Point			palet;
+	protected final	Point			palet;
 	
 	/**
 	 * pg PoseGiver permettant de retourner une pose du robot
 	 */
-	protected 		PoseGiver		pg;
+	protected final	PoseGiver		pg;
 	
 	/**
 	 * eom EyeOfMarvin, permet de fournir les position
 	 */
-	protected		ItemGiver		eom;
+	protected final	ItemGiver		eom;
 	
 	/**
 	 * un DistanceGiver permettant de donner des distance radar
 	 */
-	protected		DistanceGiver 	radar;
+	protected final	DistanceGiver	radar;
 	
 	/**
 	 * Marge autorisé par rapport à la distance radar considéré fiable
@@ -54,7 +54,7 @@ public class GoalGrabPessimist extends Goal {
 	 * @param radar un DistanceGiver permettant de donner des distance radar
 	 * @see Pose
 	 */
-	public GoalGrabPessimist(GoalFactory gf, Marvin ia, Point palet, PoseGiver pg, ItemGiver eom, DistanceGiver radar) {
+	public GoalGrabPessimist(final GoalFactory gf, final Marvin ia, final Point palet, final PoseGiver pg, final ItemGiver eom, final DistanceGiver radar) {
 		super(gf, ia);
 		this.radar	= radar;
 		this.eom 	= eom;
@@ -131,24 +131,23 @@ public class GoalGrabPessimist extends Goal {
 	 * Recherche le meilleur angle dans a + ou - 25° en fonction de l'angle initial.
 	 */
 	private void setBestAngle(){
-		int radarDistance 	= Main.RADAR_OUT_OF_BOUND;
-		int previousRadar 	= Main.RADAR_OUT_OF_BOUND;
+		int[] radarDistances = new int[]{
+				Main.RADAR_OUT_OF_BOUND,
+				Main.RADAR_OUT_OF_BOUND,
+				Main.RADAR_OUT_OF_BOUND
+		};
 		
+		radarDistances[1] = this.radar.getRadarDistance();
 		this.ia.turnHere(-25);
-		radarDistance = this.radar.getRadarDistance();
-		previousRadar = radarDistance;
-		this.ia.turnHere(25);
-		radarDistance = this.radar.getRadarDistance();
-		if (radarDistance > previousRadar){
+		radarDistances[0] = this.radar.getRadarDistance();
+		this.ia.turnHere(50);
+		radarDistances[2] = this.radar.getRadarDistance();
+		
+		if(radarDistances[1] <= radarDistances[0] && radarDistances[1] <= radarDistances[2]){
 			this.ia.turnHere(-25);
 		}
-		else{
-			previousRadar = radarDistance;
-			this.ia.turnHere(25);
-			radarDistance = this.radar.getRadarDistance();
-			if (radarDistance > previousRadar){
-				this.ia.turnHere(-25);
-			}
+		else if(radarDistances[0] <= radarDistances[1] && radarDistances[0] <= radarDistances[2]){
+			this.ia.turnHere(-50);
 		}
 	}
 	

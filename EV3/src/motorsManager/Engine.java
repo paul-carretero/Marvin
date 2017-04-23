@@ -77,7 +77,7 @@ public class Engine{
 	 * Si le robot a grab un palet alors il tournera légèrement moins.
 	 * Corriger la distance des roues par rapport au centre permet de corriger ce problème
 	 */
-	public void updateWheelOffset(){
+	public final void updateWheelOffset(){
 		if(Main.HAVE_PALET){
 			this.leftWheel	= WheeledChassis.modelWheel(this.leftMotor, Main.WHEEL_DIAMETER).offset(-1*Main.DISTANCE_TO_CENTER_P);
 			this.rightWheel	= WheeledChassis.modelWheel(this.rightMotor, Main.WHEEL_DIAMETER + RIGHT_WHEEL_CORRECTION).offset(Main.DISTANCE_TO_CENTER_P);

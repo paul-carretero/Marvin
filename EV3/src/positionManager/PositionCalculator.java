@@ -53,12 +53,17 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	/**
 	 * Instance du radar permettant de retourne la distance vers un objet situé devant le robot
 	 */
-	private DistanceGiver 			radar;
+	private final DistanceGiver 	radar;
 	
 	/**
 	 * Pose provider fourni par la librairie LeJos, utilisé comme base pour suivre les déplacement du robot
 	 */
-	private OdometryPoseProvider 	odometryPoseProvider;
+	private final OdometryPoseProvider odometryPoseProvider;
+	
+	/**
+	 * Classe centralisant les données de type IA, notament les interruption ou les demandes de navigation
+	 */
+	private final SignalListener	marvin;
 	
 	/**
 	 * Interface retournant la position des item sur la carte, dont le robot
@@ -69,11 +74,6 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	 * Classe donnant l'area actuelle sur laquelle est le robot.
 	 */
 	private AreaGiver 				area;
-	
-	/**
-	 * Classe centralisant les données de type IA, notament les interruption ou les demandes de navigation
-	 */
-	private SignalListener			marvin;
 	
 	/**
 	 * Vrai si le positionManager se considère comme perdu, faux sinon
@@ -91,7 +91,8 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	 * @param radar Une instance du radar du robot
 	 * @param ia le gestionnaire de l'IA et des objectifs
 	 */
-	public PositionCalculator(MoveProvider mp, DistanceGiver radar, SignalListener ia){
+	public PositionCalculator(final MoveProvider mp, final DistanceGiver radar, final SignalListener ia){
+		super("PositionCalculator");
 		this.radar 					= radar;
 		this.odometryPoseProvider 	= new OdometryPoseProvider(mp);
 		this.marvin					= ia;
@@ -121,21 +122,21 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	/**
 	 * Définie la pose actuelle du robot comme la pose initiale au commencement du jeu
 	 */
-	public void initPose(){
+	public final void initPose(){
 		this.odometryPoseProvider.setPose(new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL));
 	}
 	
 	/**
 	 * @param eom un ItemGiver fournissant les données reçue par le serveur
 	 */
-	synchronized public void addItemGiver(ItemGiver eom){
+	synchronized public void addItemGiver(final ItemGiver eom){
 		this.eom = eom;
 	}
 	
 	/**
 	 * @param area le gestionnaire des Area
 	 */
-	synchronized public void addAreaManager(AreaGiver area){
+	synchronized public void addAreaManager(final AreaGiver area){
 		this.area = area;
 	}
 	

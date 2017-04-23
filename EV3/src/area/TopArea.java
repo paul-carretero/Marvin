@@ -14,17 +14,17 @@ public class TopArea extends Area{
 	/**
 	 * @param id de l'area (14)
 	 */
-	public TopArea(int id) {
+	public TopArea(final int id) {
 		super(id);
 	}
 
 	@Override
-	public boolean getConsistency(Pose p) {
+	public boolean getConsistency(final Pose p) {
 		return (p.getY() > (Main.Y_TOP_WHITE - MARGE_ERREUR));
 	}
 
 	@Override
-	public Area colorChange(Color color, Pose p) {
+	public Area colorChange(final Color color, final Pose p) {
 		if(color == Color.GREY){
 			return this;
 		}

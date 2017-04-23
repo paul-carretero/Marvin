@@ -24,12 +24,12 @@ public class Main{
 	
 	public static final boolean	ARE_SENSORS_BUGGED	= true;
 	
-	public static final int X_INITIAL 				= 1000;
-	public static final int Y_INITIAL 				= 2700;
-	public static final int H_INITIAL 				= -90;
+	public static 	    int X_INITIAL 				= 1000;
+	public static       int Y_INITIAL 				= 2700;
+	public static       int H_INITIAL 				= -90;
 
-	public static final int Y_OBJECTIVE_WHITE		= 1400; // 300
-	public static final int Y_DEFEND_WHITE 			= 2700;
+	public static       int Y_OBJECTIVE_WHITE		= 300;
+	public static       int Y_DEFEND_WHITE 			= 2700;
 	
 	public static final int Y_BOTTOM_WHITE			= 300;
 	public static final int Y_TOP_WHITE 			= 2700;
@@ -43,9 +43,8 @@ public class Main{
 	public static final int X_BLACK_LINE 			= 1000;
 	
 	public volatile static boolean 	PRESSION		= false;
-	public volatile static boolean	HAS_MOVED 		= false;
 	public volatile static boolean	HAND_OPEN 		= false;
-	public volatile static boolean	HAVE_PALET		= false;
+	public          static boolean	HAVE_PALET		= false;
 	
 	public static final int RADAR_MAX_RANGE			= 1000;
 	public static final int RADAR_MIN_RANGE			= 400;
@@ -203,14 +202,38 @@ public class Main{
 			String str = s + "#";
 			DatagramSocket clientSocket = new DatagramSocket();
 			InetAddress IPAddress = InetAddress.getByName(IP);
-			byte[] sendData = new byte[256];
-			sendData = str.getBytes();
+			byte[] sendData = str.getBytes();
 			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 4242);
 			clientSocket.send(sendPacket);
 			clientSocket.close();
 		} catch (Exception e) {
 			System.out.println("[ERREUR] : impossible d'envoyer les données : " + e.getMessage());
 		}
+	}
+	
+	private static void menu(){
+		System.out.print("\n   [   UP   ]   \nDépart Top-Side \nY_Camera = 30   \nY_Robot  = 2700 \n   [  DOWN  ]   \nDépart Bot-Side \nY_Camera = 270  \nY_Robot  = 300");
+		
+		int pressButton = Button.waitForAnyPress();
+		
+		if(pressButton == Button.ID_DOWN){
+			Y_INITIAL = 300;
+			H_INITIAL = 90;
+			Y_OBJECTIVE_WHITE = Y_TOP_WHITE;
+			Y_DEFEND_WHITE = Y_BOTTOM_WHITE;
+ 		}
+		
+		System.out.println("[LEFT] : Gauche\nX = 500\n[ENTER]: Milieu\nX = 1000\n[RIGHT]: Droite\nX = 1500");
+		
+		pressButton = Button.waitForAnyPress();
+		
+		if(pressButton == Button.ID_LEFT){
+			X_INITIAL = 500;
+ 		}
+		else if(pressButton == Button.ID_RIGHT){
+			X_INITIAL = 1500;
+ 		}
+		
 	}
 
 
@@ -221,6 +244,9 @@ public class Main{
 	public static void main(String[] args) {
 		
 		LocalEV3.get().getLED().setPattern(2);
+		
+		menu();
+		
 		System.out.println(CHOO_CHOO[0]);
 
 		Marvin marvin = new Marvin();
@@ -246,7 +272,7 @@ public class Main{
  			
  			Main.TIMER.resetTimer();
  			marvin.run();
- 		}		
+ 		}
 		
 		printf("@@@ The first ten million years were the worst. And the second ten million: they were the worst, too. The third ten million I didn't enjoy at all. After that, I went into a bit of a decline. @@@");
 	}

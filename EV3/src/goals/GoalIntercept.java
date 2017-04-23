@@ -14,17 +14,17 @@ public class GoalIntercept extends Goal {
 	/**
 	 * Distance maximum ou l'on considère être suffisament près du point d'interception pour attendre
 	 */
-	private static final float			MAX_DISTANCE = 200;
+	private static final float					MAX_DISTANCE = 200;
 
 	/**
 	 * Calculateur de point d'interception possible
 	 */
-	private CentralIntelligenceService	cis;
+	private final CentralIntelligenceService	cis;
 	
 	/**
 	 * PoseGiver, utilisé pour accéder aux informations sur la position du robot
 	 */
-	private PoseGiver					pg;
+	private final PoseGiver						pg;
 	
 	/**
 	 * Le point d'interception éventuel (peut être null)
@@ -40,7 +40,7 @@ public class GoalIntercept extends Goal {
 	 * @see Marvin
 	 * @see GoalFactory
 	 */
-	protected GoalIntercept(GoalFactory gf, Marvin ia, CentralIntelligenceService cis, PoseGiver pg) {
+	protected GoalIntercept(final GoalFactory gf, final Marvin ia, final CentralIntelligenceService cis, final PoseGiver pg) {
 		super(gf, ia);
 		
 		this.cis	= cis;

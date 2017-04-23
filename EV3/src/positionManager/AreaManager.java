@@ -14,27 +14,27 @@ public class AreaManager extends Thread implements AreaGiver {
 	/**
 	 * Contient l'Area dans laquelle le robot se trouve
 	 */
-	private Area 		currentArea;
+	private Area 				currentArea;
 	
 	/**
 	 * Capteur de couleur
 	 */
-	private ColorSensor	colorSensor;
+	private final ColorSensor	colorSensor;
 	
 	/**
 	 * représente la dernière couleur vu par le robot
 	 */
-	private Color		currentColor;
+	private Color				currentColor;
 	
 	/**
 	 * Interface donnant la position du robot
 	 */
-	private PoseGiver	pg;
+	private final PoseGiver		pg;
 	
 	/**
 	 * Objet sur lequelle notifier un thread en attente lorsque l'on detecte une couleur significative
 	 */
-	private Object		wakeUp;
+	private Object				wakeUp;
 	
 	/**
 	 * durée entre deux vérification de couleur
@@ -45,6 +45,7 @@ public class AreaManager extends Thread implements AreaGiver {
 	 * @param pg L'interface du PoseGiver initialisé précédement
 	 */
 	public AreaManager(PoseGiver pg){
+		super("AreaManager");
 		this.currentColor	= null;
 		this.colorSensor	= new ColorSensor();
 		this.pg				= pg;
@@ -75,7 +76,7 @@ public class AreaManager extends Thread implements AreaGiver {
 	/**
 	 * @param w un objet moniteur
 	 */
-	public void addWakeUp(Object w){
+	public void addWakeUp(final Object w){
 		this.wakeUp = w;
 	}
 	

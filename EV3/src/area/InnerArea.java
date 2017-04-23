@@ -57,7 +57,7 @@ public class InnerArea extends Area {
 	 * @param minY borne Y minimum
 	 * @param minYColor Couleur de la ligne Y de la borne minimum 
 	 */
-	public InnerArea(int id, int maxX , Color maxXColor , int minX , Color minXColor , int maxY , Color maxYColor , int minY , Color minYColor ){
+	public InnerArea(final int id, final int maxX , final Color maxXColor , final int minX , final Color minXColor , final int maxY , final Color maxYColor , final int minY , final Color minYColor ){
 		super(id);
 		
 		this.maxX = maxX;
@@ -72,13 +72,13 @@ public class InnerArea extends Area {
 	}
 	
 	@Override
-	public boolean getConsistency(Pose p){
+	public boolean getConsistency(final Pose p){
 		return (p.getX() > (this.minX - MARGE_ERREUR) && p.getX() < (this.maxX + MARGE_ERREUR) && 
 				p.getY() < (this.maxY + MARGE_ERREUR) && p.getY() > (this.minY + MARGE_ERREUR));
 	}
 
 	@Override
-	public Area colorChange(Color color, Pose p) {
+	public Area colorChange(final Color color, final Pose p) {
 		switch (this.id) {
 			case 2:
 				if(color == Color.WHITE && checkAmbiguousAngleHorizontal(p) ){

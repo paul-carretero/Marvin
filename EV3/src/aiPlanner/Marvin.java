@@ -85,8 +85,8 @@ public class Marvin implements SignalListener, WaitProvider{
 		this.eventManager 			= new EventHandler(this,this.radar);
 		this.graber 				= new GraberManager();
 		this.positionManager		= new PositionCalculator(this.engine.getPilot(), this.radar, this);
-		this.directionCalculator 	= new DirectionCalculator(this.positionManager);
 		this.itemManager 			= new EyeOfMarvin(this.positionManager);
+		this.directionCalculator 	= new DirectionCalculator(this.positionManager,this.itemManager);
 		this.areaManager			= new AreaManager(this.positionManager);
 		this.server 				= new FakeServer(this.itemManager);
 		this.audio					= new SoundManager();
@@ -94,7 +94,6 @@ public class Marvin implements SignalListener, WaitProvider{
 
 		/**********************************************************/
 		
-		this.directionCalculator.addEom(this.itemManager);
 		this.positionManager.addItemGiver(this.itemManager);
 		this.positionManager.addAreaManager(this.areaManager);
 		
@@ -235,7 +234,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	/**
 	 * Termine proprement les Threads de l'application et termine le programe
 	 */
-	synchronized private void cleanUp(){
+	private void cleanUp(){
 		this.allowMoreGoal = false;
 		LocalEV3.get().getLED().setPattern(3);
 		this.goals.clear();
@@ -360,7 +359,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	/**
 	 * @param value vrai si l'objectif autorise l'ia à interrompre un ordre moteur, faux sinon
 	 */
-	public void setAllowInterrupt(final boolean value){
+	synchronized public void setAllowInterrupt(final boolean value){
 		this.allowInterrupt = value;
 	}
 

@@ -19,28 +19,28 @@ import lejos.robotics.filter.MeanFilter;
  */
 public class ColorSensor {
 
-	public static final int COLOR_BLUE 				= 0;
-	public static final int COLOR_BLACK 			= 1;
-	public static final int COLOR_WHITE 			= 2;
-	public static final int COLOR_GREY 				= 3;
-	public static final int COLOR_YELLOW 			= 4;
-	public static final int COLOR_RED 				= 5;
-	public static final int COLOR_GREEN 			= 6;
+	public static final int COLOR_BLUE 		= 0;
+	public static final int COLOR_BLACK 	= 1;
+	public static final int COLOR_WHITE 	= 2;
+	public static final int COLOR_GREY 		= 3;
+	public static final int COLOR_YELLOW 	= 4;
+	public static final int COLOR_RED 		= 5;
+	public static final int COLOR_GREEN 	= 6;
 	
 	/**
 	 * Tableau contenant l'indice de la couleur ainsi qu'un échantillon des valeurs couleurs récupérés
 	 */
-	private float[][]		colors;
+	private float[][]				colors;
 	
 	/**
 	 * Capteur de couleur physique du robot.
 	 */
-	private EV3ColorSensor	colorSensor;
+	private final EV3ColorSensor	colorSensor;
 	
 	/**
 	 * représnte les données fournit par le capteur de couleur sous forme standard
 	 */
-	private SampleProvider	average;
+	private final SampleProvider	average;
 	
 	/**
 	 * Créer une nouvelle instance du capteur de couleur et initialize le SampleProvider et charge le fichier de configuration
@@ -98,7 +98,7 @@ public class ColorSensor {
 	 * @param color un entier associé à une couleur
 	 * @return Color.COLOR la couleur associé à l'entier en entrée
 	 */
-	private static shared.Color getRealColor(int color) {
+	private static shared.Color getRealColor(final int color) {
 		switch (color) {
 		case COLOR_BLACK:
 			return shared.Color.BLACK;
@@ -125,7 +125,7 @@ public class ColorSensor {
 	 * @param v2 la seconde couleur
 	 * @return la distance entre les deux couleurs.
 	 */
-	protected static double scalaire(float[] v1, float[] v2) {
+	protected static double scalaire(final float[] v1, final float[] v2) {
 		return Math.sqrt (Math.pow(v1[0] - v2[0], 2.0) +
 				Math.pow(v1[1] - v2[1], 2.0) +
 				Math.pow(v1[2] - v2[2], 2.0));

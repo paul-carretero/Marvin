@@ -85,6 +85,7 @@ public class EventHandler extends Thread implements MoveListener{
 	 * @param radar Fournit des primitives pour l'utilisation du radar du robot
 	 */
 	public EventHandler(SignalListener marvin, VisionSensor radar){
+		super("EventHandler");
 		this.pressSensor 		= new PressionSensor();
 		
 		this.aiPlanner			= marvin;
@@ -166,7 +167,7 @@ public class EventHandler extends Thread implements MoveListener{
 	 * Informe l'ia si oui
 	 */
 	private void checkInfiniteMove(){
-		if(Main.TIMER.getElapsedSec() - this.moveStarted > MAX_TIME_STALLED && Main.HAS_MOVED){
+		if(this.moveStarted != NO_DATA && Main.TIMER.getElapsedSec() - this.moveStarted > MAX_TIME_STALLED){
 			this.aiPlanner.signalStalled();
 		}
 	}

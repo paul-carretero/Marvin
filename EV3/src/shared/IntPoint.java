@@ -33,7 +33,7 @@ public class IntPoint {
 	 * @param p un Point utilisé par la bibliothèque LeJos
 	 * @see Point
 	 */
-	public IntPoint(Point p) {
+	public IntPoint(final Point p) {
 		this.x = (int) p.getX();
 		this.y = (int) p.getY();
 	}
@@ -43,7 +43,7 @@ public class IntPoint {
 	 * @param pose une pose de robot
 	 * @see Pose
 	 */
-	public IntPoint(Pose pose) {
+	public IntPoint(final Pose pose) {
 		this.x = (int) pose.getX();
 		this.y = (int) pose.getY();
 	}
@@ -67,7 +67,7 @@ public class IntPoint {
 	 * @param x une nouvelle coordonné x
 	 * @return met à jour la coordonné x
 	 */
-	public int setX(int x){
+	public int setX(final int x){
 		return this.x = x;
 	}
 	
@@ -75,12 +75,12 @@ public class IntPoint {
 	 * @param y une nouvelle coordonné y
 	 * @return met à jour la coordonné y
 	 */
-	public int setY(int y){
+	public int setY(final int y){
 		return this.y = y;
 	}
 	
 	@Override
-	public boolean equals(Object  o){
+	public boolean equals(final Object  o){
 		if (!(o instanceof IntPoint)) {
 	        return false;
 	    }
@@ -98,7 +98,7 @@ public class IntPoint {
 	 * @param x coordonné du point sur l'axe x
 	 * @param y coordonné du point sur l'axe y
 	 */
-	public void update(int x, int y){
+	public void update(final int x, final int y){
 		this.x = x;
 		this.y = y;
 	}
@@ -107,7 +107,7 @@ public class IntPoint {
 	 * @param p2 un IntPoint non null
 	 * @return la distance entre ce point et p2 (entier positif)
 	 */
-	public int getDistance(IntPoint p2){
+	public int getDistance(final IntPoint p2){
 		return (int) Math.round(Math.sqrt((this.x-p2.x())*(this.x-p2.x()) + (this.y-p2.y())*(this.y-p2.y())));
 	}
 	
@@ -123,7 +123,7 @@ public class IntPoint {
 	 * @param p2 une autre IntPoint
 	 * @return le vecteur en partance de ce point vers P2
 	 */
-	public IntPoint computeVector(IntPoint p2){
+	public IntPoint computeVector(final IntPoint p2){
 		return new IntPoint((p2.x() - this.x()) , (p2.y() - this.y()));
 	}
 	
@@ -132,7 +132,7 @@ public class IntPoint {
 	 * @param vecteur un IntPoint représentant un vecteur
 	 * @return retourne le point d'interction entre la droite partant de ce point avec le vecteur et la ligne de défense
 	 */
-	public IntPoint getIntersection(IntPoint vecteur){
+	public IntPoint getIntersection(final IntPoint vecteur){
 		try{
 			int coeff = Math.max(Main.Y_DEFEND_WHITE - this.y(),this.y() - Main.Y_DEFEND_WHITE) / vecteur.y();
 			

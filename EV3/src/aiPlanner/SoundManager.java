@@ -19,6 +19,7 @@ public class SoundManager extends Thread{
 	 * Retourne une nouvelle instance de la class SoundManager pour gérer les sons, initialise la liste.
 	 */
 	public SoundManager(){
+		super("SoundManager");
 		this.audioList = new LinkedList<String>();
 		Main.printf("[AUDIO]                 : Initialized");
 	}

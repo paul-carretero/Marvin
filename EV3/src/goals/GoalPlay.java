@@ -17,7 +17,7 @@ public class GoalPlay extends Goal {
 	 * @param gf le GoalFactory
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
 	 */
-	public GoalPlay(GoalFactory gf, Marvin ia) {
+	public GoalPlay(final GoalFactory gf, final Marvin ia) {
 		super(gf, ia);
 	}
 

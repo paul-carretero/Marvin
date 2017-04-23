@@ -26,11 +26,11 @@ public class GoalRecalibrate extends Goal {
 	/**
 	 * EyeOfMarvin, permet de fournir les positions des items
 	 */
-	private ItemGiver 		eom;
+	private final ItemGiver	eom;
 	/**
 	 * 
 	 */
-	private PoseGiver 		pg;
+	private final PoseGiver	pg;
 
 	/**
 	 * @param gf le GoalFactory
@@ -38,7 +38,7 @@ public class GoalRecalibrate extends Goal {
 	 * @param eom EyeOfMarvin, permet de fournir les positions des items
 	 * @param pg PoseGiver permettant de retourner une pose du robot
 	 */
-	public GoalRecalibrate(GoalFactory gf, Marvin ia, ItemGiver eom, PoseGiver pg) {
+	public GoalRecalibrate(final GoalFactory gf, final Marvin ia, final ItemGiver eom, final PoseGiver pg) {
 		super(gf, ia);
 		this.eom	= eom;
 		this.pg		= pg;
@@ -125,7 +125,7 @@ public class GoalRecalibrate extends Goal {
 	 * @param end point d'arrivé
 	 * @return l'angle (convention Lejos) entre les point start et end.
 	 */
-	private static float getAngle(Point start, Point end){
+	private static float getAngle(final Point start, final Point end){
 		if(start != null && end != null){
 			return start.angleTo(end);
 		}

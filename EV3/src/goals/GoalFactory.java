@@ -18,27 +18,27 @@ public class GoalFactory {
 	/**
 	 * instance de Marvin, gestionnaire de l'ia et des moteurs
 	 */
-	private	Marvin						ia;
+	private	final Marvin		ia;
 	/**
 	 * PoseGiver permettant de retourner une pose du robot
 	 */
-	private	PoseGiver					pg;
+	private	final PoseGiver		pg;
 	/**
 	 * EyeOfMarvin, permet de fournir les position
 	 */
-	private	ItemGiver					eom;
+	private	final ItemGiver		eom;
 	/**
 	 * Permet de stocker l'état de la dernière tentative degrab pour décider si on doit choisir un objectif de grab de type optimiste ou pessimiste à l'avenir
 	 */
-	private	boolean 					lastGrabOk;
+	private	boolean 			lastGrabOk;
 	/**
 	 * un DistanceGiver permettant de donner des distance radar
 	 */
-	private	DistanceGiver				radar;
+	private	final DistanceGiver	radar;
 	/**
 	 * CentralIntelligenceService permettant de donner des points d'interceptions
 	 */
-	private CentralIntelligenceService	cis;
+	private final CentralIntelligenceService cis;
 	
 	/**
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
@@ -47,7 +47,7 @@ public class GoalFactory {
 	 * @param radar un DistanceGiver permettant de donner des distance radar
 	 * @param cis CentralIntelligenceService permettant de donner des points d'interceptions
 	 */
-	public GoalFactory(Marvin ia, PoseGiver pg, ItemGiver eom, DistanceGiver radar, CentralIntelligenceService	cis){
+	public GoalFactory(final Marvin ia, final PoseGiver pg, final ItemGiver eom, final DistanceGiver radar, final CentralIntelligenceService cis){
 		this.ia			= ia;
 		this.pg			= pg;
 		this.eom		= eom;
@@ -71,7 +71,7 @@ public class GoalFactory {
 	 * Met à jour le status du dernier grab.
 	 * @param b vrai si le dernier grab a réussi, faux sinon
 	 */
-	public void setLastGrab(boolean b){
+	public void setLastGrab(final boolean b){
 		this.lastGrabOk = b;
 	}
 	
@@ -86,7 +86,7 @@ public class GoalFactory {
 	 * @param destination un point de destination
 	 * @return un objectif de type GoToPosition
 	 */
-	public Goal goalGoToPosition(Point destination){
+	public Goal goalGoToPosition(final Point destination){
 		return new GoalGoToPosition(this,this.ia,destination,this.pg);
 	}
 	
@@ -101,7 +101,7 @@ public class GoalFactory {
 	 * @param palet une position d'un palet
 	 * @return un objectif de Grab sur un palet
 	 */
-	public Goal goalGrab(Point palet){
+	public Goal goalGrab(final Point palet){
 		if(this.lastGrabOk){
 			return new GoalGrabOptimist(this, this.ia, palet, this.pg, this.eom, this.radar);
 		}

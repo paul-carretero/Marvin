@@ -42,7 +42,8 @@ public class CentralIntelligenceService extends Thread{
 	 * @param eom EyeOfMarvin, permet de fournir les positions des items
 	 * @param pg PoseGiver permettant de retourner une pose du robot
 	 */
-	public CentralIntelligenceService(ItemGiver eom, PoseGiver pg){
+	public CentralIntelligenceService(final ItemGiver eom, final PoseGiver pg){
+		super("CentralIntelligenceService");
 		this.pg						= pg;
 		this.interceptionTarget		= null;
 		this.eom					= eom;
@@ -101,7 +102,7 @@ public class CentralIntelligenceService extends Thread{
 	/**
 	 * @param target une nouveaux point d'interception calculé
 	 */
-	synchronized private void updateInterceptionTarget(IntPoint target){
+	synchronized private void updateInterceptionTarget(final IntPoint target){
 		this.interceptionTarget = target;
 	}
 	

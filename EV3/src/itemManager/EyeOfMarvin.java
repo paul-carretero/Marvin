@@ -64,7 +64,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * Créer une nouvelle instance du gestionnaire de la mastermap des items du terrain
 	 * @param pg Un poseGiver permettant d'obtenir la position du robot (entre autre)
 	 */
-	public EyeOfMarvin(PoseGiver pg) {
+	public EyeOfMarvin(final PoseGiver pg) {
 		
 		this.poseGiver	= pg;
 		this.masterMap 	= new HashMap<IntPoint,Item>();
@@ -107,7 +107,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * Arrondi la postion d'un Item, sans mettre à jour son temps de référence
 	 * @param i un Item a arrondir
 	 */
-	private static void averagize(Item i){
+	private static void averagize(final Item i){
 		i.silentUpdate((i.x()/MAP_PRECISION)*MAP_PRECISION,(i.y()/MAP_PRECISION)*MAP_PRECISION);
 	}
 	
@@ -115,7 +115,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * Arrondi la postion d'un Intpoint
 	 * @param i un Intpoint a arrondir
 	 */
-	private static void averagize(IntPoint i){
+	private static void averagize(final IntPoint i){
 		i.update((i.x()/MAP_PRECISION)*MAP_PRECISION,(i.y()/MAP_PRECISION)*MAP_PRECISION);
 	}
 	
@@ -123,7 +123,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * Ajoute un nouvel item dans la mastermap ou met à jour le temps de référence de celui ci ainsi que son type (si définit).
 	 * @param i un item a ajouter dans la mastermap
 	 */
-	synchronized private void putInHashMap(Item i){
+	synchronized private void putInHashMap(final Item i){
 		averagize(i);
 		IntPoint key = new IntPoint(i.x(), i.y());
 		if(this.masterMap.containsKey(key)){
@@ -169,7 +169,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * supprime les référence obsolète de la mastermap
 	 * @param timeout temps au dessous duquel on supprime les référence de la map
 	 */
-	synchronized private void cleanHashMap(int timeout) {
+	synchronized private void cleanHashMap(final int timeout) {
 		for(Iterator<Map.Entry<IntPoint, Item>> it = this.masterMap.entrySet().iterator(); it.hasNext(); ) {
 			Entry<IntPoint, Item> entry = it.next();
 			if(entry.getValue().getReferenceTime() < timeout){
@@ -181,7 +181,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		}
 	}
 	
-	synchronized public void receiveRawPoints(int timeout, List<Item> PointsList) {
+	synchronized public void receiveRawPoints(final int timeout, final List<Item> PointsList) {
 			for(Item tp : PointsList){
 				putInHashMap(tp);
 			}
@@ -207,7 +207,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		return null;
 	}
 	
-	synchronized public Item getNearestItem(IntPoint searchPoint) {
+	synchronized public Item getNearestItem(final IntPoint searchPoint) {
 		int distance = OUT_OF_RANGE;
 		IntPoint res = null;
 		for (Entry<IntPoint, Item> entry : this.masterMap.entrySet()){
@@ -235,7 +235,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * @param type Type d'un item a compter
 	 * @return le nombre d'item dans la mastermap ayant le type type.
 	 */
-	synchronized private int count(ItemType type){
+	synchronized private int count(final ItemType type){
 		int res = 0;
 		for (Item item : this.masterMap.values()){
 			if(item.getType() == type){
@@ -259,7 +259,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		return null;
 	}
 	
-	synchronized public List<IntPoint> searchPosition(Color color){
+	synchronized public List<IntPoint> searchPosition(final Color color){
 		List<IntPoint> resList = new LinkedList<IntPoint>();
 		
 		if(color == Color.YELLOW || color == Color.RED){
@@ -309,7 +309,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * Affiche la map passée en paramètre
 	 * @param map une map d'item
 	 */
-	public static void printHashMap(Map<IntPoint,Item> map){
+	public static void printHashMap(final Map<IntPoint,Item> map){
 		Main.printf("--------------------------------" + map.size() + "Elements");
 		for(Item item : map.values()) {
 			Main.printf("[EYE OF MARVIN]         : " + item.toString());
@@ -317,14 +317,14 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		Main.printf("------------------------------------------------------");
 	}
 	
-	synchronized public boolean checkpalet(IntPoint position){
+	synchronized public boolean checkpalet(final IntPoint position){
 		if(this.masterMap.containsKey(position)){
 			return this.masterMap.get(position).getType() == ItemType.PALET;
 		}
 		return false;
 	}
 	
-	synchronized public List<IntPoint> searchPosition(IntPoint start, int minRange, int maxRange){
+	synchronized public List<IntPoint> searchPosition(final IntPoint start, final int minRange, final int maxRange){
 		List<IntPoint> resList = new LinkedList<IntPoint>();
 		for (IntPoint key : this.masterMap.keySet()){
 			if(start.getDistance(key) < maxRange && start.getDistance(key) > minRange && this.masterMap.get(key).getType() != ItemType.PALET ){
