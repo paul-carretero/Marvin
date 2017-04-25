@@ -3,6 +3,7 @@ package goals;
 import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.ItemGiver;
+import lejos.robotics.geometry.Point;
 import shared.IntPoint;
 
 /**
@@ -36,6 +37,9 @@ public class GoalGrabAndDropPalet extends Goal {
 		if(palet != null){
 			this.ia.pushGoal(this.gf.goalDrop());
 			this.ia.pushGoal(this.gf.goalGrab(palet.toLejosPoint()));
+		}
+		else{
+			this.ia.pushGoal(this.gf.goalGoToPosition(new Point(Main.X_INITIAL, Main.Y_INITIAL)));
 		}
 	}
 	

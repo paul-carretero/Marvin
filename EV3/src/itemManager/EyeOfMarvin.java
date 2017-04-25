@@ -1,8 +1,6 @@
 package itemManager;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import aiPlanner.Main;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
@@ -11,11 +9,9 @@ import lejos.robotics.navigation.Pose;
 import shared.Item;
 import shared.ItemType;
 import shared.IntPoint;
-
 import shared.Color;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 /**
  * gestionnaire de la mastermap des items du terrain.
@@ -32,13 +28,13 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * Map principace regroupant les différent Item du terrain.
 	 * Cette carte est mise à jour par le serveur et est utilisée pour récupérer la position des items.
 	 */
-	private final Map<IntPoint,Item>	masterMap;
+	private final List<Item>			masterList;
 	
 	/**
 	 * Précision de la carte (permet d'arrondir les position obtenues)
 	 * Permet également de minimiser le bruit dans la reception des données
 	 */
-	private	static final int			MAP_PRECISION 	= 40; // on arrondi au multiple de MAP_PRECISION
+	private	static final int			MAP_PRECISION 	= 30; // on arrondi au multiple de MAP_PRECISION
 	
 	/**
 	 * représente une distance infinie
@@ -56,9 +52,14 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	private static final int			MIN_PALET_MARGE	= 100;
 	
 	/**
+	 * Distance minium du robot en dessous de laquelle on ne recherche pas de palet
+	 */
+	private static final int			MIN_PALET_DIST	= 500;
+	
+	/**
 	 * marge de tolérance lors de la recherche d'un item
 	 */
-	private static final int			MAX_SEARCH		= 100;
+	private static final int			MAX_SEARCH		= 150;
 	
 	/**
 	 * Créer une nouvelle instance du gestionnaire de la mastermap des items du terrain
@@ -67,10 +68,14 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	public EyeOfMarvin(final PoseGiver pg) {
 		
 		this.poseGiver	= pg;
-		this.masterMap 	= new HashMap<IntPoint,Item>();
+		this.masterList 	= new ArrayList<Item>();
 		
 		Main.printf("[EYE OF MARVIN]         : Initialized");
 	}
+	
+	/********************************************************
+	 * Fonctions utilitaires de calibration
+	 *******************************************************/
 	
 	/**
 	 * Calcul la différences moyennes des coordonnées fournies par le serveur avec les coordonnées connues de départ des palets.
@@ -92,6 +97,17 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 			else{
 				Main.printf("[EYE OF MARVIN]         : Error, no item in the expected position : " + pFix);
 			}
+		}
+		
+		IntPoint meStart = new IntPoint(Main.X_INITIAL,Main.Y_INITIAL);
+		IntPoint pSensor = getNearestItem(meStart);
+		if(pSensor != null && meStart.getDistance(pSensor) < sensorMarge){
+			xTotal += meStart.x() - pSensor.x();
+			yTotal += meStart.y() - pSensor.y();
+			total++;
+		}
+		else{
+			Main.printf("[EYE OF MARVIN]         : Error, no Robot in the expected position : " + meStart);
 		}
 		
 		if(total > 0){
@@ -119,49 +135,25 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		i.update((i.x()/MAP_PRECISION)*MAP_PRECISION,(i.y()/MAP_PRECISION)*MAP_PRECISION);
 	}
 	
-	/**
-	 * Ajoute un nouvel item dans la mastermap ou met à jour le temps de référence de celui ci ainsi que son type (si définit).
-	 * @param i un item a ajouter dans la mastermap
-	 */
-	synchronized private void putInHashMap(final Item i){
-		averagize(i);
-		IntPoint key = new IntPoint(i.x(), i.y());
-		if(this.masterMap.containsKey(key)){
-			this.masterMap.get(key).updateTimeStamp(i.getReferenceTime());
-			if(i.getType() != ItemType.UNDEFINED){
-				this.masterMap.get(key).setType(i.getType());
-			}
-		}
-		else{
-			this.masterMap.put(key,i);
-		}
-	}
+	/********************************************************
+	 * Mise a jour de la carte avec le donnees serveurs
+	 *******************************************************/
 	
 	/**
-	 * Définit un unique item comme le robot si un item est suffisament proche de la position théorique de celui ci.
+	 * Ajoute un nouvel item dans la mastermap ou met à jour le temps de référence de celui ci ainsi que son type (si définit).
+	 * @param item un item a ajouter dans la mastermap
 	 */
-	synchronized private void defineMe(){
-		Pose p = this.poseGiver.getPosition();
-		Main.poseRealToSensor(p);
-		IntPoint myPosition = new IntPoint(p);
-		averagize(myPosition);
-		
-		if(this.masterMap.containsKey(myPosition)){
-			this.masterMap.get(myPosition).setType(ItemType.ME);
+	synchronized private void putInMasterList(final Item item){
+		averagize(item);
+		int index = this.masterList.indexOf(item);
+		if(index != -1){
+			this.masterList.get(index).updateTimeStamp(item.getReferenceTime());
+			if(item.getType() != ItemType.UNDEFINED){
+				this.masterList.get(index).setType(item.getType());
+			}
 		}
 		else{
-			int distance = OUT_OF_RANGE;
-			IntPoint posOnMap = null;
-			for (Entry<IntPoint, Item> entry : this.masterMap.entrySet()){
-				if(entry.getValue().getDistance(myPosition) < distance){
-					posOnMap = entry.getValue();
-					distance = entry.getValue().getDistance(myPosition);
-				}
-			}
-			
-			if(posOnMap != null && this.masterMap.get(posOnMap) != null && this.masterMap.get(posOnMap).getDistance(myPosition) < MAX_SEARCH){
-				this.masterMap.get(posOnMap).setType(ItemType.ME);
-			}
+			this.masterList.add(item);
 		}
 	}
 	
@@ -170,66 +162,95 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * @param timeout temps au dessous duquel on supprime les référence de la map
 	 */
 	synchronized private void cleanHashMap(final int timeout) {
-		for(Iterator<Map.Entry<IntPoint, Item>> it = this.masterMap.entrySet().iterator(); it.hasNext(); ) {
-			Entry<IntPoint, Item> entry = it.next();
-			if(entry.getValue().getReferenceTime() < timeout){
+		for(Iterator<Item> it = this.masterList.iterator(); it.hasNext(); ) {
+			Item entry = it.next();
+			if(entry.getReferenceTime() < timeout){
 				it.remove();
 			}
-			else if(entry.getValue().getLifeTime() > MIN_LIFE){
-				entry.getValue().setType(ItemType.PALET);
+			else if(entry.getLifeTime() > MIN_LIFE){
+				entry.setType(ItemType.PALET);
 			}
 		}
 	}
 	
 	synchronized public void receiveRawPoints(final int timeout, final List<Item> PointsList) {
 			for(Item tp : PointsList){
-				putInHashMap(tp);
+				putInMasterList(tp);
 			}
 			cleanHashMap(timeout);
-			defineMe();
-		//printHashMap(masterMap);
 	}
+	
+	/********************************************************
+	 * Primitive pour la recherche d'item
+	 *******************************************************/
 	
 	synchronized public Item getNearestpalet() {
 		IntPoint myIntPose = new IntPoint(this.poseGiver.getPosition().getLocation());
 		int distance = OUT_OF_RANGE;
-		IntPoint res = null;
-		for (Entry<IntPoint, Item> entry : this.masterMap.entrySet()){
-			if((entry.getValue().getDistance(myIntPose) < distance) && entry.getValue().getType() == ItemType.PALET
-					&& entry.getValue().y() > Main.Y_BOTTOM_WHITE + MIN_PALET_MARGE && entry.getValue().y() < (Main.Y_TOP_WHITE - MIN_PALET_MARGE)){
-				res = entry.getKey();
-				distance = entry.getValue().getDistance(myIntPose);
+		Item res = null;
+		
+		for (Item entry : this.masterList){
+			if((entry.getDistance(myIntPose) < distance) 
+					&& entry.getType() == ItemType.PALET
+					&& entry.y() > (Main.Y_BOTTOM_WHITE + MIN_PALET_MARGE)
+					&& entry.y() < (Main.Y_TOP_WHITE - MIN_PALET_MARGE)
+					&& entry.getDistance(myIntPose) > MIN_PALET_DIST){
+				res = entry;
+				distance = entry.getDistance(myIntPose);
 			}
 		}
-		if(res != null){
-			return this.masterMap.get(res);
-		}
-		return null;
+		return res;
 	}
 	
 	synchronized public Item getNearestItem(final IntPoint searchPoint) {
+		
 		int distance = OUT_OF_RANGE;
-		IntPoint res = null;
-		for (Entry<IntPoint, Item> entry : this.masterMap.entrySet()){
-			if(searchPoint != null){
-				if((entry.getValue().getDistance(searchPoint) < distance)){
-					res			= entry.getKey();
-					distance	= entry.getValue().getDistance(searchPoint);
-				}
+		Item res = null;
+		
+		for (Item entry : this.masterList){
+			if(searchPoint != null && (entry.getDistance(searchPoint) < distance)){
+				res			= entry;
+				distance	= entry.getDistance(searchPoint);
 			}
 		}
-		return this.masterMap.get(res);
+		return res;
 	}
 	
-	synchronized public Item getMarvinPosition(){
-		for (Entry<IntPoint, Item> entry : this.masterMap.entrySet())
-		{
-			if(entry.getValue().getType() == ItemType.ME){
-				return entry.getValue();
+	public Item getMarvinPosition(){
+		Pose p = this.poseGiver.getPosition();
+		Main.printf("[EYE OF MARVIN]                          :" + p);
+		Main.poseRealToSensor(p);
+		IntPoint myPosition = new IntPoint(p);
+		averagize(myPosition);
+		
+		int distance = OUT_OF_RANGE;
+		int myIndex = -1;
+		int testDist = OUT_OF_RANGE;
+		
+		synchronized (this) {
+			for(int i = 0; i < this.masterList.size(); i++){
+				testDist = this.masterList.get(i).getDistance(myPosition);
+				if(testDist < distance){
+					myIndex = i;
+					distance = testDist;
+				}
+			}
+
+			if(myIndex > -1){
+				this.masterList.get(myIndex).setType(ItemType.ME);
+				return this.masterList.get(myIndex);
 			}
 		}
 		return null;
 	}
+	
+	synchronized public boolean checkpalet(final IntPoint position){
+		return this.masterList.indexOf(position) != -1;
+	}
+	
+	/********************************************************
+	 * Aide a la detection d'ennemies
+	 *******************************************************/
 	
 	/**
 	 * @param type Type d'un item a compter
@@ -237,7 +258,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 */
 	synchronized private int count(final ItemType type){
 		int res = 0;
-		for (Item item : this.masterMap.values()){
+		for (Item item : this.masterList){
 			if(item.getType() == type){
 				res++;
 			}
@@ -249,8 +270,8 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 * @return la position d'un ennemy éventuel ou null si plusieurs ennemie possible ou non trouvé
 	 */
 	synchronized public Item getPossibleEnnemy(){
-		if(count(ItemType.UNDEFINED) == 1 ){
-			for (Item item : this.masterMap.values()){
+		if(count(ItemType.UNDEFINED) == 1){
+			for (Item item : this.masterList){
 				if(item.getType() == ItemType.UNDEFINED){
 					return item;
 				}
@@ -259,8 +280,12 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		return null;
 	}
 	
+	/********************************************************
+	 * Aide a la recalibration
+	 *******************************************************/
+
 	synchronized public List<IntPoint> searchPosition(final Color color){
-		List<IntPoint> resList = new LinkedList<IntPoint>();
+		List<IntPoint> resList = new ArrayList<IntPoint>();
 		
 		if(color == Color.YELLOW || color == Color.RED){
 			// x fixé
@@ -273,11 +298,9 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 				x = Main.X_RED_LINE;
 			}
 			
-			for (IntPoint key : this.masterMap.keySet()){
-				if(Main.areApproximatelyEqual(key.x(), x, MAX_SEARCH)){
-					if(this.masterMap.get(key).getType() != ItemType.PALET){
-						resList.add(key);
-					}
+			for (Item entry : this.masterList){
+				if(Main.areApproximatelyEqual(entry.x(), x, MAX_SEARCH)){
+					resList.add(entry);
 				}
 			}
 			
@@ -293,44 +316,39 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 				y = Main.Y_GREEN_LINE;
 			}
 			
-			for (IntPoint key : this.masterMap.keySet()){
-				if(Main.areApproximatelyEqual(key.y(), y, MAX_SEARCH)){
-					if(this.masterMap.get(key).getType() != ItemType.PALET){
-						resList.add(key);
-					}
+			for (Item entry : this.masterList){
+				if(Main.areApproximatelyEqual(entry.y(), y, MAX_SEARCH)){
+					resList.add(entry);
 				}
 			}
-			
 		}
 		return resList;
-	}
-	
-	/**
-	 * Affiche la map passée en paramètre
-	 * @param map une map d'item
-	 */
-	public static void printHashMap(final Map<IntPoint,Item> map){
-		Main.printf("--------------------------------" + map.size() + "Elements");
-		for(Item item : map.values()) {
-			Main.printf("[EYE OF MARVIN]         : " + item.toString());
-		}
-		Main.printf("------------------------------------------------------");
-	}
-	
-	synchronized public boolean checkpalet(final IntPoint position){
-		if(this.masterMap.containsKey(position)){
-			return this.masterMap.get(position).getType() == ItemType.PALET;
-		}
-		return false;
 	}
 	
 	synchronized public List<IntPoint> searchPosition(final IntPoint start, final int minRange, final int maxRange){
-		List<IntPoint> resList = new LinkedList<IntPoint>();
-		for (IntPoint key : this.masterMap.keySet()){
-			if(start.getDistance(key) < maxRange && start.getDistance(key) > minRange && this.masterMap.get(key).getType() != ItemType.PALET ){
-				resList.add(key);
+		List<IntPoint> resList = new ArrayList<IntPoint>();
+		for (Item entry : this.masterList){
+			if(start.getDistance(entry) < maxRange && start.getDistance(entry) > minRange){
+				resList.add(entry);
 			}
 		}
 		return resList;
+	}
+	
+	/********************************************************
+	 * Divers
+	 *******************************************************/
+	
+	/**
+	 * Affiche la mastermap
+	 */
+	@SuppressWarnings("unused")
+	synchronized private void printMasterList(){
+		Main.printf("[EYE OF MARVIN]         : POS = " + this.poseGiver.getPosition());
+		Main.printf("--------------------------------" + this.masterList.size() + "Elements");
+		for(Item item : this.masterList) {
+			Main.printf("[EYE OF MARVIN]         : " + item.toString());
+		}
+		Main.printf("------------------------------------------------------");
 	}
 }

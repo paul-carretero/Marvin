@@ -1,15 +1,12 @@
 package motorsManager;
 
 import aiPlanner.Main;
-import interfaces.WaitProvider;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
 
 /**
  * Fournit des primitives pour les actions du graber (grab, fermer et stop).
- * Ne considère pas l'état du graber.
- * @see GraberManager
  */
 public class Graber {
 	/**
@@ -18,17 +15,11 @@ public class Graber {
 	private EV3LargeRegulatedMotor	graber;
 	
 	/**
-	 * le Thread gérant le grabber, permet d'attendre sur ce moniteur
+	 * Initialise ce graber
 	 */
-	private WaitProvider			manager;
-	
-	/**
-	 * @param manager le Thread gérant le grabber, permet d'attendre sur ce moniteur
-	 */
-	public Graber(WaitProvider manager){
+	public Graber(){
 		Port port   	= LocalEV3.get().getPort(Main.GRABER);
 		this.graber 	= new EV3LargeRegulatedMotor(port);
-		this.manager	= manager;
 		
 		this.graber.setSpeed(Main.GRABER_SPEED);
 	}
@@ -36,19 +27,28 @@ public class Graber {
 	/**
 	 * Ferme les pinces
 	 */
-	public void close(){
-		this.graber.backward();
-		this.manager.syncWait(Main.GRABER_TIMER);
-		this.graber.stop();
+	synchronized public void close(){
+		while(this.graber.isMoving()){
+			Thread.yield();
+		}
+		if(Main.HAND_OPEN){
+			this.graber.rotate((-1)*Main.GRABER_TIMER, true);
+			Main.HAND_OPEN = false;
+		}
 	}
 	
 	/**
 	 * Ouvre les pinces
 	 */
-	public void open(){
-		this.graber.forward();
-		this.manager.syncWait(Main.GRABER_TIMER);
-		this.graber.stop();
+	synchronized public void open(){
+		while(this.graber.isMoving()){
+			Thread.yield();
+		}
+		if(!Main.HAND_OPEN){
+			this.graber.rotate(Main.GRABER_TIMER/2, false);
+			this.graber.rotate(Main.GRABER_TIMER/2, true);
+			Main.HAND_OPEN = true;
+		}
 	}
 	
 	/**

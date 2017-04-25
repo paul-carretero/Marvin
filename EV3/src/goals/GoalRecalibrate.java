@@ -31,6 +31,11 @@ public class GoalRecalibrate extends Goal {
 	 * 
 	 */
 	private final PoseGiver	pg;
+	
+	/**
+	 * 
+	 */
+	private static boolean BACKWARD = true;
 
 	/**
 	 * @param gf le GoalFactory
@@ -42,60 +47,69 @@ public class GoalRecalibrate extends Goal {
 		super(gf, ia);
 		this.eom	= eom;
 		this.pg		= pg;
-		// TODO Auto-generated constructor stub
 	}
 	
-	/**
-	 * Effectue un demi-tour et ajoute un objectif de recalibreation dans la pile d'objectif pour tenter à nouveau de se recalibrer
-	 */
-	private void tryAgain(){
-		this.ia.turnHere(180);
-		this.ia.pushGoal(this.gf.goalRecalibrate());
-	}
-
 	@Override
-	// si ligne blanche = demi tour
 	public void start() {
+		
 		this.ia.addMeWakeUpOnColor();
 		
 		this.ia.setSpeed(Main.RESEARCH_SPEED);
 		
-		this.ia.goForward(2000);
-		this.ia.goBackward(5);
-		
-		Color color = this.ia.getColor();
-		
-		if(color == Color.WHITE){
-			tryAgain();
-		}
-		else if(color == Color.GREY || color == Color.BLACK){
-			this.ia.pushGoal(this.gf.goalRecalibrate());
+		if(BACKWARD){
+			this.ia.goBackward(1500);
+			this.ia.goForward(5);
 		}
 		else{
-			
+			this.ia.turnHere(90);
+			this.ia.goForward(1500);
+			this.ia.goBackward(5);
+		}
+		BACKWARD = !BACKWARD;
+
+		Color color = this.ia.getColor();
+		
+		this.ia.removeMeWakeUpOnColor();
+		
+		Main.printf("on color : " + color);
+		
+		this.ia.syncWait(200);
+		
+		if(color != Color.GREY){
 			List<IntPoint> initialList = this.eom.searchPosition(color);
 			
-			this.ia.turnHere(180);
+			System.out.println("initial list : ");
+			for(IntPoint p : initialList){
+				System.out.println(p);
+			}
 			
 			this.ia.goForward(300);
 			
 			List<IntPoint> finalList = this.eom.searchPosition(color);
 			
+			System.out.println("final list : ");
+			for(IntPoint p : initialList){
+				System.out.println(p);
+			}
+			
 			IntPoint start	= null;
-			boolean error	= false;
 			
 			for(IntPoint p : initialList){
 				if(!finalList.contains(p)){
-					if(start != null){
-						error = true;
-					}
 					start = p;
 				}
 			}
 			
-			// si il n'y en a eu qu'un qui est supprimé de la ligne
-			if(!error && start != null){
+			System.out.println("start = " + start);
+			
+			// si il n'y en a eu qu'un qui est supprime de la ligne
+			if(start != null){
 				List<IntPoint> resList = this.eom.searchPosition(start, 200, 400);
+				
+				System.out.println("resList list : ");
+				for(IntPoint p : resList){
+					System.out.println(p);
+				}
 				
 				if(resList.size() == 1){
 					IntPoint me = resList.get(0);
@@ -104,20 +118,12 @@ public class GoalRecalibrate extends Goal {
 					Pose myPose = new Pose(me.x(), me.y(), angle);
 					
 					this.pg.setPose(myPose);
-					Main.printf("calculated pose = " + myPose);
-				}
-				else{
-					tryAgain();
+					System.out.println("calculated pose = " + myPose);
 				}
 			}
-			else{
-				tryAgain();
-			}
-			
 		}
-		
 		this.ia.setSpeed(Main.CRUISE_SPEED);
-		this.ia.removeMeWakeUpOnColor();
+		this.ia.signalNoLost();
 	}
 	
 	/**

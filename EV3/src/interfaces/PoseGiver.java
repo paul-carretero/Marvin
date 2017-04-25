@@ -13,18 +13,6 @@ public interface PoseGiver {
 	public Pose getPosition();
 	
 	/**
-	 * Met à jour la position en considérant un X détecté de manière certaine.
-	 * @param x une coordonnée x sûre.
-	 */
-	public void sendFixX(int x);
-	
-	/**
-	 * Met à jour la position en considérant un X détecté de manière certaine.
-	 * @param y une coordonnée y sûre.
-	 */
-	public void sendFixY(int y);
-	
-	/**
 	 * @return l'ID de l'aire courante basé sur le gestionnaire d'Area
 	 */
 	public int getAreaId();

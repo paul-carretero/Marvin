@@ -1,6 +1,5 @@
 package goals;
 
-import aiPlanner.Main;
 import aiPlanner.Marvin;
 
 /**
@@ -23,11 +22,8 @@ public class GoalPlay extends Goal {
 
 	@Override
 	public void start() {
-		
-		this.ia.pushGoal(this.gf.play());
+		this.ia.pushGoal(this);
 		this.ia.pushGoal(this.gf.goalGrabAndDropPalet());
-
-		Main.printf("This is the sort of thing you lifeforms enjoy, is it?");
 	}
 	
 	@Override

@@ -9,11 +9,12 @@ import interfaces.SignalListener;
 import interfaces.WaitProvider;
 import itemManager.CentralIntelligenceService;
 import itemManager.EyeOfMarvin;
-import itemManager.FakeServer;
 import itemManager.Server;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
+import lejos.robotics.navigation.Pose;
 import motorsManager.Engine;
-import motorsManager.GraberManager;
+import motorsManager.Graber;
 import positionManager.AreaManager;
 import positionManager.DirectionCalculator;
 import positionManager.PositionCalculator;
@@ -37,8 +38,8 @@ public class Marvin implements SignalListener, WaitProvider{
 	private	final EyeOfMarvin 					itemManager;
 	private	final EventHandler 					eventManager;
 	private	final PositionCalculator 			positionManager;
-	private	final FakeServer					server;
-	private	final GraberManager 				graber;
+	private	final Server						server;
+	private	final Graber 						graber;
 	private	final Engine 						engine;
 	private final GoalFactory 					GFactory;
 	private	final AreaManager					areaManager;
@@ -56,7 +57,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	 */
 	public Marvin(){
 		
-		Main.printf("Not that anyone cares what I say, but the restaurant is at the *other* end of the Universe.");
+		Main.printf("[MARVIN]                : Not that anyone cares what I say, but the restaurant is at the *other* end of the Universe.");
 		
 		/**********************************************************/
 		
@@ -83,12 +84,12 @@ public class Marvin implements SignalListener, WaitProvider{
 		this.radar 					= radarTemp;
 		this.engine 				= new Engine(this);
 		this.eventManager 			= new EventHandler(this,this.radar);
-		this.graber 				= new GraberManager();
+		this.graber 				= new Graber();
 		this.positionManager		= new PositionCalculator(this.engine.getPilot(), this.radar, this);
 		this.itemManager 			= new EyeOfMarvin(this.positionManager);
 		this.directionCalculator 	= new DirectionCalculator(this.positionManager,this.itemManager);
 		this.areaManager			= new AreaManager(this.positionManager);
-		this.server 				= new FakeServer(this.itemManager);
+		this.server 				= new Server(this.itemManager);
 		this.audio					= new SoundManager();
 		this.cis					= new CentralIntelligenceService(this.itemManager, this.positionManager);
 
@@ -102,10 +103,11 @@ public class Marvin implements SignalListener, WaitProvider{
 		
 		/**********************************************************/
 		
-		this.GFactory 				= new GoalFactory(this,this.positionManager, this.itemManager, this.radar, this.cis);
+		this.GFactory 				= new GoalFactory(this,this.positionManager, this.itemManager, this.radar, this.cis, this.areaManager);
 		this.goals 					= this.GFactory.initializeStartGoals();
 		
 		/**********************************************************/
+		
 	}
 	
 	/**
@@ -114,13 +116,11 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * les calibrer et les marquer comme palet.
 	 */
 	public void startThreads(){
-		this.positionManager.start();
-		this.eventManager.start();
-		this.graber.start();
 		this.server.start();
+		this.eventManager.start();
 		this.areaManager.start();
-		this.audio.start();
-		this.cis.start();
+		//this.audio.start();
+		//this.cis.start();
 		
 		LocalEV3.get().getLED().setPattern(3);
 		for(int i = 0; i< 6; i++){
@@ -155,6 +155,7 @@ public class Marvin implements SignalListener, WaitProvider{
 		
 		while(!this.goals.isEmpty() && (Main.TIMER.getElapsedMin() < 5)){
 			newGoal = this.goals.pop();
+			//System.out.println("MyPose = " + this.positionManager.getPosition());
 			if(newGoal != null){
 				newGoal.startWrapper();
 			}
@@ -167,6 +168,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	/**
 	 * @param name nom d'un objectif
 	 * @return retourne vrai si aucun objectif de ce type n'est dans la pile, faux sinon
+	 * ex7811un
 	 */
 	private boolean noTypeOfGoal(final GoalType name){ 
 		for(Iterator<Goal> itr = this.goals.iterator() ; itr.hasNext() ; )  {
@@ -193,12 +195,15 @@ public class Marvin implements SignalListener, WaitProvider{
 	 */
 	synchronized public void tryInterruptEngine(){
 		if(this.allowInterrupt){
+			this.positionManager.setInterrupted(true);
 			this.engine.stop();
 			this.notifyAll();
 		}
 	}
 	
 	public void signalLost(){
+		Sound.beep();
+		Main.printf("[MARVIN]                : MAYDAY MAYDAY MAYDAY");
 		if(noTypeOfGoal(GoalType.RECALIBRATE)){
 			this.goals.push(this.GFactory.goalRecalibrate());
 		}
@@ -209,25 +214,46 @@ public class Marvin implements SignalListener, WaitProvider{
 	}
 	
 	synchronized public void signalStalled(){
+		Main.log("[MARVIN]                : signalStalled");
+		this.positionManager.setInterrupted(true);
+		syncWait(200);
 		this.engine.stop();
 		goBackward(200);
 		this.notifyAll();
 	}
 	
 	synchronized public void signalObstacle(){
+		this.positionManager.setInterrupted(true);
+		syncWait(200);
 		this.engine.stop();
-		goBackward(50);
+		Pose myPose = this.positionManager.getPosition();
+		// si c'est un mur
+		if(myPose.getX() < 150 || myPose.getX() > 1850 || myPose.getY() < 150 || myPose.getY() > 2850){
+			Main.log("[MARVIN]                : signalObstacle : Mur");
+			goBackward(100);
+		}
+		else{
+			Main.log("[MARVIN]                : signalObstacle : Obstacle");
+			goBackward(200);
+			turnHere(90);
+			goBackward(200);
+			turnHere(90);
+		}
 		this.notifyAll();
 	}
 	
 	public void signalPression(){
+		Main.log("[MARVIN]                : signalPression");
 		tryInterruptEngine();
 	}
 	
 	public void signalStop(){
-		this.graber.stopGrab();
+		Main.log("[MARVIN]                : signalStop");
+		this.graber.stop();
 		this.engine.stop();
-		debug();
+		if(Main.PRINT_LOG){
+			debug();
+		}
 		System.exit(2);
 	}
 	
@@ -235,6 +261,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * Termine proprement les Threads de l'application et termine le programe
 	 */
 	private void cleanUp(){
+		Main.log("[MARVIN]                : cleanUp");
 		this.allowMoreGoal = false;
 		LocalEV3.get().getLED().setPattern(3);
 		this.goals.clear();
@@ -248,9 +275,6 @@ public class Marvin implements SignalListener, WaitProvider{
 			this.server.interrupt();
 			this.server.join();
 			
-			this.graber.interrupt();
-			this.graber.join();
-			
 			this.eventManager.interrupt();
 			this.eventManager.join();
 			
@@ -262,9 +286,6 @@ public class Marvin implements SignalListener, WaitProvider{
 			
 			this.cis.interrupt();
 			this.cis.join();
-			
-			this.positionManager.interrupt();
-			this.positionManager.join();
 			
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
@@ -295,15 +316,20 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * Fonction permettant de parcourir une distance donné vers l'avant (encapsule les traitement de navigation)
 	 * @param distance distance à parcourir
 	 */
-	public void goForward(final int distance){
-		if(distance > 0 && this.linearSpeed > 0){			
-			this.directionCalculator.startLine();
-			this.positionManager.setIsMovingForward(true);
+	public void goForward(final float distance){
+		if(distance > 0 && this.linearSpeed > 0){	
+			
+			this.engine.setrightWheelCorrection(this.linearSpeed);
+			
+			if(distance > Main.FIABLE_DIST){
+				this.directionCalculator.startLine();
+			}
+			this.positionManager.startLine(distance);
 			
 			this.engine.goForward(distance, this.linearSpeed);
 
 			this.directionCalculator.reset();
-			this.positionManager.setIsMovingForward(false);
+			this.engine.setrightWheelCorrection(0);
 		}
 	}
 	
@@ -311,10 +337,12 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * Fonction permettant de parcourir une distance donné vers l'arrière
 	 * @param distance distance à parcourir
 	 */
-	public void goBackward(final int distance){
+	public void goBackward(final float distance){
 		if(distance > 0 && this.linearSpeed > 0){
 			
-			this.positionManager.swap();
+			Pose myFuturePose = this.positionManager.getPosition();
+			myFuturePose.moveUpdate((-1) * distance);
+			this.positionManager.setBackward(true);
 			
 			for(int i = 0; i<(distance/this.linearSpeed); i++){
 				this.audio.addBip();
@@ -322,22 +350,25 @@ public class Marvin implements SignalListener, WaitProvider{
 			
 			this.engine.goBackward(distance, this.linearSpeed);
 			
-			this.positionManager.swap();
+			syncWait(50);
+			
+			this.positionManager.setBackward(false);
+			this.positionManager.setPose(myFuturePose);
 		}
 	}
 	
 	/**
 	 * Permet de tourner sur place (encapsule les traitement de navigation, ainsi que la présence ou non du palet)
-	 * @param angle angle en degrès de rotation par rapport à la position courrante, compris entre -180 et 180
+	 * @param f angle en degrès de rotation par rapport à la position courrante, compris entre -180 et 180
 	 */
-	public void turnHere(final int angle){
-		if(angle != 0){
+	public void turnHere(final float f){
+		if(f != 0){
 			this.engine.updateWheelOffset();
 			if(Main.HAVE_PALET){
-				this.engine.turnHere(angle, Main.SAFE_ROTATION_SPEED);
+				this.engine.turnHere(f, Main.SAFE_ROTATION_SPEED);
 			}
 			else{
-				this.engine.turnHere(angle, Main.ROTATION_SPEED);
+				this.engine.turnHere(f, Main.ROTATION_SPEED);
 			}
 		}
 	}

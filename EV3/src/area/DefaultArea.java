@@ -21,7 +21,7 @@ public class DefaultArea extends Area {
 	}
 
 	@Override
-	public Area colorChange(final Color color, final Pose p) {
+	public Area colorChange(final Color color, final float h) {
 		return this;
 	}
 	

@@ -3,8 +3,11 @@ package goals;
 import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.PoseGiver;
+import lejos.hardware.Sound;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
+import positionManager.AreaManager;
+import shared.Color;
 
 /**
  * Objectif de drop d'un palet (ne s'éxécutera que si l'on dispose d'un palet)
@@ -17,11 +20,6 @@ public class GoalDrop extends Goal{
 	protected final GoalType NAME = GoalType.DROP;
 	
 	/**
-	 * Nombre maximum de tentative avant d'abandonner le palet
-	 */
-	private static final int MAX_TRY = 3;
-	
-	/**
 	 * PoseGiver permettant de retourner une pose du robot
 	 */
 	protected final PoseGiver poseGiver;
@@ -29,17 +27,24 @@ public class GoalDrop extends Goal{
 	/**
 	 * autorise ou non le rédémarrage de l'objectif si il n'a pas pu être terminé
 	 */
-	protected	int			tryCount;
+	protected int			tryCount;
+
+	/**
+	 * Gestionnaire des couleurs
+	 */
+	private AreaManager am;
+
 
 	/**
 	 * @param gf le GoalFactory
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
 	 * @param pg PoseGiver permettant de retourner une pose du robot
 	 */
-	public GoalDrop(final GoalFactory gf, final Marvin ia, final PoseGiver pg) {
+	public GoalDrop(final GoalFactory gf, final Marvin ia, final PoseGiver pg, AreaManager am) {
 		super(gf, ia);
 		this.poseGiver	= pg;
 		this.tryCount	= 0;
+		this.am			= am;
 	}
 
 	@Override
@@ -52,8 +57,9 @@ public class GoalDrop extends Goal{
 	 */
 	private void drop(){
 		this.ia.open();
+		this.ia.syncWait(100);
 		Main.HAVE_PALET = false;
-		this.ia.goBackward(200);
+		this.ia.goBackward(350);
 	}
 	
 	/**
@@ -76,28 +82,20 @@ public class GoalDrop extends Goal{
 		this.tryCount++;
 	}
 
-
 	@Override
 	protected void start() {
-		
 		Pose currentPose = this.poseGiver.getPosition();
-		
-		if((currentPose.getY() < Main.Y_OBJECTIVE_WHITE && Main.Y_OBJECTIVE_WHITE < 1500) || (currentPose.getY() > Main.Y_OBJECTIVE_WHITE && Main.Y_OBJECTIVE_WHITE > 1500)){
-			drop();
-		}
-		else{
-			if(this.tryCount == 0){
-				goToDropZone(currentPose);
-			}
-			else if(this.tryCount < MAX_TRY){
-				this.ia.turnHere(90);
-				this.ia.goForward(200);
-				this.ia.turnHere(-90);
-				goToDropZone(currentPose);
-			}
-			else{
+		if(this.tryCount > 0){
+			if(this.am.getLastLine() == Color.WHITE){
 				drop();
 			}
+			else{
+				this.ia.goForward(100);
+				drop();
+			}
+		}
+		else{
+			goToDropZone(currentPose);
 		}
 	}
 	

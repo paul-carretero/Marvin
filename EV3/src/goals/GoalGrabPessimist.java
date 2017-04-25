@@ -44,6 +44,11 @@ public class GoalGrabPessimist extends Goal {
 	 * Marge autorisé par rapport à la distance radar considéré fiable
 	 */
 	protected final static int		MARGE = 100;
+	
+	/**
+	 * Autorise un seul decalage au début
+	 */
+	protected       static boolean	decal = true;
 
 	/**
 	 * @param gf le GoalFactory
@@ -91,6 +96,7 @@ public class GoalGrabPessimist extends Goal {
 		if(Main.PRESSION){
 			Main.HAVE_PALET = true;
 			this.ia.grab();
+			this.ia.syncWait(100);
 			return true;
 		}
 		return false;
@@ -111,10 +117,11 @@ public class GoalGrabPessimist extends Goal {
 	protected void grabWrapper(){
 		Pose currentPose 	= this.pg.getPosition();
 		int distance 		= (int)currentPose.distanceTo(this.palet);
+		distance += 100;
 		
 		this.ia.setAllowInterrupt(true);
 		
-		if(this.radar.checkSomething()){
+		if(!Main.USE_RADAR || this.radar.checkSomething()){
 			
 			this.ia.goForward(distance);
 			
@@ -138,16 +145,16 @@ public class GoalGrabPessimist extends Goal {
 		};
 		
 		radarDistances[1] = this.radar.getRadarDistance();
-		this.ia.turnHere(-25);
+		this.ia.turnHere(-20);
 		radarDistances[0] = this.radar.getRadarDistance();
-		this.ia.turnHere(50);
+		this.ia.turnHere(40);
 		radarDistances[2] = this.radar.getRadarDistance();
 		
 		if(radarDistances[1] <= radarDistances[0] && radarDistances[1] <= radarDistances[2]){
-			this.ia.turnHere(-25);
+			this.ia.turnHere(-20);
 		}
 		else if(radarDistances[0] <= radarDistances[1] && radarDistances[0] <= radarDistances[2]){
-			this.ia.turnHere(-50);
+			this.ia.turnHere(-40);
 		}
 	}
 	
@@ -157,12 +164,27 @@ public class GoalGrabPessimist extends Goal {
 		if(this.eom.checkpalet(new IntPoint(this.palet))){
 			
 			correctPosition();
-			setBestAngle();
+			if(Main.USE_RADAR){
+				setBestAngle();
+			}
 			grabWrapper();
-			
+			decal();
 		}
 		
 		updateStatus();
+	}
+
+	/**
+	 * Se décalle légèrement afin de ne pas percuter les autre palets
+	 */
+	protected void decal() {
+		if(decal && Main.areApproximatelyEqual((int)this.pg.getPosition().getHeading(), -90, 10)){
+			this.ia.turnHere(90);
+			this.ia.goForward(200);
+			this.ia.turnHere(-90);
+			decal = false;
+		}
+		
 	}
 
 	/**
@@ -170,14 +192,14 @@ public class GoalGrabPessimist extends Goal {
 	 * Un grab n'est pas réussi si on a pas eu de confirmation du capteur de pression.
 	 */
 	protected void failGrabHandler() {
-		this.ia.goBackward(200);
-		this.ia.turnHere(13);
-		this.ia.goForward(225);
+		this.ia.goBackward(350);
+		this.ia.turnHere(15);
+		this.ia.goForward(400);
 		
 		if(!tryGrab()){
-			this.ia.goBackward(225);
-			this.ia.turnHere(-26);
-			this.ia.goForward(250);
+			this.ia.goBackward(400);
+			this.ia.turnHere(-30);
+			this.ia.goForward(450);
 			tryGrab();
 		}
 	}

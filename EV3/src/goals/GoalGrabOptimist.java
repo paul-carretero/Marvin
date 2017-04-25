@@ -37,7 +37,8 @@ public class GoalGrabOptimist extends GoalGrabPessimist {
 		
 		if(this.eom.checkpalet(new IntPoint(this.palet))){
 			correctPosition();
-			grabWrapper();			
+			grabWrapper();
+			decal();
 		}
 		
 		updateStatus();

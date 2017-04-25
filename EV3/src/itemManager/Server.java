@@ -127,10 +127,6 @@ public class Server extends Thread{
 				this.eom.receiveRawPoints(this.lastReceivedTimer,this.lastPointsReceived);
 				this.packet.setLength(this.buffer.length);
 			}
-			aJeter ++;
-			if(aJeter == 3){
-				aJeter = 0;
-			}
 		}
 		Main.printf("[SERVER]                : Finished");
 	}
@@ -139,7 +135,6 @@ public class Server extends Thread{
 	public void interrupt(){
 		this.dsocket.close();
 		this.stop = true;
-		//this.interrupt(); ???
 	}
 
 }

@@ -9,6 +9,7 @@ import interfaces.ItemGiver;
 import interfaces.PoseGiver;
 import itemManager.CentralIntelligenceService;
 import lejos.robotics.geometry.Point;
+import positionManager.AreaManager;
 
 /**
  * Factory permettant de construire une pile d'objectif et de construire des objectif à l'aide de primitive simple
@@ -40,20 +41,24 @@ public class GoalFactory {
 	 */
 	private final CentralIntelligenceService cis;
 	
+	private final AreaManager areaManager;
+	
 	/**
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
 	 * @param pg PoseGiver permettant de retourner une pose du robot
 	 * @param eom EyeOfMarvin, permet de fournir les position
 	 * @param radar un DistanceGiver permettant de donner des distance radar
 	 * @param cis CentralIntelligenceService permettant de donner des points d'interceptions
+	 * @param areaManager gestionnaire de couleurs
 	 */
-	public GoalFactory(final Marvin ia, final PoseGiver pg, final ItemGiver eom, final DistanceGiver radar, final CentralIntelligenceService cis){
+	public GoalFactory(final Marvin ia, final PoseGiver pg, final ItemGiver eom, final DistanceGiver radar, final CentralIntelligenceService cis, final AreaManager areaManager){
 		this.ia			= ia;
 		this.pg			= pg;
 		this.eom		= eom;
 		this.lastGrabOk = true;
 		this.radar		= radar;
 		this.cis		= cis;
+		this.areaManager = areaManager;
 	}
 	
 	/**
@@ -61,9 +66,7 @@ public class GoalFactory {
 	 */
 	public Deque<Goal> initializeStartGoals(){
 		Deque<Goal> goals = new ConcurrentLinkedDeque<Goal>();
-		//goals.push(play());
-		//goals.push(goalRecalibrate());
-		goals.push(goalGrabAndDropPalet());
+		goals.push(goalTest());
 		return goals;
 	}
 	
@@ -94,7 +97,7 @@ public class GoalFactory {
 	 * @return un objectif de Drop
 	 */
 	public Goal goalDrop(){
-		return new GoalDrop(this,this.ia,this.pg);
+		return new GoalDrop(this,this.ia,this.pg, this.areaManager);
 	}
 	
 	/**
@@ -121,10 +124,18 @@ public class GoalFactory {
 	public Goal goalRecalibrate(){
 		return new GoalRecalibrate(this, this.ia, this.eom, this.pg);
 	}
+	
 	/**
 	 * @return Un objectif d'interception
 	 */
 	public Goal goalIntercept(){
 		return new GoalIntercept(this,this.ia,this.cis,this.pg);
+	}
+	
+	/**
+	 * @return un Objectif de test
+	 */
+	public Goal goalTest(){
+		return new GoalTest(this, this.ia, this.pg);
 	}
 }

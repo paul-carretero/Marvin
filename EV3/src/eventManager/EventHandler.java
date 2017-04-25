@@ -66,13 +66,9 @@ public class EventHandler extends Thread implements MoveListener{
 	
 	/**
 	 * Temps minimum en seconde avant que l'on considère que l'on a plus de pression palet (depuis la dernière vérification positive)
-	 */
-	private static final int	PRESSION_DELAY		= 2;
-	
-	/**
 	 * Temps minimum en seconde avant de vérifier à nouveau si l'on est bloqué par un obstacle
 	 */
-	private static final int	WALL_DELAY			= 4;
+	private static final int	SENSOR_DELAY		= 2;
 	
 	/**
 	 * Temps entre chaque cycle de vérifications
@@ -110,8 +106,10 @@ public class EventHandler extends Thread implements MoveListener{
 			checkPression();
 			checkEscPressed();
 			checkInfiniteMove();
-			checkWall();
-			
+			if(Main.USE_RADAR){
+				checkWall();
+			}
+
 			syncWait();
 		}
 		
@@ -133,7 +131,7 @@ public class EventHandler extends Thread implements MoveListener{
 	 * Vérifie si le robot est face à un mur, si oui alors génère un signal à l'ia (ne peut pas se déclanché en continu)
 	 */
 	private void checkWall(){
-		if(this.radar.getRadarDistance() < Main.RADAR_WALL_DETECT && this.radar.getRadarDistance() > 0 && (Main.TIMER.getElapsedSec() - this.lastWall) > WALL_DELAY){
+		if(this.radar.getRadarDistance() < Main.RADAR_WALL_DETECT && this.radar.getRadarDistance() > 0 && (Main.TIMER.getElapsedSec() - this.lastWall) > SENSOR_DELAY){
 			this.aiPlanner.signalObstacle();
 			this.lastWall = Main.TIMER.getElapsedSec();
 		}
@@ -144,7 +142,7 @@ public class EventHandler extends Thread implements MoveListener{
 	 * Informe l'ia si une pression est détectée et met à jour les variable d'état (Main)
 	 */
 	private void checkPression(){
-		if(this.currentPression && (this.pressSensor.isPressed() == false) && (Main.TIMER.getElapsedSec() - this.lastPression > PRESSION_DELAY)){
+		if(this.currentPression && (this.pressSensor.isPressed() == false) && (Main.TIMER.getElapsedSec() - this.lastPression > SENSOR_DELAY)){
 			
 			this.currentPression = false;
 			Main.PRESSION 		 = false;

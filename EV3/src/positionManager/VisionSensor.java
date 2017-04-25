@@ -2,6 +2,7 @@ package positionManager;
 
 import aiPlanner.Main;
 import interfaces.DistanceGiver;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
@@ -82,8 +83,11 @@ public class VisionSensor implements DistanceGiver{
 			this.dynamicOffset = START_DISTANCE - getRadarDistance();
 		}
 		else{
-			Main.printf("[VISION SENSOR]         : This sensor is nothing but bugged, better die now");
-			System.exit(1);
+			Main.printf("[VISION SENSOR]         : This sensor is nothing but bugged, will try without...");
+			Sound.beep();
+			Sound.beep();
+			Sound.beep();
+			Main.USE_RADAR = false;
 		}
 	}
 

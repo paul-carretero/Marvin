@@ -76,14 +76,14 @@ public class Item extends IntPoint{
 		this.referenceTime	= Main.TIMER.getElapsedMs();
 	}
 	
-	@Override
+	/*@Override
 	public boolean equals(final Object  o){
 		if (!(o instanceof IntPoint)) {
 	        return false;
 	    }
 		Item p = (Item)o;
 		return (y() == p.y() && x() == p.x()) && this.type == p.getType() && this.referenceTime == p.getReferenceTime();
-	}
+	}*/
 	
 	/**
 	 * @param x la nouvelle coordonné de l'item sur l'axe x

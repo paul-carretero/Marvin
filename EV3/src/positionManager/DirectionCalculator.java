@@ -33,16 +33,7 @@ public class DirectionCalculator {
 	 */
 	private static final int NO_ANGLE_FOUND	= 9999;
 	
-	/**
-	 * Distance en dessous de laquelle on considère que l'on a pas suffisament d'information pour calculer une direction (pas assez précis)
-	 */
-	private static final int MIN_DISTANCE	= 200;
-	
-	/**
-	 * Distance (en mm) au délà de laquelle on considère la distance parcouru suffisament fiable pour avoir une calcul précis de l'angle.
-	 */
-	private static final int FIABLE_DIST	= 700;
-	
+
 	/**
 	 * Créer une nouvelle instance du calculateur de Direction.
 	 * @param pg Le gestionnaire de position fournissant une interface pour la mise à jour de la Pose actuelle.
@@ -61,11 +52,9 @@ public class DirectionCalculator {
 	 * @return l'angle entre le point initial et le point p.
 	 */
 	private float getAngle(Point p){
-		if(p != null){
-			if(this.startPoint.distance(p) > MIN_DISTANCE ){
-				Main.printf("angle calculé = " + this.startPoint.angleTo(p));
+		if(p != null && p.distance(this.startPoint) > Main.FIABLE_DIST){
+				Main.printf("[DIRECTION CALCULATOR]  : angle calcule = " + this.startPoint.angleTo(p));
 				return this.startPoint.angleTo(p);
-			}
 		}
 		return NO_ANGLE_FOUND;
 	}
@@ -77,15 +66,11 @@ public class DirectionCalculator {
 	 * @return vrai si on a effectué une mise à jour sur l'angle
 	 */
 	private boolean updateAngle(final Pose p){
-		if(p != null){
-			float calcAngle = getAngle(this.eom.getMarvinPosition().toLejosPoint());
+		Item me = this.eom.getMarvinPosition();
+		if(p != null && me != null){
+			float calcAngle = getAngle(me.toLejosPoint());
 			if(calcAngle != NO_ANGLE_FOUND){
-				if(p.distanceTo(this.startPoint) < FIABLE_DIST ){
-					p.setHeading((float) ((p.getHeading() * 0.4) + (calcAngle * 0.6)));
-				}
-				else{
-					p.setHeading((float) ((p.getHeading() * 0.2) + (calcAngle * 0.8)));
-				}
+				p.setHeading((float) ((p.getHeading() * 0.5) + (calcAngle * 0.5)));
 				return true;
 			}
 		}
@@ -105,7 +90,7 @@ public class DirectionCalculator {
 			if(updateAngle(myPose)){
 				this.pg.setPose(myPose);
 			}
-			Main.printf("nouveau angle pose = " + myPose);
+			Main.printf("[DIRECTION CALCULATOR]  : nouveau angle pose = " + myPose);
 		}
 		
 		// reset

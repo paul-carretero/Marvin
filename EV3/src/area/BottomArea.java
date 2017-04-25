@@ -23,26 +23,9 @@ public class BottomArea extends Area{
 	}
 
 	@Override
-	public Area colorChange(final Color color, final Pose p) {
+	public Area colorChange(final Color color, final float h) {
 		if(color == Color.GREY){
 			return this;
-		}
-		else if(color == Color.WHITE){
-			// on évite les cas limites
-			if( checkAmbiguousAngleHorizontal(p) ){
-				if(p.getX() < Main.X_YELLOW_LINE){
-					return Main.getArea(10);
-				}
-				if(p.getX() > Main.X_YELLOW_LINE && p.getX() < Main.X_BLACK_LINE){
-					return Main.getArea(11);
-				}
-				if(p.getX() > Main.X_BLACK_LINE && p.getX() < Main.X_RED_LINE){
-					return Main.getArea(12);
-				}
-				if(p.getX() > Main.X_RED_LINE){
-					return Main.getArea(13);
-				}
-			}
 		}
 		return Main.getArea(15); // default Area
 	}
@@ -56,5 +39,4 @@ public class BottomArea extends Area{
 			300
 		};
 	}
-
 }

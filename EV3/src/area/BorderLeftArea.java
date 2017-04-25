@@ -53,49 +53,49 @@ public class BorderLeftArea extends Area {
 	}
 
 	@Override
-	public Area colorChange(final Color color, final Pose p) {
+	public Area colorChange(final Color color, final float h) {
 		switch (this.id) {
 			case 1:
-				if(color == Color.WHITE && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.WHITE && checkAmbiguousAngleHorizontal(h) ){
 					return Main.getArea(0);
 				}
-				if(color == Color.BLUE && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.BLUE && checkAmbiguousAngleHorizontal(h) ){
 					return Main.getArea(5);
 				}
-				if(color == Color.YELLOW && checkAmbiguousAngleVertical(p) ){
+				if(color == Color.YELLOW && checkAmbiguousAngleVertical(h) ){
 					return Main.getArea(2);
 				}
 				break;
 			case 5:
-				if(color == Color.BLACK && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.BLACK && checkAmbiguousAngleHorizontal(h) ){
 					return Main.getArea(8);
 				}
-				if(color == Color.BLUE && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.BLUE && checkAmbiguousAngleHorizontal(h) ){
 					return Main.getArea(1);
 				}
-				if(color == Color.YELLOW && checkAmbiguousAngleVertical(p) ){
+				if(color == Color.YELLOW && checkAmbiguousAngleVertical(h) ){
 					return Main.getArea(6);
 				}
 				break;
 			case 8:
-				if(color == Color.GREEN && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.GREEN && checkAmbiguousAngleHorizontal(h) ){
 					return Main.getArea(10);
 				}
-				if(color == Color.BLACK && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.BLACK && checkAmbiguousAngleHorizontal(h) ){
 					return Main.getArea(5);
 				}
-				if(color == Color.YELLOW && checkAmbiguousAngleVertical(p) ){
+				if(color == Color.YELLOW && checkAmbiguousAngleVertical(h) ){
 					return Main.getArea(6);
 				}
 				break;
 			case 10:
-				if(color == Color.WHITE && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.WHITE && checkAmbiguousAngleHorizontal(h) ){
 					return Main.getArea(14);
 				}
-				if(color == Color.GREEN && checkAmbiguousAngleHorizontal(p) ){
+				if(color == Color.GREEN && checkAmbiguousAngleHorizontal(h) ){
 					return Main.getArea(8);
 				}
-				if(color == Color.YELLOW && checkAmbiguousAngleVertical(p) ){
+				if(color == Color.YELLOW && checkAmbiguousAngleVertical(h) ){
 					return Main.getArea(11);
 				}
 				break;

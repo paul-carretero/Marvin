@@ -37,6 +37,11 @@ public class AreaManager extends Thread implements AreaGiver {
 	private Object				wakeUp;
 	
 	/**
+	 * Couleur de la dernière ligne traversee
+	 */
+	private Color 				lastLine;
+	
+	/**
 	 * durée entre deux vérification de couleur
 	 */
 	private static final int REFRESHRATE = 100;
@@ -61,9 +66,12 @@ public class AreaManager extends Thread implements AreaGiver {
 		while(!isInterrupted()){
 			if(updateColor()){
 				synchronized(this){
-				this.currentArea = this.currentArea.colorChange(this.currentColor, this.pg.getPosition());
-				//Main.printf("[AREA MANAGER]          : COLOR DETECTED = " + this.currentColor + "NEW AREA = " + this.currentArea.toString());
-			
+					this.currentArea = this.currentArea.colorChange(this.currentColor, this.pg.getPosition().getHeading());
+					Main.log("[AREA MANAGER]          : Couleur detecte : " + this.currentColor);
+					Main.printf("[AREA MANAGER]          : AREA = " + this.currentArea.toString());
+					if(this.currentColor != Color.GREY){
+						this.lastLine = this.currentColor;
+					}
 				}
 				wakeUpOnColor();
 			}
@@ -92,43 +100,10 @@ public class AreaManager extends Thread implements AreaGiver {
 	 * A pour effet de bord d'informer le gestionnaire de position si une ligne est detecté (où l'on est sûr de ses coordonnées)
 	 * @return vrai si la couleur a changé, faux sinon.
 	 */
-	private boolean updateColor(){
+	synchronized private boolean updateColor(){
 		Color checkColor = this.colorSensor.getCurrentColor();
 		if(checkColor != this.currentColor){
 			this.currentColor = checkColor;
-			switch(checkColor){
-				case BLACK:
-					if(this.pg.getPosition().getY() < 1250 || this.pg.getPosition().getY() > 1750 ){
-						this.pg.sendFixY(Main.X_BLACK_LINE);
-					}
-					else if(this.pg.getPosition().getX() > 1250 || this.pg.getPosition().getX() < 750 ){
-						this.pg.sendFixY(Main.Y_BLACK_LINE);
-					}
-					break;
-				case BLUE:
-					this.pg.sendFixY(Main.Y_BLUE_LINE);
-					break;
-				case GREEN:
-					this.pg.sendFixY(Main.Y_GREEN_LINE);
-					break;
-				case RED:
-					this.pg.sendFixX(Main.X_RED_LINE);
-					break;
-				case YELLOW:
-					this.pg.sendFixX(Main.X_YELLOW_LINE);
-					break;
-				case WHITE:
-					if(this.pg.getPosition().getY() < Main.Y_BLACK_LINE){
-						this.pg.sendFixY(Main.Y_BOTTOM_WHITE);
-					}
-					else{
-						this.pg.sendFixY(Main.Y_TOP_WHITE);
-					}
-					break;
-				default:
-					// nothing to do
-					break;
-			}
 			return true;
 		}
 		return false;
@@ -137,8 +112,8 @@ public class AreaManager extends Thread implements AreaGiver {
 	/**
 	 * réveille un thread ayant demander à être réveiller si l'on passe sur une couleur significative
 	 */
-	private void wakeUpOnColor(){
-		if(this.currentColor != Color.GREY && this.currentColor != Color.BLACK && this.wakeUp != null){
+	synchronized private void wakeUpOnColor(){
+		if(this.wakeUp != null && this.currentColor != Color.GREY && this.currentColor != Color.BLACK && this.currentColor != Color.WHITE){
 			synchronized (this.wakeUp) {
 				this.wakeUp.notify();
 			}
@@ -167,7 +142,14 @@ public class AreaManager extends Thread implements AreaGiver {
 	/**
 	 * @return la couleur courrante (sur la ou l'on est)
 	 */
-	public Color getColor() {
+	synchronized public Color getColor() {
 		return this.currentColor;
+	}
+	
+	/**
+	 * @return la couleur de la dernière ligne traversee
+	 */
+	synchronized public Color getLastLine(){
+		return this.lastLine;
 	}
 }

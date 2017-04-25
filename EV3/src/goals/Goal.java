@@ -2,6 +2,8 @@ package goals;
 
 import aiPlanner.Main;
 import aiPlanner.Marvin;
+import lejos.hardware.Button;
+import lejos.hardware.Sound;
 
 /**
  * Représente un objectif et ses fonctions communes
@@ -43,11 +45,11 @@ public abstract class Goal {
 	 */
 	public void startWrapper(){
 		if(this.checkPreConditions()){
-			Main.printf("EXECUTE GOAL : " + getName());
+			Main.printf("[MARVIN]                : EXECUTE GOAL : " + getName());
 			this.start();
 		}
 		else{
-			Main.printf("FAIL EXECUTE GOAL : " + getName());
+			Main.printf("[MARVIN]                : FAIL EXECUTE GOAL : " + getName());
 		}
 	}
 	

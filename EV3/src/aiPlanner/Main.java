@@ -9,11 +9,11 @@ import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.robotics.navigation.Pose;
+import lejos.utility.Delay;
 import shared.Color;
 import shared.IntPoint;
 import shared.Timer;
 
-@SuppressWarnings("javadoc")
 /**
  * Classe utilitaire regroupant les informations initial du robot, son état, 
  * les informations fixes sur l'environnement et le terrain et des informations fixes sur les capteurs
@@ -22,31 +22,88 @@ import shared.Timer;
  */
 public class Main{
 	
-	public static final boolean	ARE_SENSORS_BUGGED	= true;
+	/**
+	 * Defini si le radar est en etat de fonctionner ou non
+	 */
+	public static       boolean	USE_RADAR			= true;
 	
-	public static 	    int X_INITIAL 				= 1000;
+	/**
+	 * position en x intiale du robot
+	 */
+	public static 		int X_INITIAL 				= 1000;
+	/**
+	 * position en y initiale du robot
+	 */
 	public static       int Y_INITIAL 				= 2700;
+	/**
+	 * orientation initiale du robot
+	 */
 	public static       int H_INITIAL 				= -90;
 
+	/**
+	 * Ligne d'objectif (ou l'on marque)
+	 */
 	public static       int Y_OBJECTIVE_WHITE		= 300;
+	/**
+	 * Ligne de notre camps (que l'on defend)
+	 */
 	public static       int Y_DEFEND_WHITE 			= 2700;
 	
+	/**
+	 * Ligne blanche ayant le y mimum
+	 */
 	public static final int Y_BOTTOM_WHITE			= 300;
+	/**
+	 * Ligne blanche ayant le y maximum
+	 */
 	public static final int Y_TOP_WHITE 			= 2700;
 	
+	/**
+	 * Y de la ligne verte
+	 */
 	public static final int Y_GREEN_LINE 			= 900;
+	/**
+	 * Y de la ligne bleu
+	 */
 	public static final int Y_BLUE_LINE 			= 2100;
+	/**
+	 * Y de la ligne noire
+	 */
 	public static final int Y_BLACK_LINE 			= 1500;
 	
+	/**
+	 * X de la ligne rouge
+	 */
 	public static final int X_RED_LINE 				= 1500;
+	/**
+	 * X de la ligne jaune
+	 */
 	public static final int X_YELLOW_LINE 			= 500;
+	/**
+	 * X de la ligne noire
+	 */
 	public static final int X_BLACK_LINE 			= 1000;
 	
+	/**
+	 * Vrai si le capteur de pression à été actionné récement, faux sinon
+	 */
 	public volatile static boolean 	PRESSION		= false;
+	/**
+	 * Vrai si les pinces du robot sont ouvertes, faux sinon
+	 */
 	public volatile static boolean	HAND_OPEN 		= false;
+	/**
+	 * Vrai si le robot (pense) posseder un palet
+	 */
 	public          static boolean	HAVE_PALET		= false;
 	
+	/**
+	 * porte maximale du radar pour detecter un palet
+	 */
 	public static final int RADAR_MAX_RANGE			= 1000;
+	/**
+	 * Porte minimale du radar pour detecter un palet
+	 */
 	public static final int RADAR_MIN_RANGE			= 400;
 	/**
 	 * doit être fiable +/- 100 ... (le reste pas trop)
@@ -56,43 +113,103 @@ public class Main{
 	 *  distance où on est sur de ne pas avoir de palet, et suffisamant petite pour éviter les faux-positif
 	 */
 	public static final int RADAR_WALL_DETECT		= 250;
+	/**
+	 * Arbitraire, absence de donnee radar
+	 */
 	public static final int RADAR_OUT_OF_BOUND		= 9999;
 	
+	/**
+	 * Port du capteur de couleur
+	 */
 	public static final String COLOR_SENSOR 		= "S2";
+	/**
+	 * Port du capteur de pression
+	 */
 	public static final String TOUCH_SENSOR 		= "S3";
+	/**
+	 * Port du capteur ultrason (radar)
+	 */
 	public static final String US_SENSOR    		= "S4";
 	
+	/**
+	 * Diametre d'une roue (mm)
+	 */
 	public static final float WHEEL_DIAMETER        = 55.3f;
+	/**
+	 * Distance des roues par rapport au centre (mm)
+	 */
 	public static final float DISTANCE_TO_CENTER	= 62.5f;
+	/**
+	 * Distance des roues par rapport au centre, corrige de la presence d'un palet
+	 */
 	public static final float DISTANCE_TO_CENTER_P	= 65f;
+	/**
+	 * Port du moteur gauche
+	 */
 	public static final String LEFT_WHEEL 			= "C";
+	/**
+	 * Port du moteur droit
+	 */
 	public static final String RIGHT_WHEEL			= "B";
+	/**
+	 * Port du moteur de graber
+	 */
 	public static final String GRABER    			= "D";
-	public static final float LINEAR_ACCELERATION	= 10.0f;
+	/**
+	 * Acceleration Lineaire (probablement non utilise)
+	 */
+	public static final float LINEAR_ACCELERATION	= 100.0f;
 	
+	/**
+	 * Distance (en mm) au délà de laquelle on considère la distance parcouru suffisament fiable pour avoir une calcul précis de l'angle.
+	 */
+	public static final int FIABLE_DIST	= 700;
+	
+	/**
+	 * Vitesse d'une rotation standard
+	 */
 	public static final int   ROTATION_SPEED		= 240;
+	/**
+	 * Vitesse d'une rotation lorsque le robot possede un palet
+	 */
 	public static final int   SAFE_ROTATION_SPEED 	= 120;
 	
 	/**
-	 * En mm/s
+	 * Vitesse minimum de recherche de position En mm/s
 	 */
 	public static final int   RESEARCH_SPEED		= 120;
 	
 	/**
-	 * En mm/s
+	 * Vitesse standard En mm/s
 	 */
 	public static final int   CRUISE_SPEED			= 240;
 	
 	/**
-	 * En mm/s
+	 * Vitesse maximum sans perte de precision En mm/s
 	 */
-	public static final int   MAX_SPEED				= 360;
+	public static final int   MAX_SPEED				= 300;
 	
-	public static final int   GRABER_TIMER			= 1200;
+	/**
+	 * Duree d'un grab
+	 */
+	public static final int   GRABER_TIMER			= 800;
+	/**
+	 * Vitesse du moteur du grabber
+	 */
 	public static final int   GRABER_SPEED			= 800;
 	
-	public static final String	IP					= "192.168.0.9";
+	/**
+	 * IP du pc affichant le détail des log
+	 */
+	public static final String	IP					= "192.168.0.12";
+	/**
+	 * Timer du programme
+	 */
 	public static final Timer 	TIMER 				= new Timer();
+	/**
+	 * Definie si il faut afficher ou non les logs secondaires
+	 */
+	public static final boolean PRINT_LOG 			= false;
 	
 	/**
 	 * Représente les positions initiales des 9 palet, notament utilisé pour calibrer la Map des item
@@ -135,7 +252,7 @@ public class Main{
 	 * CHOO CHOO
 	 */
 	public static final String[] CHOO_CHOO = new String[]{
-			"\n\n\n\n=================",
+			"\n\n\n\n\n=================",
 			"\n\n\n\n\n}\n\\================\n\n\n\n",
 			"\n\nO\nY\n|}\n\\\\===============\n\n\n\n",
 			"\n\n O\n_Y\n_|}\nO\\\\==============\n\n\n\n",
@@ -211,29 +328,91 @@ public class Main{
 		}
 	}
 	
+	/**
+	 * @param s une chaine de log secondaire a afficher (ou non)
+	 */
+	public static void log(String s){
+		if(PRINT_LOG){
+			printf(s);
+		}
+	}
+	
+	/**
+	 * Menu d'initialisation du robot permettant de choisir sa position initiale
+	 * Initialise les variables globales de position initiale.
+	 */
 	private static void menu(){
-		System.out.print("\n   [   UP   ]   \nDépart Top-Side \nY_Camera = 30   \nY_Robot  = 2700 \n   [  DOWN  ]   \nDépart Bot-Side \nY_Camera = 270  \nY_Robot  = 300");
+		
+		String stringPose[] = new String[]{
+			"\n  -------------\n  |[ ] [ ] [ ]|\n  |           |\n  |           |\n  |           |\n  |[M] [ ] [ ]|\n  -------------\n 0",
+			"\n  -------------\n  |[ ] [ ] [ ]|\n  |           |\n  |           |\n  |           |\n  |[ ] [M] [ ]|\n  -------------\n 0",
+			"\n  -------------\n  |[ ] [ ] [ ]|\n  |           |\n  |           |\n  |           |\n  |[ ] [ ] [M]|\n  -------------\n 0",
+			"\n  -------------\n  |[M] [ ] [ ]|\n  |           |\n  |           |\n  |           |\n  |[ ] [ ] [ ]|\n  -------------\n 0",
+			"\n  -------------\n  |[ ] [M] [ ]|\n  |           |\n  |           |\n  |           |\n  |[ ] [ ] [ ]|\n  -------------\n 0",
+			"\n  -------------\n  |[ ] [ ] [M]|\n  |           |\n  |           |\n  |           |\n  |[ ] [ ] [ ]|\n  -------------\n 0",
+		};
+		
+		int startPoses[][] = new int[][]{
+			new int[]{500,2700,-90},
+			new int[]{1000,2700,-90},
+			new int[]{1500,2700,-90},
+			new int[]{500,300,90},
+			new int[]{1000,300,90},
+			new int[]{1500,300,90},
+		};
+		
+		int current = 1;
+		
+		System.out.print(stringPose[current]);
 		
 		int pressButton = Button.waitForAnyPress();
 		
-		if(pressButton == Button.ID_DOWN){
-			Y_INITIAL = 300;
-			H_INITIAL = 90;
-			Y_OBJECTIVE_WHITE = Y_TOP_WHITE;
-			Y_DEFEND_WHITE = Y_BOTTOM_WHITE;
- 		}
+		while(pressButton != Button.ID_ENTER){
+			switch (pressButton) {
+				case Button.ID_UP:
+					if(current == 0){
+						current = 3;
+						
+					}
+					if(current == 1){
+						current = 4;
+					}
+					if(current == 2){
+						current = 5;
+					}
+					break;
+				case Button.ID_DOWN:
+					if(current == 3){
+						current = 0;
+					}
+					if(current == 4){
+						current = 1;
+					}
+					if(current == 5){
+						current = 2;
+					}
+					break;
+				case Button.ID_LEFT:
+					if(current == 1 || current == 2 || current == 4 || current == 5){
+						current--;
+					}
+					break;
+				case Button.ID_RIGHT:
+					if(current == 0 || current == 1 || current == 3 || current == 4){
+						current++;
+					}
+					break;
+				default:
+					break;
+			}
+			System.out.print(stringPose[current]);
+			Delay.msDelay(200);
+			pressButton = Button.waitForAnyPress();
+		}
 		
-		System.out.println("[LEFT] : Gauche\nX = 500\n[ENTER]: Milieu\nX = 1000\n[RIGHT]: Droite\nX = 1500");
-		
-		pressButton = Button.waitForAnyPress();
-		
-		if(pressButton == Button.ID_LEFT){
-			X_INITIAL = 500;
- 		}
-		else if(pressButton == Button.ID_RIGHT){
-			X_INITIAL = 1500;
- 		}
-		
+		X_INITIAL = startPoses[current][0];
+		Y_INITIAL = startPoses[current][1];
+		H_INITIAL = startPoses[current][2];
 	}
 
 
@@ -243,9 +422,9 @@ public class Main{
 	 */
 	public static void main(String[] args) {
 		
-		LocalEV3.get().getLED().setPattern(2);
-		
+		LocalEV3.get().getLED().setPattern(1);
 		menu();
+		LocalEV3.get().getLED().setPattern(2);
 		
 		System.out.println(CHOO_CHOO[0]);
 
@@ -255,23 +434,32 @@ public class Main{
  		
  		LocalEV3.get().getLED().setPattern(1);
  		
- 		
+ 		System.out.print("\n-----------------\n   [HAND OPEN]\n \n[OPEN] [X] [GRAB]\n\n  [HAND CLOSED]\n-----------------\nMarvin Start Menu");
  		int pressButton = Button.waitForAnyPress();
  		
  		if(pressButton == Button.ID_DOWN){
  			HAND_OPEN = false;
  			Sound.beep();
- 			Sound.beep();
  			
  			Main.TIMER.resetTimer();
  			marvin.run();
  		}
- 		else if(pressButton == Button.ID_UP){
+ 		else if(pressButton == Button.ID_UP || pressButton == Button.ID_ENTER){
  			HAND_OPEN = true;
  			Sound.beep();
  			
  			Main.TIMER.resetTimer();
  			marvin.run();
+ 		}
+ 		else if(pressButton == Button.ID_RIGHT){
+ 			HAND_OPEN = true;
+ 			marvin.grab();
+ 			Delay.msDelay(800);
+ 		}
+ 		else if(pressButton == Button.ID_LEFT){
+ 			HAND_OPEN = false;
+ 			marvin.open();
+ 			Delay.msDelay(800);
  		}
 		
 		printf("@@@ The first ten million years were the worst. And the second ten million: they were the worst, too. The third ten million I didn't enjoy at all. After that, I went into a bit of a decline. @@@");

@@ -23,7 +23,7 @@ public abstract class Area {
 	/**
 	 * Marge d'erreur authorisé pour le calcul de cohérence, en mm
 	 */
-	protected static final int 	MARGE_ERREUR	= 30;
+	protected static final int 	MARGE_ERREUR	= 50;
 	
 	/**
 	 * @param id ID de l'Area
@@ -34,7 +34,7 @@ public abstract class Area {
 	
 	/**
 	 * @param p la position actuelle du robot.
-	 * @return l'area associé a cette position.
+	 * @return l'area associée a cette position.
 	 */
 	public static Area getAreaWithPosition(final Pose p){
 		if(p.getY() > (Main.Y_TOP_WHITE)){
@@ -121,34 +121,38 @@ public abstract class Area {
 	public abstract boolean getConsistency(Pose p);
 	
 	/**
+	 * minX<br/>
+	 * maxX<br/>
+	 * minY<br/>
+	 * maxY<br/>
 	 * @return un tableau contenant les borne minimal et maximal de l'area
 	 */
 	public abstract float[] getBorder();
 	
 	/**
 	 * @param currentColor la couleur que l'on vient de détecter
-	 * @param p la pose du robot
+	 * @param heading la direction du robot
 	 * @return l'area associée ce changement de couleur
 	 */
-	public abstract Area colorChange(Color currentColor, Pose p);
+	public abstract Area colorChange(Color currentColor, float heading);
 	
 	/**
 	 * Vérifie si l'angle est succeptible d'entrainer un doute lorsque l'on rencontre une ligne Verticale
-	 * @param p la pose du robot
+	 * @param h la pose du robot
 	 * @return vrai si l'angle ne perttra pas de définir avec précision la nouvelle area en fonction d'une couleur, faux sinon
 	 */
-	public static boolean checkAmbiguousAngleVertical(final Pose p){
-		return Math.abs(p.getHeading()) > (90 + AMBIGUOUS_ANGLE) || 
-				Math.abs(p.getHeading()) < (90 - AMBIGUOUS_ANGLE);
+	public static boolean checkAmbiguousAngleVertical(final float h){
+		return Math.abs(h) > (90 + AMBIGUOUS_ANGLE) || 
+				Math.abs(h) < (90 - AMBIGUOUS_ANGLE);
 	}
 	
 	/**
 	 * Vérifie si l'angle est succeptible d'entrainer un doute lorsque l'on rencontre une ligne horizontale
-	 * @param p la pose du robot
+	 * @param h la pose du robot
 	 * @return vrai si l'angle ne perttra pas de définir avec précision la nouvelle area en fonction d'une couleur, faux sinon
 	 */
-	public static boolean checkAmbiguousAngleHorizontal(final Pose p){
-		return Math.abs(p.getHeading()) > (0 + AMBIGUOUS_ANGLE) || 
-				Math.abs(p.getHeading()) < (180 - AMBIGUOUS_ANGLE);
+	public static boolean checkAmbiguousAngleHorizontal(final float h){
+		return Math.abs(h) > (0 + AMBIGUOUS_ANGLE) || 
+				Math.abs(h) < (180 - AMBIGUOUS_ANGLE);
 	}
 }

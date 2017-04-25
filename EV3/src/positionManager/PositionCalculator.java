@@ -6,6 +6,7 @@ import interfaces.DistanceGiver;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
 import interfaces.SignalListener;
+import shared.Color;
 import shared.IntPoint;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.localization.OdometryPoseProvider;
@@ -18,37 +19,27 @@ import lejos.robotics.navigation.Move.MoveType;
 /**
  * Class principale centralisant les informations de position. reçoit ou les informations de déplacement et calcule la cohérence en fonction des capteurs
  */
-public class PositionCalculator extends Thread implements PoseGiver, MoveListener {
+public class PositionCalculator implements PoseGiver, MoveListener {
 
 	/**
 	 * Pourcentage de la position de la carte qui sera utilisé pour calculer la position final une fois le mouvement arrété
 	 */
-	private static final float		MAP_PERCENT			= 0.5f;
-	
-	/**
-	 * Pourcentage de la position de la carte qui sera utilisé pour calculer la position final lorsque le mouvement est en cours
-	 */
-	private static final float		CONTINUOUS_PERCENT	= 0.2f;
+	private static final float		MAP_PERCENT			= 0.7f;
 	
 	/**
 	 *  Pourcentage de la position du areaManager qui sera utilisé pour calculer la position final une fois le mouvement arrété
 	 */
-	private static final float		AREA_PERCENT		= 0.5f;
+	private static final float		AREA_PERCENT		= 0.1f;
+	
+	/**
+	 * Distance au dela de laquelle on considère l'area comme invalidee
+	 */
+	private static final float		AREA_LOST			= 300f;
 	
 	/**
 	 * Distance maximum entre le point donné et le point calculé (en mm) avant qu'un gestionnaire de position se déclare en état de "lost".
 	 */
-	private static final int		MAX_SAMPLE_ERROR	= 250;
-	
-	/**
-	 * Temps entre deux mise à jour du mouvmeent en cours
-	 */
-	private static final int 		REFRESHRATE			= 500;
-	
-	/**
-	 * Temps entre deux mise à jour du mouvmeent en cours
-	 */
-	private static final int 		MIN_DIST_CONS_CHECK	= 230;
+	private static final int		MAX_SAMPLE_ERROR	= 300;
 	
 	/**
 	 * Instance du radar permettant de retourne la distance vers un objet situé devant le robot
@@ -78,12 +69,17 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	/**
 	 * Vrai si le positionManager se considère comme perdu, faux sinon
 	 */
-	private boolean					lost;
+	private Point					estimatedDest;
+
+	/**
+	 * Vrai si le robot circule en marche arriere
+	 */
+	private boolean 				setBackward = false;
 	
 	/**
-	 * Vrai si le robot avance en ligne droite en avant, faux sinon.
+	 * Vrai si le mouvement du Robot a ete interrompu, faux sinon
 	 */
-	private volatile boolean		isMovingForward;
+	private volatile boolean		hasBeenInterrupted = false;
 	
 	/**
 	 * Initialise les principaux paramètre initiaux du gestionnaire de position.
@@ -92,31 +88,13 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	 * @param ia le gestionnaire de l'IA et des objectifs
 	 */
 	public PositionCalculator(final MoveProvider mp, final DistanceGiver radar, final SignalListener ia){
-		super("PositionCalculator");
 		this.radar 					= radar;
 		this.odometryPoseProvider 	= new OdometryPoseProvider(mp);
 		this.marvin					= ia;
-		this.lost					= false;
-		this.isMovingForward		= false;
 		
 		initPose();
 		
 		Main.printf("[POSITION CALCULATOR]   : Initialized");
-	}
-	
-	@Override
-	public void run(){
-		Main.printf("[POSITION CALCULATOR]   : Started");
-		this.setPriority(MAX_PRIORITY);
-		while(!isInterrupted()){
-			
-			if(this.isMovingForward){
-				mapPositionUpdate(CONTINUOUS_PERCENT);
-			}
-			
-			syncWait();
-		}
-		Main.printf("[POSITION CALCULATOR]   : FInished");
 	}
 	
 	/**
@@ -142,89 +120,23 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 	
 	/**
 	 * Tente de mettre à jour la pose (position seulement) du robot en fonction des informations reçues
+	 * Met eventuellement à jour l'area
 	 */
 	private void updatePose() {
-		mapPositionUpdate(MAP_PERCENT);
-		AreaPositionUpdate();
-	}
-	
-	/**
-	 * Vérifie la cohérence des données de navigation, notament utilisé pour détecter une perte du robot.
-	 * @return vrai si les données de position sont cohérente, faux sinon
-	 */
-	private boolean checkConsistancy(){
-		int nCorrect = 1;
-				
-		// radar pas super fiable
-		// surtout pour l'angle
-		if(checkRadarConsistancy()){
-			nCorrect += 1;
+		if(this.area.getCurrentArea().getId() != 15){
+			areaPositionUpdate();
 		}
-				
-		// peut se tromper car capteur pas super fiable
-		if(this.area.getCurrentArea().getConsistency(this.odometryPoseProvider.getPose())){
-			nCorrect += 2;
-		}
-				
-		if(checkMapConsistancy()){
-			nCorrect += 3;
-		}
-				
-		// si on est plutôt sur de la ou on est alors on met à jour les areas si besoin
-		if(this.area.getCurrentArea().getId() == 15 && nCorrect > 6){
+		mapPositionUpdate();
+		if(this.area.getCurrentArea().getId() == 15 && checkRadarConsistancy()){
 			this.area.updateArea();
 		}
-				
-		// on est sur de la ou on est avec au moins 2 ou 3 de cohérent
-		return nCorrect > 3;
 	}
 	
 	/**
-	 * Utilisé pour détecter une perte en fonction des données radar, le radar n'est toutefois pas vraiment fiable...
-	 * @return vrai si la position actuelle est cohérente avec les données radar (en fonction de l'item que l'on a devant), faux sinon
-	 */
-	private boolean checkRadarConsistancy() {
-		int radarDistance = this.radar.getRadarDistance();
-		if(radarDistance < Main.RADAR_MAX_RANGE && radarDistance > Main.RADAR_MIN_RANGE){
-		
-			Pose tempPose = this.odometryPoseProvider.getPose();
-			tempPose.moveUpdate(radarDistance);
-			
-			// si on a pas detecter un mur... avec 3 cm de marge d'erreur
-			if(tempPose.getX() > 30 && tempPose.getX() < 1970 && tempPose.getY() < 2970 && tempPose.getY() > 30){
-				IntPoint nearest = this.eom.getNearestItem(new IntPoint(tempPose.getLocation()));
-				
-				if(nearest != null){
-					Point bestMatch = nearest.toLejosPoint();
-					
-					tempPose = this.odometryPoseProvider.getPose();
-					
-					return Math.abs(tempPose.distanceTo(bestMatch) - radarDistance) < MAX_SAMPLE_ERROR;
-				}
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Utilisé pour détecter une perte en fonction des données de la carte des Item
-	 * @return vrai si la position actuelle est cohérente avec les données de la carte, faux sinon
-	 */
-	private boolean checkMapConsistancy() {
-		IntPoint me = this.eom.getMarvinPosition();
-		
-		if(me != null){
-			Main.printf("Map consistency : me = " + me + " && MyPose = " + this.odometryPoseProvider.getPose());
-			return me.getDistance(new IntPoint(this.odometryPoseProvider.getPose())) < MAX_SAMPLE_ERROR;
-			
-		}
-		return false;
-	}
-
-	/**
 	 * Mets à jour la position en fonction des données de la zone actuelle
+	 * @return vrai si l'area est coherente avec la position, faux sinon (demande de mise à jour de l'area)
 	 */
-	private void AreaPositionUpdate() {
+	private boolean areaPositionUpdate() {
 		float[] borders = this.area.getCurrentArea().getBorder();
 		Pose myPose = this.odometryPoseProvider.getPose();
 		
@@ -250,136 +162,127 @@ public class PositionCalculator extends Thread implements PoseGiver, MoveListene
 		}
 		
 		myPose.setLocation(x, y);
-		this.odometryPoseProvider.setPose(myPose);
+		if(this.odometryPoseProvider.getPose().distanceTo(myPose.getLocation()) < AREA_LOST){
+			this.odometryPoseProvider.setPose(myPose);
+			return true;
+		}
+		return false;
+		
 	}
 
 	/**
 	 * Mets à jour la position en fonction des données de l'item le plus proche sur la map.
-	 * @param percent pourcentage de correction de la pose donnée par l'odomètre
 	 */
-	synchronized private void mapPositionUpdate(float percent) {
+	synchronized private void mapPositionUpdate() {
 		IntPoint me = this.eom.getMarvinPosition();
-		
 		Pose myPose = this.odometryPoseProvider.getPose();
 		
 		if(me != null){
 			
-			// Main.poseRealToSensor(myPose); // UNUSED (théoriquement utile si tout les capteurs étaient super précis...)
+			Main.poseRealToSensor(myPose);
 			
-			float x = me.x() * (percent) + myPose.getX() * (1 - percent);
-			float y = me.y() * (percent) + myPose.getY() * (1 - percent);
+			float x = me.x() * (MAP_PERCENT) + myPose.getX() * (1 - MAP_PERCENT);
+			float y = me.y() * (MAP_PERCENT) + myPose.getY() * (1 - MAP_PERCENT);
 			
 			myPose.setLocation(x, y);
 			
-			//Main.poseSensorToReal(myPose); // UNUSED idem...
+			Main.poseSensorToReal(myPose);
 			
 			this.odometryPoseProvider.setPose(myPose);
 		}
 	}
 
-	/**
-	 * Permet d'attendre pendant une durée définie.
-	 */
-	synchronized private void syncWait(){
-		try {
-			this.wait(REFRESHRATE);
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
-		}
-	}
-	
-	/**
-	 * Change l'angle du robot en fonction de la direction, si on avance en marche arrière alors l'angle est inverse (-180°).
-	 * Pas géré par la bibliothèque LeJos sinon...
-	 */
-	synchronized public void swap(){
-		Pose current = this.odometryPoseProvider.getPose();
-		float currentHeading = current.getHeading();
-		if(currentHeading > 0){
-			currentHeading = currentHeading - 180;
-		}
-		else{
-			currentHeading = currentHeading + 180;
-		}
-		
-		current.setHeading(currentHeading);
-		this.odometryPoseProvider.setPose(current);
-	}
-
-	public Pose getPosition() {
+	synchronized public Pose getPosition() {
 		return this.odometryPoseProvider.getPose();
-	}
-
-	synchronized public void sendFixX(int x) {
-		Pose tempPose = this.odometryPoseProvider.getPose();
-		
-		if(Math.abs(x - tempPose.getX()) < MAX_SAMPLE_ERROR){
-			Main.poseRealToSensor(tempPose);
-			tempPose.setLocation(x, tempPose.getY());
-			Main.poseSensorToReal(tempPose);
-			this.odometryPoseProvider.setPose(tempPose);
-		}
-	}
-
-	synchronized public void sendFixY(int y) {
-		Pose tempPose = this.odometryPoseProvider.getPose();
-		
-		if(Math.abs(y - tempPose.getY()) < MAX_SAMPLE_ERROR){
-			Main.poseRealToSensor(tempPose);
-			tempPose.setLocation(tempPose.getX(), y);
-			Main.poseSensorToReal(tempPose);
-			this.odometryPoseProvider.setPose(tempPose);
-		}
 	}
 
 	synchronized public int getAreaId() {
 		return this.area.getCurrentArea().getId();
 	}
 
-	public void setPose(Pose p) {
+	synchronized public void setPose(Pose p) {
 		this.odometryPoseProvider.setPose(p);
+		mapPositionUpdate();
 	}
 
-	public void moveStarted(Move event, MoveProvider mp) {
-		// void
+	synchronized public void moveStarted(Move event, MoveProvider mp) {
+		Main.printf("[POSITION CALCULATOR]   : start on : " + this.odometryPoseProvider.getPose().toString());
+	}
+	
+	/**
+	 * on ne met à jour le position que si l'on a effectué un déplacement de type TRAVEL (linéaire)
+	 * si on est en marche arriere alors l'ia nous indiquera notre position
+	 * @param distance distance parcouru sur la ligne
+	 */
+	synchronized public void startLine(final float distance) {
+		Pose myCurrentPose = this.odometryPoseProvider.getPose();
+		myCurrentPose.moveUpdate(distance);
+		this.estimatedDest = myCurrentPose.getLocation();
+		Main.printf("[POSITION CALCULATOR]   : estimated : " + this.estimatedDest);
 	}
 
 	synchronized public void moveStopped(Move event, MoveProvider mp) {
+		Main.printf("[POSITION CALCULATOR]   : end on estimated : " + this.odometryPoseProvider.getPose().toString());
 		
-		// on ne met à jour le position que si l'on a effectué un déplacement de type TRAVEL (linéaire)
-		if (event.getMoveType() == MoveType.TRAVEL){
+		if(!this.setBackward){
+			if (event.getMoveType() == MoveType.TRAVEL){
+				updatePose();
+			}
 			
-			updatePose();
+			Main.printf("[POSITION CALCULATOR]   : end on fixed : " + this.odometryPoseProvider.getPose().toString());
 			
-			// si on a parcouru une distance pas trop petite alors on vérifie si on est toujours consistent avec notre position
-			
-			if(event.getDistanceTraveled() > MIN_DIST_CONS_CHECK){
-				if (!checkConsistancy()){
-					if(!this.lost){
-						this.marvin.signalLost();
-						this.lost = true;
-					}
+			if(this.estimatedDest != null && !this.hasBeenInterrupted){
+				float errorDistance = getPosition().distanceTo(this.estimatedDest);
+				if(errorDistance > MAX_SAMPLE_ERROR && !Main.PRESSION){
+					this.marvin.signalLost();
 				}
-				else if(this.lost){
-					this.marvin.signalNoLost();
-					this.lost = false;
+				this.estimatedDest = null;
+			}
+		}
+		this.hasBeenInterrupted = false;
+	}
+	
+	/**
+	 * Utilisé pour détecter une perte en fonction des données radar, le radar n'est toutefois pas vraiment fiable...
+	 * @return vrai si la position actuelle est cohérente avec les données radar (en fonction de l'item que l'on a devant), faux sinon
+	 */
+	private boolean checkRadarConsistancy() {
+		if(!Main.USE_RADAR){
+			return true;
+		}
+		int radarDistance = this.radar.getRadarDistance();
+		if(radarDistance < Main.RADAR_MAX_RANGE && radarDistance > Main.RADAR_MIN_RANGE){
+		
+			Pose tempPose = this.odometryPoseProvider.getPose();
+			tempPose.moveUpdate(radarDistance);
+			
+			// si on a pas detecter un mur... avec 3 cm de marge d'erreur
+			if(tempPose.getX() > 30 && tempPose.getX() < 1970 && tempPose.getY() < 2970 && tempPose.getY() > 30){
+				IntPoint nearest = this.eom.getNearestItem(new IntPoint(tempPose.getLocation()));
+				
+				if(nearest != null){
+					Point bestMatch = nearest.toLejosPoint();
+					
+					tempPose = this.odometryPoseProvider.getPose();
+					
+					return Math.abs(tempPose.distanceTo(bestMatch) - radarDistance) < MAX_SAMPLE_ERROR;
 				}
 			}
 		}
-		
-				
-		
-				
-		//Main.printf("[POSITION CALCULATOR]   : " + this.odometryPoseProvider.getPose().toString());
-		//Main.printf("[POSITION CALCULATOR]   : Radar : " + this.radar.getRadarDistance());
-		
+		return true;
 	}
 
 	/**
-	 * Permet de spécifier si le robot avance en avant, utile afin de mettre à jour de manière fréquente la position en fonction de la carte des item.
-	 * @param b vrai si le robot avance en avant, faux sinon.
+	 * @param b vrai si le robot se déplacera en marche arriere, faux sinon
 	 */
-	public void setIsMovingForward(boolean b) {
-		this.isMovingForward = b;
+	synchronized public void setBackward(boolean b) {
+		this.setBackward = b;
+	}
+	
+	/**
+	 * @param b vrai si le robot a ete interrompu dans sa course par un obstacle ou un mur par exemple
+	 */
+	synchronized public void setInterrupted(boolean b) {
+		this.hasBeenInterrupted = b;
 	}
 }

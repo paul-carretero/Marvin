@@ -44,7 +44,7 @@ public class Engine{
 	/**
 	 * Permet de stabiliser la trajectoire en fonction des irrégularités de symétrie des roues
 	 */
-	private static final float 		RIGHT_WHEEL_CORRECTION 	= -0.25f; // positif ou negatif...
+	private static  float 			RIGHT_WHEEL_CORRECTION 	= -0.2f; // positif ou negatif...
 	
 	/**
 	 * Créer un nouvel Engine (un seul en tout sinon erreur).
@@ -94,6 +94,17 @@ public class Engine{
 	public MovePilot getPilot(){
 		return this.pilot;
 	}
+	
+	/**
+	 * met à jour la correction de la roue droite en fonction de la vitesse
+	 * @param speed une vitesse
+	 */
+	public void setrightWheelCorrection(int speed){
+		RIGHT_WHEEL_CORRECTION = -0.2f;
+		if(speed == Main.MAX_SPEED){
+			RIGHT_WHEEL_CORRECTION = 3f;
+		}
+	}
 
 	/**
 	 * @param ml un MoveListener qui sera informer a chaque début et fin de déplacement
@@ -129,12 +140,12 @@ public class Engine{
 	}
 	
 	/**
-	 * @param angle le robot effectura une rotation de Angle (positif ou négatif)
+	 * @param f le robot effectura une rotation de Angle (positif ou négatif)
 	 * @param speed vitesse de la rotation
 	 */
-	public void turnHere(int angle, int speed){
+	public void turnHere(float f, int speed){
 		this.pilot.setAngularSpeed(speed);
-		this.pilot.rotate(angle);
+		this.pilot.rotate(f);
 	}
 	
 	/**
