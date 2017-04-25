@@ -1,12 +1,15 @@
 package positionManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import aiPlanner.Main;
 import interfaces.AreaGiver;
 import interfaces.DistanceGiver;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
+import interfaces.PoseListener;
 import interfaces.SignalListener;
-import shared.Color;
 import shared.IntPoint;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.localization.OdometryPoseProvider;
@@ -59,22 +62,22 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 	/**
 	 * Interface retournant la position des item sur la carte, dont le robot
 	 */
-	private ItemGiver				eom;
+	private final ItemGiver			eom;
 	
 	/**
 	 * Classe donnant l'area actuelle sur laquelle est le robot.
 	 */
-	private AreaGiver 				area;
+	private final AreaGiver 		area;
 	
 	/**
 	 * Vrai si le positionManager se considère comme perdu, faux sinon
 	 */
-	private Point					estimatedDest;
+	private volatile Point			estimatedDest;
 
 	/**
 	 * Vrai si le robot circule en marche arriere
 	 */
-	private boolean 				setBackward = false;
+	private volatile boolean 		setBackward = false;
 	
 	/**
 	 * Vrai si le mouvement du Robot a ete interrompu, faux sinon
@@ -82,15 +85,25 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 	private volatile boolean		hasBeenInterrupted = false;
 	
 	/**
+	 * Liste de pose listener a mettre à jour a chaque fin de parcours
+	 */
+	private final List<PoseListener> poseListeners;
+	
+	/**
 	 * Initialise les principaux paramètre initiaux du gestionnaire de position.
 	 * @param mp le pilot du robot (de la librairie LeJos)
 	 * @param radar Une instance du radar du robot
 	 * @param ia le gestionnaire de l'IA et des objectifs
+	 * @param areaManager un gestionnaire de couleur et area
+	 * @param eom eyeOfMarvin, gestionnaire de position des items
 	 */
-	public PositionCalculator(final MoveProvider mp, final DistanceGiver radar, final SignalListener ia){
+	public PositionCalculator(final MoveProvider mp, final DistanceGiver radar, final SignalListener ia, ItemGiver eom, AreaGiver areaManager){
 		this.radar 					= radar;
 		this.odometryPoseProvider 	= new OdometryPoseProvider(mp);
 		this.marvin					= ia;
+		this.poseListeners			= new ArrayList<PoseListener>();
+		this.eom					= eom;
+		this.area					= areaManager;
 		
 		initPose();
 		
@@ -102,20 +115,24 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 	 */
 	public final void initPose(){
 		this.odometryPoseProvider.setPose(new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL));
+		broadcastPose();
 	}
 	
 	/**
-	 * @param eom un ItemGiver fournissant les données reçue par le serveur
+	 * @param pl un PoseListener a ajouter
 	 */
-	synchronized public void addItemGiver(final ItemGiver eom){
-		this.eom = eom;
+	public void addPoseListener(PoseListener pl){
+		this.poseListeners.add(pl);
 	}
 	
 	/**
-	 * @param area le gestionnaire des Area
+	 * Envoit a tous les PoseListener la dernière position de la pose
 	 */
-	synchronized public void addAreaManager(final AreaGiver area){
-		this.area = area;
+	private void broadcastPose(){
+		Pose mypose = this.odometryPoseProvider.getPose();
+		for(PoseListener p : this.poseListeners){
+			p.setPose(mypose);
+		}
 	}
 	
 	/**
@@ -196,17 +213,15 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 		return this.odometryPoseProvider.getPose();
 	}
 
-	synchronized public int getAreaId() {
-		return this.area.getCurrentArea().getId();
-	}
-
 	synchronized public void setPose(Pose p) {
 		this.odometryPoseProvider.setPose(p);
+		broadcastPose();
 		mapPositionUpdate();
+		broadcastPose();
 	}
 
 	synchronized public void moveStarted(Move event, MoveProvider mp) {
-		Main.printf("[POSITION CALCULATOR]   : start on : " + this.odometryPoseProvider.getPose().toString());
+		Main.log("[POSITION CALCULATOR]   : depart sur : " + this.odometryPoseProvider.getPose().toString());
 	}
 	
 	/**
@@ -218,18 +233,18 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 		Pose myCurrentPose = this.odometryPoseProvider.getPose();
 		myCurrentPose.moveUpdate(distance);
 		this.estimatedDest = myCurrentPose.getLocation();
-		Main.printf("[POSITION CALCULATOR]   : estimated : " + this.estimatedDest);
+		Main.log("[POSITION CALCULATOR]   : a l'arret, position future estimee : " + this.estimatedDest);
 	}
 
 	synchronized public void moveStopped(Move event, MoveProvider mp) {
-		Main.printf("[POSITION CALCULATOR]   : end on estimated : " + this.odometryPoseProvider.getPose().toString());
-		
+		Main.log("[POSITION CALCULATOR]   : arrivee sur la position estimee : " + this.odometryPoseProvider.getPose().toString());
+		broadcastPose();
 		if(!this.setBackward){
 			if (event.getMoveType() == MoveType.TRAVEL){
 				updatePose();
 			}
-			
-			Main.printf("[POSITION CALCULATOR]   : end on fixed : " + this.odometryPoseProvider.getPose().toString());
+			broadcastPose();
+			Main.printf("[POSITION CALCULATOR]   : Position fixee : " + this.odometryPoseProvider.getPose().toString());
 			
 			if(this.estimatedDest != null && !this.hasBeenInterrupted){
 				float errorDistance = getPosition().distanceTo(this.estimatedDest);
@@ -240,6 +255,7 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 			}
 		}
 		this.hasBeenInterrupted = false;
+		broadcastPose();
 	}
 	
 	/**

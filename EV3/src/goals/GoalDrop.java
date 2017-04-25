@@ -3,7 +3,6 @@ package goals;
 import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.PoseGiver;
-import lejos.hardware.Sound;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
 import positionManager.AreaManager;
@@ -39,6 +38,7 @@ public class GoalDrop extends Goal{
 	 * @param gf le GoalFactory
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
 	 * @param pg PoseGiver permettant de retourner une pose du robot
+	 * @param am Gestionnaire de couleur
 	 */
 	public GoalDrop(final GoalFactory gf, final Marvin ia, final PoseGiver pg, AreaManager am) {
 		super(gf, ia);
@@ -56,8 +56,8 @@ public class GoalDrop extends Goal{
 	 * Procedure pour lacher un palet et s'en écarter en marche arrière de 20 cm
 	 */
 	private void drop(){
+		Main.log("[MARVIN]                : drop palet");
 		this.ia.open();
-		this.ia.syncWait(100);
 		Main.HAVE_PALET = false;
 		this.ia.goBackward(350);
 	}
@@ -67,6 +67,7 @@ public class GoalDrop extends Goal{
 	 * @param currentPose la pose actuelle du robot
 	 */
 	private void goToDropZone(final Pose currentPose){
+		Main.log("[GOAL]                  : go to DropZone");
 		Point destination;
 		
 		if(Main.Y_OBJECTIVE_WHITE < 1500){
@@ -90,6 +91,7 @@ public class GoalDrop extends Goal{
 				drop();
 			}
 			else{
+				Main.log("[GOAL]                  : Ligne Blanche non detectee");
 				this.ia.goForward(100);
 				drop();
 			}

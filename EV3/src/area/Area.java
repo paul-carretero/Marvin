@@ -37,6 +37,9 @@ public abstract class Area {
 	 * @return l'area associée a cette position.
 	 */
 	public static Area getAreaWithPosition(final Pose p){
+		if(p == null){
+			return Main.getArea(15);
+		}
 		if(p.getY() > (Main.Y_TOP_WHITE)){
 			return Main.getArea(0);
 		}

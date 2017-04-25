@@ -13,11 +13,6 @@ public interface PoseGiver {
 	public Pose getPosition();
 	
 	/**
-	 * @return l'ID de l'aire courante basé sur le gestionnaire d'Area
-	 */
-	public int getAreaId();
-	
-	/**
 	 * permet à un autre objet de définir la Pose courrante.
 	 * @param p une nouvelle Pose.
 	 * @see Pose

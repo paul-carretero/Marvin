@@ -2,7 +2,6 @@ package goals;
 
 import aiPlanner.Marvin;
 import interfaces.PoseGiver;
-import lejos.robotics.navigation.Pose;
 
 /**
  * Objectif de déplacement à un point donné a la vitesse maximal
@@ -12,7 +11,7 @@ public class GoalTest extends Goal {
 	/**
 	 * Nom de l'objectif
 	 */
-	protected final GoalType 	NAME = GoalType.GO_TO_POSITION;
+	protected final GoalType 	NAME = GoalType.TEST;
 	
 	/**
 	 * PoseGiver permettant de retourner une pose du robot
@@ -31,12 +30,9 @@ public class GoalTest extends Goal {
 
 	@Override
 	public void start() {
-		Pose currentPose = this.pg.getPosition();
-
 		this.ia.goForward(200);
 		this.ia.turnHere(90);
 		this.ia.goForward(10000);
-		
 	}
 	
 	@Override

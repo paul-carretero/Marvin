@@ -41,6 +41,9 @@ public class GoalFactory {
 	 */
 	private final CentralIntelligenceService cis;
 	
+	/**
+	 * Gestionnaire des area et des couleurs
+	 */
 	private final AreaManager areaManager;
 	
 	/**

@@ -85,21 +85,22 @@ public class Marvin implements SignalListener, WaitProvider{
 		this.engine 				= new Engine(this);
 		this.eventManager 			= new EventHandler(this,this.radar);
 		this.graber 				= new Graber();
-		this.positionManager		= new PositionCalculator(this.engine.getPilot(), this.radar, this);
-		this.itemManager 			= new EyeOfMarvin(this.positionManager);
+		this.itemManager 			= new EyeOfMarvin();
+		this.areaManager			= new AreaManager();
+		this.positionManager		= new PositionCalculator(this.engine.getPilot(), this.radar, this, this.itemManager, this.areaManager);
 		this.directionCalculator 	= new DirectionCalculator(this.positionManager,this.itemManager);
-		this.areaManager			= new AreaManager(this.positionManager);
+		
 		this.server 				= new Server(this.itemManager);
 		this.audio					= new SoundManager();
 		this.cis					= new CentralIntelligenceService(this.itemManager, this.positionManager);
 
 		/**********************************************************/
 		
-		this.positionManager.addItemGiver(this.itemManager);
-		this.positionManager.addAreaManager(this.areaManager);
-		
 		this.engine.addMoveListener(this.eventManager);
 		this.engine.addMoveListener(this.positionManager);
+		
+		this.positionManager.addPoseListener(this.areaManager);
+		this.positionManager.addPoseListener(this.itemManager);
 		
 		/**********************************************************/
 		

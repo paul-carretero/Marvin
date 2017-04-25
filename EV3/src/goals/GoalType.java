@@ -35,5 +35,9 @@ public enum GoalType {
 	/**
 	 * GoalIntercept (se positionne de manière à géner le robot ennemi)
 	 */
-	INTERCEPT;
+	INTERCEPT, 
+	/**
+	 * GoalTest (lance une serie de commandes arbitraires)
+	 */
+	TEST;
 }

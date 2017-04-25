@@ -3,7 +3,7 @@ package itemManager;
 import java.util.List;
 import aiPlanner.Main;
 import interfaces.ItemGiver;
-import interfaces.PoseGiver;
+import interfaces.PoseListener;
 import interfaces.ServerListener;
 import lejos.robotics.navigation.Pose;
 import shared.Item;
@@ -18,12 +18,8 @@ import java.util.Iterator;
  * Définit et permet d'accéder aux Item de type ME (le robot) ou Palet.
  * @see Item
  */
-public class EyeOfMarvin implements ServerListener, ItemGiver {
-	
-	/**
-	 * Un poseGiver permettant d'obtenir la position du robot (entre autre)
-	 */
-	private final PoseGiver 			poseGiver;
+public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
+
 	/**
 	 * Map principace regroupant les différent Item du terrain.
 	 * Cette carte est mise à jour par le serveur et est utilisée pour récupérer la position des items.
@@ -62,12 +58,15 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	private static final int			MAX_SEARCH		= 150;
 	
 	/**
-	 * Créer une nouvelle instance du gestionnaire de la mastermap des items du terrain
-	 * @param pg Un poseGiver permettant d'obtenir la position du robot (entre autre)
+	 * Dernière pose connue du robot
 	 */
-	public EyeOfMarvin(final PoseGiver pg) {
+	private volatile Pose myPose;
+	
+	/**
+	 * Créer une nouvelle instance du gestionnaire de la mastermap des items du terrain
+	 */
+	public EyeOfMarvin() {
 		
-		this.poseGiver	= pg;
 		this.masterList 	= new ArrayList<Item>();
 		
 		Main.printf("[EYE OF MARVIN]         : Initialized");
@@ -185,7 +184,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 *******************************************************/
 	
 	synchronized public Item getNearestpalet() {
-		IntPoint myIntPose = new IntPoint(this.poseGiver.getPosition().getLocation());
+		IntPoint myIntPose = new IntPoint(this.myPose);
 		int distance = OUT_OF_RANGE;
 		Item res = null;
 		
@@ -216,18 +215,16 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 		return res;
 	}
 	
-	public Item getMarvinPosition(){
-		Pose p = this.poseGiver.getPosition();
-		Main.printf("[EYE OF MARVIN]                          :" + p);
-		Main.poseRealToSensor(p);
-		IntPoint myPosition = new IntPoint(p);
+	synchronized public Item getMarvinPosition(){
+		Main.printf("[EYE OF MARVIN]                          :" + this.myPose);
+		Main.poseRealToSensor(this.myPose);
+		IntPoint myPosition = new IntPoint(this.myPose);
 		averagize(myPosition);
 		
 		int distance = OUT_OF_RANGE;
 		int myIndex = -1;
 		int testDist = OUT_OF_RANGE;
 		
-		synchronized (this) {
 			for(int i = 0; i < this.masterList.size(); i++){
 				testDist = this.masterList.get(i).getDistance(myPosition);
 				if(testDist < distance){
@@ -240,7 +237,6 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 				this.masterList.get(myIndex).setType(ItemType.ME);
 				return this.masterList.get(myIndex);
 			}
-		}
 		return null;
 	}
 	
@@ -344,11 +340,14 @@ public class EyeOfMarvin implements ServerListener, ItemGiver {
 	 */
 	@SuppressWarnings("unused")
 	synchronized private void printMasterList(){
-		Main.printf("[EYE OF MARVIN]         : POS = " + this.poseGiver.getPosition());
 		Main.printf("--------------------------------" + this.masterList.size() + "Elements");
 		for(Item item : this.masterList) {
 			Main.printf("[EYE OF MARVIN]         : " + item.toString());
 		}
 		Main.printf("------------------------------------------------------");
+	}
+
+	synchronized public void setPose(Pose p) {
+		this.myPose = p;
 	}
 }

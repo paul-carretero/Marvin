@@ -3,13 +3,14 @@ package positionManager;
 import aiPlanner.Main;
 import area.Area;
 import interfaces.AreaGiver;
-import interfaces.PoseGiver;
+import interfaces.PoseListener;
+import lejos.robotics.navigation.Pose;
 import shared.Color;
 
 /**
  * class gérant la position du robot sur les 15+1 zones du terrain en fonction des lignes de couleurs.
  */
-public class AreaManager extends Thread implements AreaGiver {
+public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	
 	/**
 	 * Contient l'Area dans laquelle le robot se trouve
@@ -29,7 +30,7 @@ public class AreaManager extends Thread implements AreaGiver {
 	/**
 	 * Interface donnant la position du robot
 	 */
-	private final PoseGiver		pg;
+	private volatile Pose		myPose;
 	
 	/**
 	 * Objet sur lequelle notifier un thread en attente lorsque l'on detecte une couleur significative
@@ -47,14 +48,13 @@ public class AreaManager extends Thread implements AreaGiver {
 	private static final int REFRESHRATE = 100;
 	
 	/**
-	 * @param pg L'interface du PoseGiver initialisé précédement
+	 * initialise le gestionnaire de couleur
 	 */
-	public AreaManager(PoseGiver pg){
+	public AreaManager(){
 		super("AreaManager");
 		this.currentColor	= null;
 		this.colorSensor	= new ColorSensor();
-		this.pg				= pg;
-		this.currentArea	= Area.getAreaWithPosition(pg.getPosition());
+		this.currentArea	= Area.getAreaWithPosition(new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL));
 		Main.printf("[AREA MANAGER]          : Initialized");
 	}
 	
@@ -66,7 +66,7 @@ public class AreaManager extends Thread implements AreaGiver {
 		while(!isInterrupted()){
 			if(updateColor()){
 				synchronized(this){
-					this.currentArea = this.currentArea.colorChange(this.currentColor, this.pg.getPosition().getHeading());
+					this.currentArea = this.currentArea.colorChange(this.currentColor, this.myPose.getHeading());
 					Main.log("[AREA MANAGER]          : Couleur detecte : " + this.currentColor);
 					Main.printf("[AREA MANAGER]          : AREA = " + this.currentArea.toString());
 					if(this.currentColor != Color.GREY){
@@ -136,7 +136,7 @@ public class AreaManager extends Thread implements AreaGiver {
 	}
 
 	synchronized public void updateArea() {
-		this.currentArea = Area.getAreaWithPosition(this.pg.getPosition());
+		this.currentArea = Area.getAreaWithPosition(this.myPose);
 	}
 
 	/**
@@ -151,5 +151,9 @@ public class AreaManager extends Thread implements AreaGiver {
 	 */
 	synchronized public Color getLastLine(){
 		return this.lastLine;
+	}
+
+	synchronized public void setPose(Pose p) {
+		this.myPose = p;
 	}
 }
