@@ -17,6 +17,10 @@ import lejos.robotics.navigation.MovePilot;
 public class Engine{
 	
 	/**
+	 * Marge d'erreur maximum d'errur lors de l'attente
+	 */
+	private static final int MARGE_MS = 150;
+	/**
 	 * Roue gauche du robot
 	 */
 	private Wheel					leftWheel;
@@ -117,26 +121,30 @@ public class Engine{
 	 * Fait rouler le robot en avant sur une distance définie
 	 * @param distance distance à parcourir en millimètre
 	 * @param speed vitesse a utiliser pour ce parcours
+	 * @return vrai si l'on a attendu pendant toute la duree, faux sinon
 	 */
-	public void goForward(float distance, float speed){
+	public boolean goForward(float distance, float speed){
 		int waitTime = (int) (distance * 1000f/speed);
 		this.pilot.setLinearSpeed(speed);
 		this.pilot.forward();
-		syncWait(waitTime);
+		boolean res = syncWait(waitTime);
 		this.pilot.stop();
+		return res;
 	}
 	
 	/**
 	 * Fait rouler le robot en arrière sur une distance définie
 	 * @param distance distance à parcourir en millimètre
 	 * @param speed vitesse a utiliser pour ce parcours
+	 * @return vrai si l'on a attendu pendant toute la duree, faux sinon
 	 */
-	public void goBackward(float distance, float speed){
+	public boolean goBackward(float distance, float speed){
 		final int waitTime = (int) ((distance * 1000f)/speed);
 		this.pilot.setLinearSpeed(speed);
 		this.pilot.backward();
-		syncWait(waitTime);
+		boolean res = syncWait(waitTime);
 		this.pilot.stop();
+		return res;
 	}
 	
 	/**
@@ -158,8 +166,14 @@ public class Engine{
 	/**
 	 * Demande au moniteur d'attente d'attendre pendant une durée déterminé (éventuellemnt interruptible).
 	 * @param ms une durée en ms pendant laquelle attendre
+	 * @return vrai si l'on a attendu pendant toute la duree specifie, faux sinon
 	 */
-	public void syncWait(int ms){
+	public boolean syncWait(int ms){
+		
+		int start = Main.TIMER.getElapsedMs();
 		this.waitProvider.syncWait(ms);
+		int end = Main.TIMER.getElapsedMs();
+		
+		return Main.areApproximatelyEqual(end - start, ms, MARGE_MS);
 	}
 }

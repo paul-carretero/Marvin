@@ -40,56 +40,56 @@ public class ColorCalibrator {
 		
 		float[][] colors = new float[7][average.sampleSize()];
 		
-		System.out.println("Press enter to calibrate blue...");
-		Button.UP.waitForPressAndRelease();
+		System.out.println("Press a button to calibrate blue...");
+		Button.waitForAnyPress();
 		float[] blue = new float[average.sampleSize()];
 		average.fetchSample(blue, 0);
 		colors[COLOR_BLUE] = blue;
 		
-		Delay.msDelay(500);
+		Delay.msDelay(300);
 		
-		System.out.println("Press enter to calibrate red...");
-		Button.UP.waitForPressAndRelease();
+		System.out.println("Press a button to calibrate red...");
+		Button.waitForAnyPress();
 		float[] red = new float[average.sampleSize()];
 		average.fetchSample(red, 0);
 		colors[COLOR_RED] = red;
 		
-		Delay.msDelay(500);
+		Delay.msDelay(300);
 		
-		System.out.println("Press enter to calibrate green...");
-		Button.UP.waitForPressAndRelease();
+		System.out.println("Press a button to calibrate green...");
+		Button.waitForAnyPress();
 		float[] green = new float[average.sampleSize()];
 		average.fetchSample(green, 0);
 		colors[COLOR_GREEN] = green;
 		
-		Delay.msDelay(500);
+		Delay.msDelay(300);
 
-		System.out.println("Press enter to calibrate black...");
-		Button.UP.waitForPressAndRelease();
+		System.out.println("Press a button to calibrate black...");
+		Button.waitForAnyPress();
 		float[] black = new float[average.sampleSize()];
 		average.fetchSample(black, 0);
 		colors[COLOR_BLACK] = black;
 		
-		Delay.msDelay(500);
+		Delay.msDelay(300);
 		
-		System.out.println("Press enter to calibrate grey...");
-		Button.UP.waitForPressAndRelease();
+		System.out.println("Press a button to calibrate grey...");
+		Button.waitForAnyPress();
 		float[] grey = new float[average.sampleSize()];
 		average.fetchSample(grey, 0);
 		colors[COLOR_GREY] = grey;
 		
-		Delay.msDelay(500);
+		Delay.msDelay(300);
 		
-		System.out.println("Press enter to calibrate white...");
-		Button.UP.waitForPressAndRelease();
+		System.out.println("Press a button to calibrate white...");
+		Button.waitForAnyPress();
 		float[] white = new float[average.sampleSize()];
 		average.fetchSample(white, 0);
 		colors[COLOR_WHITE] = white;
 		
-		Delay.msDelay(500);
+		Delay.msDelay(300);
 		
-		System.out.println("Press enter to calibrate yellow...");
-		Button.UP.waitForPressAndRelease();
+		System.out.println("Press a button to calibrate yellow...");
+		Button.waitForAnyPress();
 		float[] yellow = new float[average.sampleSize()];
 		average.fetchSample(yellow, 0);
 		colors[COLOR_YELLOW] = yellow;
@@ -114,7 +114,7 @@ public class ColorCalibrator {
 		
 		while (again) {
 			float[] sample = new float[average.sampleSize()];
-			System.out.println("\nPress enter to detect a color...");
+			System.out.println("\nPress UP to detect a color...");
 			Button.UP.waitForPressAndRelease();
 			average.fetchSample(sample, 0);
 			double minscal = Double.MAX_VALUE;
@@ -170,7 +170,7 @@ public class ColorCalibrator {
 				colorSensor.setFloodlight(false);
 				again = false;
 			}
-			Delay.msDelay(500);
+			Delay.msDelay(300);
 		}
 		colorSensor.close();
 	}

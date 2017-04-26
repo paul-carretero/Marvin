@@ -54,7 +54,9 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		super("AreaManager");
 		this.currentColor	= null;
 		this.colorSensor	= new ColorSensor();
-		this.currentArea	= Area.getAreaWithPosition(new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL));
+		this.myPose 		= new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
+		this.currentArea	= Area.getAreaWithPosition(this.myPose);
+		
 		Main.printf("[AREA MANAGER]          : Initialized");
 	}
 	
@@ -66,9 +68,11 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		while(!isInterrupted()){
 			if(updateColor()){
 				synchronized(this){
-					this.currentArea = this.currentArea.colorChange(this.currentColor, this.myPose.getHeading());
-					Main.log("[AREA MANAGER]          : Couleur detecte : " + this.currentColor);
-					Main.printf("[AREA MANAGER]          : AREA = " + this.currentArea.toString());
+					if(Main.USE_AREA){
+						this.currentArea = this.currentArea.colorChange(this.currentColor, this.myPose.getHeading());
+						Main.log("[AREA MANAGER]          : Couleur detecte : " + this.currentColor);
+						Main.printf("[AREA MANAGER]          : AREA = " + this.currentArea.toString());
+					}
 					if(this.currentColor != Color.GREY){
 						this.lastLine = this.currentColor;
 					}
@@ -139,16 +143,10 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		this.currentArea = Area.getAreaWithPosition(this.myPose);
 	}
 
-	/**
-	 * @return la couleur courrante (sur la ou l'on est)
-	 */
 	synchronized public Color getColor() {
 		return this.currentColor;
 	}
 	
-	/**
-	 * @return la couleur de la dernière ligne traversee
-	 */
 	synchronized public Color getLastLine(){
 		return this.lastLine;
 	}

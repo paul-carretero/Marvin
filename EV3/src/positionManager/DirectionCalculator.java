@@ -1,11 +1,9 @@
 package positionManager;
 
 import aiPlanner.Main;
-import interfaces.ItemGiver;
 import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
-import shared.Item;
 
 /**
  * Classe permettant de calculer l'angle du robot (suivant les convention utilisées par LeJos)
@@ -17,11 +15,6 @@ public class DirectionCalculator {
 	 * Point de départ pour un déplacement en ligne droite en avant
 	 */
 	private Point 			 startPoint;
-	
-	/**
-	 * gestionnaire d'Item (gère la carte des Item)
-	 */
-	private final ItemGiver  eom;
 	
 	/**
 	 * Le gestionnaire de position fournissant une interface pour la mise à jour de la Pose actuelle.
@@ -37,12 +30,10 @@ public class DirectionCalculator {
 	/**
 	 * Créer une nouvelle instance du calculateur de Direction.
 	 * @param pg Le gestionnaire de position fournissant une interface pour la mise à jour de la Pose actuelle.
-	 * @param eom EyeOfMarvin un ItemGiver fournissant les données reçue par le serveur
 	 */
-	public DirectionCalculator(PoseGiver pg, ItemGiver eom){
+	public DirectionCalculator(PoseGiver pg){
 		this.startPoint	= null;
 		this.pg			= pg;
-		this.eom 		= eom;
 		
 		Main.printf("[DIRECTION CALCULATOR]  : Initialized");
 	}
@@ -66,11 +57,15 @@ public class DirectionCalculator {
 	 * @return vrai si on a effectué une mise à jour sur l'angle
 	 */
 	private boolean updateAngle(final Pose p){
-		Item me = this.eom.getMarvinPosition();
-		if(p != null && me != null){
-			float calcAngle = getAngle(me.toLejosPoint());
+		if(p != null){
+			float calcAngle = getAngle(p.getLocation());
+			float distance = p.distanceTo(this.startPoint);
+			float newCoeff = 0.5f;
+			if(distance > 2 * Main.FIABLE_DIST){
+				newCoeff = 0.7f;
+			}
 			if(calcAngle != NO_ANGLE_FOUND){
-				p.setHeading((float) ((p.getHeading() * 0.5) + (calcAngle * 0.5)));
+				p.setHeading((p.getHeading() * (1f - newCoeff)) + (calcAngle * newCoeff));
 				return true;
 			}
 		}
@@ -104,18 +99,7 @@ public class DirectionCalculator {
 	 * Enregistre la position initiale à ce moment.
 	 */
 	public void startLine(){
-		if(this.eom != null){
-			Item eomStart = this.eom.getMarvinPosition();
-			if(eomStart != null){
-				this.startPoint	= eomStart.toLejosPoint();
-			}
-			else{
-				Main.printf("[ERREUR]                : Impossible d'initialiser le DirectionCalculator (getMarvinPosition null)");
-			}
-		}
-		else{
-			Main.printf("[ERREUR]                : Impossible d'initialiser le DirectionCalculator (eom null)");
-		}
+		this.startPoint = this.pg.getPosition().getLocation();
 	}
 
 }

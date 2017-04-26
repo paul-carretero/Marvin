@@ -68,6 +68,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 	public EyeOfMarvin() {
 		
 		this.masterList 	= new ArrayList<Item>();
+		this.myPose 		= new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
 		
 		Main.printf("[EYE OF MARVIN]         : Initialized");
 	}
@@ -244,6 +245,19 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 		return this.masterList.indexOf(position) != -1;
 	}
 	
+	synchronized public boolean canPlayAgain() {
+		
+		for(Item item : this.masterList){
+			if(item.getType() == ItemType.PALET 
+					&& item.y() > (Main.Y_BOTTOM_WHITE + MIN_PALET_MARGE)
+					&& item.y() < (Main.Y_TOP_WHITE - MIN_PALET_MARGE) 
+			){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/********************************************************
 	 * Aide a la detection d'ennemies
 	 *******************************************************/
@@ -295,7 +309,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 			}
 			
 			for (Item entry : this.masterList){
-				if(Main.areApproximatelyEqual(entry.x(), x, MAX_SEARCH)){
+				if(entry.y() < Main.Y_TOP_WHITE && entry.y() > Main.Y_BOTTOM_WHITE && Main.areApproximatelyEqual(entry.x(), x, MAX_SEARCH)){
 					resList.add(entry);
 				}
 			}
@@ -350,4 +364,5 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 	synchronized public void setPose(Pose p) {
 		this.myPose = p;
 	}
+
 }

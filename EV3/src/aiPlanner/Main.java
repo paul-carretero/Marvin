@@ -28,6 +28,21 @@ public class Main{
 	public static       boolean	USE_RADAR			= true;
 	
 	/**
+	 * Defini si l'on doit utiliser le gestionnaire d'area ou juste de couleur
+	 */
+	public static       boolean	USE_AREA			= false;
+	
+	/**
+	 * Defini si l'on doit utiliser les sons
+	 */
+	public static final boolean	USE_SOUND			= false;
+	
+	/**
+	 * Defini si l'on doit detecter les positions ennemies
+	 */
+	public static final boolean	USE_CIS				= true;
+	
+	/**
 	 * position en x intiale du robot
 	 */
 	public static 		int X_INITIAL 				= 1000;
@@ -163,7 +178,7 @@ public class Main{
 	/**
 	 * Distance (en mm) au délà de laquelle on considère la distance parcouru suffisament fiable pour avoir une calcul précis de l'angle.
 	 */
-	public static final int FIABLE_DIST	= 700;
+	public static final int FIABLE_DIST	= 400;
 	
 	/**
 	 * Vitesse d'une rotation standard
@@ -188,6 +203,11 @@ public class Main{
 	 * Vitesse maximum sans perte de precision En mm/s
 	 */
 	public static final int   MAX_SPEED				= 300;
+	
+	/**
+	 * Distance maximum considéré comme fiable
+	 */
+	public static final float MAX_SAFE_DISTANCE		= 1000;
 	
 	/**
 	 * Duree d'un grab

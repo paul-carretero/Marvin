@@ -148,15 +148,12 @@ public class EventHandler extends Thread implements MoveListener{
 			Main.PRESSION 		 = false;
 			
 		}
-		else{
-			if(!this.currentPression && this.pressSensor.isPressed()){
-
-				this.currentPression = true;
-				Main.PRESSION		 = true;
-				this.aiPlanner.signalPression();
-				this.lastPression	 = Main.TIMER.getElapsedSec();
+		else if(this.pressSensor.isPressed()){
+			this.currentPression = true;
+			Main.PRESSION		 = true;
+			this.aiPlanner.signalPression();
+			this.lastPression	 = Main.TIMER.getElapsedSec();
 				
-			}
 		}
 	}
 	

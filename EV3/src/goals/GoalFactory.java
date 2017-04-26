@@ -4,12 +4,12 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import aiPlanner.Marvin;
+import interfaces.AreaGiver;
 import interfaces.DistanceGiver;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
 import itemManager.CentralIntelligenceService;
 import lejos.robotics.geometry.Point;
-import positionManager.AreaManager;
 
 /**
  * Factory permettant de construire une pile d'objectif et de construire des objectif à l'aide de primitive simple
@@ -44,7 +44,7 @@ public class GoalFactory {
 	/**
 	 * Gestionnaire des area et des couleurs
 	 */
-	private final AreaManager areaManager;
+	private final AreaGiver areaManager;
 	
 	/**
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
@@ -54,7 +54,7 @@ public class GoalFactory {
 	 * @param cis CentralIntelligenceService permettant de donner des points d'interceptions
 	 * @param areaManager gestionnaire de couleurs
 	 */
-	public GoalFactory(final Marvin ia, final PoseGiver pg, final ItemGiver eom, final DistanceGiver radar, final CentralIntelligenceService cis, final AreaManager areaManager){
+	public GoalFactory(final Marvin ia, final PoseGiver pg, final ItemGiver eom, final DistanceGiver radar, final CentralIntelligenceService cis, final AreaGiver areaManager){
 		this.ia			= ia;
 		this.pg			= pg;
 		this.eom		= eom;
@@ -69,7 +69,7 @@ public class GoalFactory {
 	 */
 	public Deque<Goal> initializeStartGoals(){
 		Deque<Goal> goals = new ConcurrentLinkedDeque<Goal>();
-		goals.push(goalTest());
+		goals.push(play());
 		return goals;
 	}
 	
@@ -85,7 +85,7 @@ public class GoalFactory {
 	 * @return un objectif de type play
 	 */
 	public Goal play(){
-		return new GoalPlay(this, this.ia);
+		return new GoalPlay(this, this.ia, this.eom);
 	}
 	
 	/**
@@ -125,7 +125,7 @@ public class GoalFactory {
 	 * @return Un Objectif de Recalibration
 	 */
 	public Goal goalRecalibrate(){
-		return new GoalRecalibrate(this, this.ia, this.eom, this.pg);
+		return new GoalRecalibrate(this, this.ia, this.eom, this.pg, this.areaManager);
 	}
 	
 	/**

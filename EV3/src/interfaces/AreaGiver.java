@@ -22,4 +22,9 @@ public interface AreaGiver {
 	 * @return retourne la couleur courrante
 	 */
 	public Color getColor();
+	
+	/**
+	 * @return la couleur de la dernière ligne de couleur traversee
+	 */
+	public Color getLastLine();
 }

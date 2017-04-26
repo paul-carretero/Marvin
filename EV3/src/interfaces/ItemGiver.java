@@ -45,4 +45,9 @@ public interface ItemGiver {
 	 * @return une liste contenant les item situé entre minRange et maxRange du point start
 	 */
 	public List<IntPoint> searchPosition(IntPoint start, int minRange, int maxRange);
+	
+	/**
+	 * @return vrai si il reste des palet sur la map, faux sinon
+	 */
+	public boolean canPlayAgain();
 }

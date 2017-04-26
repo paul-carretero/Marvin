@@ -75,17 +75,32 @@ public class GoalGrabPessimist extends Goal {
 	protected void correctPosition(){
 		Pose currentPose = this.pg.getPosition();
 
-		int distance = (int)currentPose.distanceTo(this.palet);
-		int angleCorrection = (int)currentPose.relativeBearing(this.palet);
+		float distance = currentPose.distanceTo(this.palet);
+
+		float angleCorrection = currentPose.relativeBearing(this.palet);
 		
 		this.ia.turnHere(angleCorrection);
 		
+		this.ia.setSpeed(Main.MAX_SPEED);
 		if(distance < (Main.RADAR_DEFAULT_RANGE - MARGE)){
 			this.ia.goBackward(Main.RADAR_DEFAULT_RANGE - distance);
 		}
 		else if(distance > Main.RADAR_DEFAULT_RANGE + MARGE){
+			if(distance > Main.MAX_SAFE_DISTANCE){
+				this.ia.goForward((distance - Main.RADAR_DEFAULT_RANGE)/2f);
+				
+				currentPose = this.pg.getPosition();
+				distance = currentPose.distanceTo(this.palet);
+				angleCorrection = currentPose.relativeBearing(this.palet);
+				this.ia.turnHere(angleCorrection);
+			}
 			this.ia.goForward(distance - Main.RADAR_DEFAULT_RANGE);
 		}
+		this.ia.setSpeed(Main.CRUISE_SPEED);
+		
+		currentPose = this.pg.getPosition();
+		angleCorrection = currentPose.relativeBearing(this.palet);
+		this.ia.turnHere(angleCorrection);
 	}
 	
 	/**
@@ -96,7 +111,6 @@ public class GoalGrabPessimist extends Goal {
 		if(Main.PRESSION){
 			Main.HAVE_PALET = true;
 			this.ia.grab();
-			this.ia.syncWait(100);
 			return true;
 		}
 		return false;
@@ -192,14 +206,14 @@ public class GoalGrabPessimist extends Goal {
 	 * Un grab n'est pas réussi si on a pas eu de confirmation du capteur de pression.
 	 */
 	protected void failGrabHandler() {
-		this.ia.goBackward(350);
+		this.ia.goBackward(400);
 		this.ia.turnHere(15);
 		this.ia.goForward(400);
 		
 		if(!tryGrab()){
 			this.ia.goBackward(400);
 			this.ia.turnHere(-30);
-			this.ia.goForward(450);
+			this.ia.goForward(400);
 			tryGrab();
 		}
 	}

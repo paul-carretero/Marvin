@@ -13,26 +13,22 @@ import interfaces.SignalListener;
 import shared.IntPoint;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.localization.OdometryPoseProvider;
-import lejos.robotics.navigation.Move;
-import lejos.robotics.navigation.MoveListener;
 import lejos.robotics.navigation.MoveProvider;
 import lejos.robotics.navigation.Pose;
-import lejos.robotics.navigation.Move.MoveType;
-
 /**
  * Class principale centralisant les informations de position. reçoit ou les informations de déplacement et calcule la cohérence en fonction des capteurs
  */
-public class PositionCalculator implements PoseGiver, MoveListener {
+public class PositionCalculator implements PoseGiver {
 
 	/**
 	 * Pourcentage de la position de la carte qui sera utilisé pour calculer la position final une fois le mouvement arrété
 	 */
-	private static final float		MAP_PERCENT			= 0.7f;
+	private static final float		MAP_PERCENT			= 0.5f;
 	
 	/**
 	 *  Pourcentage de la position du areaManager qui sera utilisé pour calculer la position final une fois le mouvement arrété
 	 */
-	private static final float		AREA_PERCENT		= 0.1f;
+	private static final float		AREA_PERCENT		= 0f;
 	
 	/**
 	 * Distance au dela de laquelle on considère l'area comme invalidee
@@ -75,16 +71,6 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 	private volatile Point			estimatedDest;
 
 	/**
-	 * Vrai si le robot circule en marche arriere
-	 */
-	private volatile boolean 		setBackward = false;
-	
-	/**
-	 * Vrai si le mouvement du Robot a ete interrompu, faux sinon
-	 */
-	private volatile boolean		hasBeenInterrupted = false;
-	
-	/**
 	 * Liste de pose listener a mettre à jour a chaque fin de parcours
 	 */
 	private final List<PoseListener> poseListeners;
@@ -110,43 +96,25 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 		Main.printf("[POSITION CALCULATOR]   : Initialized");
 	}
 	
-	/**
-	 * Définie la pose actuelle du robot comme la pose initiale au commencement du jeu
-	 */
-	public final void initPose(){
-		this.odometryPoseProvider.setPose(new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL));
-		broadcastPose();
-	}
-	
-	/**
-	 * @param pl un PoseListener a ajouter
-	 */
-	public void addPoseListener(PoseListener pl){
-		this.poseListeners.add(pl);
-	}
-	
-	/**
-	 * Envoit a tous les PoseListener la dernière position de la pose
-	 */
-	private void broadcastPose(){
-		Pose mypose = this.odometryPoseProvider.getPose();
-		for(PoseListener p : this.poseListeners){
-			p.setPose(mypose);
-		}
-	}
+	/********************************************************
+	 * Correction de la position du robot
+	 *******************************************************/
 	
 	/**
 	 * Tente de mettre à jour la pose (position seulement) du robot en fonction des informations reçues
 	 * Met eventuellement à jour l'area
+	 * @return La distance avec la position sur la map
 	 */
-	private void updatePose() {
-		if(this.area.getCurrentArea().getId() != 15){
+	private float updatePose() {
+		if(this.area.getCurrentArea().getId() != 15 && Main.USE_AREA){
 			areaPositionUpdate();
 		}
-		mapPositionUpdate();
-		if(this.area.getCurrentArea().getId() == 15 && checkRadarConsistancy()){
+		float dist = mapPositionUpdate();
+		if(Main.USE_AREA && this.area.getCurrentArea().getId() == 15 && checkRadarConsistancy()){
 			this.area.updateArea();
 		}
+		
+		return dist;
 	}
 	
 	/**
@@ -189,12 +157,15 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 
 	/**
 	 * Mets à jour la position en fonction des données de l'item le plus proche sur la map.
+	 * @return la distance entre la position theroque et celle sur la carte
 	 */
-	synchronized private void mapPositionUpdate() {
-		IntPoint me = this.eom.getMarvinPosition();
+	synchronized private float mapPositionUpdate() {
 		Pose myPose = this.odometryPoseProvider.getPose();
-		
+		IntPoint me = this.eom.getMarvinPosition();
+		float distance = Integer.MAX_VALUE;
 		if(me != null){
+			
+			distance = myPose.distanceTo(me.toLejosPoint());
 			
 			Main.poseRealToSensor(myPose);
 			
@@ -207,7 +178,12 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 			
 			this.odometryPoseProvider.setPose(myPose);
 		}
+		return distance;
 	}
+	
+	/********************************************************
+	 * Modification de la position du robot
+	 *******************************************************/
 
 	synchronized public Pose getPosition() {
 		return this.odometryPoseProvider.getPose();
@@ -219,10 +195,35 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 		mapPositionUpdate();
 		broadcastPose();
 	}
-
-	synchronized public void moveStarted(Move event, MoveProvider mp) {
-		Main.log("[POSITION CALCULATOR]   : depart sur : " + this.odometryPoseProvider.getPose().toString());
+	
+	/**
+	 * Définie la pose actuelle du robot comme la pose initiale au commencement du jeu
+	 */
+	public final void initPose(){
+		this.odometryPoseProvider.setPose(new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL));
+		broadcastPose();
 	}
+	
+	/**
+	 * @param pl un PoseListener a ajouter
+	 */
+	synchronized public void addPoseListener(PoseListener pl){
+		this.poseListeners.add(pl);
+	}
+	
+	/**
+	 * Envoit a tous les PoseListener la dernière position de la pose
+	 */
+	synchronized private void broadcastPose(){
+		Pose mypose = this.odometryPoseProvider.getPose();
+		for(PoseListener p : this.poseListeners){
+			p.setPose(mypose);
+		}
+	}
+	
+	/********************************************************
+	 * Notifications des types de mouvements
+	 *******************************************************/
 	
 	/**
 	 * on ne met à jour le position que si l'on a effectué un déplacement de type TRAVEL (linéaire)
@@ -233,30 +234,46 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 		Pose myCurrentPose = this.odometryPoseProvider.getPose();
 		myCurrentPose.moveUpdate(distance);
 		this.estimatedDest = myCurrentPose.getLocation();
+		
+		Main.log("[POSITION CALCULATOR]   : depart sur : " + this.odometryPoseProvider.getPose().toString());
 		Main.log("[POSITION CALCULATOR]   : a l'arret, position future estimee : " + this.estimatedDest);
 	}
 
-	synchronized public void moveStopped(Move event, MoveProvider mp) {
+	/**
+	 * Operation a effectuer pour garantire la consistance de la position a la fin d'un deplacement en type lieaire
+	 * @param hasBeenInterrupted vrai si le deplacement a ete interrompu, faux sinon
+	 */
+	synchronized public void endLine(boolean hasBeenInterrupted){
 		Main.log("[POSITION CALCULATOR]   : arrivee sur la position estimee : " + this.odometryPoseProvider.getPose().toString());
+		
 		broadcastPose();
-		if(!this.setBackward){
-			if (event.getMoveType() == MoveType.TRAVEL){
-				updatePose();
+		float dist = updatePose();
+		broadcastPose();
+		
+		Main.printf("[POSITION CALCULATOR]   : (linear) Position fixee : " + this.odometryPoseProvider.getPose().toString());
+			
+		if(!hasBeenInterrupted){
+			float errorDistance = getPosition().distanceTo(this.estimatedDest);
+			if(errorDistance > MAX_SAMPLE_ERROR && !Main.PRESSION || dist > MAX_SAMPLE_ERROR * 2){
+				this.marvin.signalLost();
 			}
 			broadcastPose();
-			Main.printf("[POSITION CALCULATOR]   : Position fixee : " + this.odometryPoseProvider.getPose().toString());
-			
-			if(this.estimatedDest != null && !this.hasBeenInterrupted){
-				float errorDistance = getPosition().distanceTo(this.estimatedDest);
-				if(errorDistance > MAX_SAMPLE_ERROR && !Main.PRESSION){
-					this.marvin.signalLost();
-				}
-				this.estimatedDest = null;
-			}
 		}
-		this.hasBeenInterrupted = false;
-		broadcastPose();
+		this.estimatedDest = null;
 	}
+	
+	/**
+	 * Operation a effectuer pour garantire la consistance de la position a la fin d'un deplacement en type turnHere
+	 */
+	synchronized public void endTurn(){
+		Main.printf("[POSITION CALCULATOR]   : (turn) arrivee sur la position estimee : " + this.odometryPoseProvider.getPose().toString());	
+		broadcastPose();
+		this.estimatedDest = null;
+	}
+	
+	/********************************************************
+	 * Calcul de coherence des informations de positions
+	 *******************************************************/
 	
 	/**
 	 * Utilisé pour détecter une perte en fonction des données radar, le radar n'est toutefois pas vraiment fiable...
@@ -286,19 +303,5 @@ public class PositionCalculator implements PoseGiver, MoveListener {
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * @param b vrai si le robot se déplacera en marche arriere, faux sinon
-	 */
-	synchronized public void setBackward(boolean b) {
-		this.setBackward = b;
-	}
-	
-	/**
-	 * @param b vrai si le robot a ete interrompu dans sa course par un obstacle ou un mur par exemple
-	 */
-	synchronized public void setInterrupted(boolean b) {
-		this.hasBeenInterrupted = b;
 	}
 }

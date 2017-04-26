@@ -33,7 +33,7 @@ public class SoundManager extends Thread{
 				if(!this.audioList.isEmpty()){
 					try{
 						final File track = new File(this.audioList.poll());
-						//Sound.playSample(track);
+						Sound.playSample(track);
 					}
 					catch (Exception e) {
 						Main.printf("[AUDIO]                 : Impossible de lire le fichier");

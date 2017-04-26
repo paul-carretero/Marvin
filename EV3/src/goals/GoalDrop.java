@@ -2,10 +2,10 @@ package goals;
 
 import aiPlanner.Main;
 import aiPlanner.Marvin;
+import interfaces.AreaGiver;
 import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
-import positionManager.AreaManager;
 import shared.Color;
 
 /**
@@ -31,7 +31,7 @@ public class GoalDrop extends Goal{
 	/**
 	 * Gestionnaire des couleurs
 	 */
-	private AreaManager am;
+	private AreaGiver		am;
 
 
 	/**
@@ -40,7 +40,7 @@ public class GoalDrop extends Goal{
 	 * @param pg PoseGiver permettant de retourner une pose du robot
 	 * @param am Gestionnaire de couleur
 	 */
-	public GoalDrop(final GoalFactory gf, final Marvin ia, final PoseGiver pg, AreaManager am) {
+	public GoalDrop(final GoalFactory gf, final Marvin ia, final PoseGiver pg, AreaGiver am) {
 		super(gf, ia);
 		this.poseGiver	= pg;
 		this.tryCount	= 0;
@@ -64,6 +64,7 @@ public class GoalDrop extends Goal{
 	
 	/**
 	 * Tente de faire déplacer le robot jusqu'a la zone de drop des palet (but adverse).
+	 * Divise en deux si la distance a parcourir est trop importante pour garantir la fiabilité
 	 * @param currentPose la pose actuelle du robot
 	 */
 	private void goToDropZone(final Pose currentPose){
@@ -79,6 +80,13 @@ public class GoalDrop extends Goal{
 		
 		this.ia.pushGoal(this);
 		this.ia.pushGoal(this.gf.goalGoToPosition(destination));
+		
+		if(Math.abs(destination.getY() - currentPose.getY()) > Main.MAX_SAFE_DISTANCE){
+			float intermediateY = (float) ( (destination.getY() + currentPose.getY()) / 2f);
+			
+			this.ia.pushGoal(this.gf.goalGoToPosition(new Point(currentPose.getX(), intermediateY )));
+		}
+		
 		
 		this.tryCount++;
 	}

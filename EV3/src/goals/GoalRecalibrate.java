@@ -4,6 +4,7 @@ import java.util.List;
 
 import aiPlanner.Main;
 import aiPlanner.Marvin;
+import interfaces.AreaGiver;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
 import lejos.robotics.geometry.Point;
@@ -31,6 +32,11 @@ public class GoalRecalibrate extends Goal {
 	 * 
 	 */
 	private final PoseGiver	pg;
+
+	/**
+	 * Fourni des primitives pour la gestion des couleurs et des areas
+	 */
+	private final AreaGiver am;
 	
 	/**
 	 * 
@@ -42,15 +48,19 @@ public class GoalRecalibrate extends Goal {
 	 * @param ia instance de Marvin, gestionnaire de l'ia et des moteurs
 	 * @param eom EyeOfMarvin, permet de fournir les positions des items
 	 * @param pg PoseGiver permettant de retourner une pose du robot
+	 * @param am Fourni des primitives pour la gestion des couleurs et des areas
 	 */
-	public GoalRecalibrate(final GoalFactory gf, final Marvin ia, final ItemGiver eom, final PoseGiver pg) {
+	public GoalRecalibrate(final GoalFactory gf, final Marvin ia, final ItemGiver eom, final PoseGiver pg, final AreaGiver am) {
 		super(gf, ia);
 		this.eom	= eom;
 		this.pg		= pg;
+		this.am		= am;
 	}
 	
 	@Override
 	public void start() {
+		
+		boolean success = false;
 		
 		this.ia.addMeWakeUpOnColor();
 		
@@ -67,7 +77,7 @@ public class GoalRecalibrate extends Goal {
 		}
 		BACKWARD = !BACKWARD;
 
-		Color color = this.ia.getColor();
+		Color color = this.am.getColor();
 		
 		this.ia.removeMeWakeUpOnColor();
 		
@@ -102,7 +112,6 @@ public class GoalRecalibrate extends Goal {
 			
 			System.out.println("start = " + start);
 			
-			// si il n'y en a eu qu'un qui est supprime de la ligne
 			if(start != null){
 				List<IntPoint> resList = this.eom.searchPosition(start, 200, 400);
 				
@@ -119,11 +128,15 @@ public class GoalRecalibrate extends Goal {
 					
 					this.pg.setPose(myPose);
 					System.out.println("calculated pose = " + myPose);
+					success = true;
 				}
 			}
 		}
 		this.ia.setSpeed(Main.CRUISE_SPEED);
-		this.ia.signalNoLost();
+		if(success){
+			this.ia.signalNoLost();
+		}
+		
 	}
 	
 	/**
