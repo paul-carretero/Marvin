@@ -4,13 +4,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-import area.*;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.robotics.navigation.Pose;
 import lejos.utility.Delay;
-import shared.Color;
 import shared.IntPoint;
 import shared.Timer;
 
@@ -247,28 +245,6 @@ public class Main{
 	};
 		
 	/**
-	 * tableau comprenant l'ensemble des 16 Area du terrain (séparée par les lignes de couleurs)
-	 */
-	public static final Area[] AREAS				= {
-		new TopArea(0),
-		new BorderLeftArea(1,Y_TOP_WHITE,Color.WHITE,Y_BLUE_LINE,Color.BLUE),
-		new InnerArea(2,X_BLACK_LINE,Color.BLACK,X_YELLOW_LINE,Color.YELLOW,Y_TOP_WHITE,Color.WHITE,Y_BLUE_LINE,Color.BLUE),
-		new InnerArea(3,X_RED_LINE,Color.RED,X_BLACK_LINE,Color.BLUE,Y_TOP_WHITE,Color.WHITE,Y_BLUE_LINE,Color.BLUE),
-		new BorderRightArea(4,Y_TOP_WHITE,Color.WHITE,Y_BLUE_LINE,Color.BLUE),	
-		new BorderLeftArea(5,Y_BLUE_LINE,Color.BLUE,Y_BLACK_LINE,Color.BLACK),
-		new CenterArea(6),
-		new BorderRightArea(7,Y_BLUE_LINE,Color.BLUE,Y_BLACK_LINE,Color.BLACK),		
-		new BorderLeftArea(8,Y_BLACK_LINE,Color.BLACK,Y_GREEN_LINE,Color.GREEN),
-		new BorderRightArea(9,Y_BLACK_LINE,Color.BLACK,Y_GREEN_LINE,Color.GREEN),
-		new BorderLeftArea(10,Y_GREEN_LINE,Color.GREEN,Y_BOTTOM_WHITE,Color.WHITE),
-		new InnerArea(11,X_BLACK_LINE,Color.BLACK,X_YELLOW_LINE,Color.YELLOW,Y_GREEN_LINE,Color.GREEN,Y_BOTTOM_WHITE,Color.WHITE),
-		new InnerArea(12,X_RED_LINE,Color.RED,X_BLACK_LINE,Color.BLACK,Y_GREEN_LINE,Color.GREEN,Y_BOTTOM_WHITE,Color.WHITE),
-		new BorderRightArea(13,Y_GREEN_LINE,Color.GREEN,Y_BOTTOM_WHITE,Color.WHITE),
-		new BottomArea(14),
-		new DefaultArea(15)
-	};
-	
-	/**
 	 * CHOO CHOO
 	 */
 	public static final String[] CHOO_CHOO = new String[]{
@@ -291,14 +267,6 @@ public class Main{
 			"\n   o  o  O  O\n____  ____    O\n MN \\_|[]|_'__Y\n______|__|_|__|}\no--oo==oo--OOO\\\\=\n\n\n",
 			"\n    o  o  O  O\n,____  ____    O\n| MN \\_|[]|_'__Y\n|______|__|_|__|}\noo--oo==oo--OOO\\\\\n\nMARVIN : STAND-BY\n"
 	};
-	
-	/**
-	 * @param id l'id de l'area dans le tableau (entre 0 et 15)
-	 * @return retourne l'Area ayant l'indice i dans le tableau
-	 */
-	public static Area getArea(final int id){
-		return AREAS[id];
-	}
 	
 	/**
 	 * Les capteurs de couleur notament étant légèrement en avant du point a partir duquel nous calculons la position, 

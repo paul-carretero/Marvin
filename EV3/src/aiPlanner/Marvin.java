@@ -14,13 +14,15 @@ import lejos.hardware.ev3.LocalEV3;
 import lejos.robotics.navigation.Pose;
 import motorsManager.Engine;
 import motorsManager.Graber;
-import positionManager.AreaManager;
 import positionManager.DirectionCalculator;
 import positionManager.PositionCalculator;
 import positionManager.VisionSensor;
 
 import java.util.Iterator;
 import java.util.Map;
+
+import area.AreaManager;
+
 import java.util.Deque;
 
 /**
@@ -280,7 +282,7 @@ public class Marvin implements SignalListener, WaitProvider{
 			myFuturePose.moveUpdate((-1) * distance);
 			
 			this.engine.goBackward(distance, this.linearSpeed);
-			this.positionManager.setPose(myFuturePose);
+			this.positionManager.setPose(myFuturePose, false);
 		}
 	}
 	

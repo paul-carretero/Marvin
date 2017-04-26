@@ -1,19 +1,27 @@
 package area;
 
-import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
 import shared.Color;
 
 /**
- * Regroupe les différentes informations sur les "Area" du terrain (définies en annexes)
- * Permet en autre de vérifier le cohérence des données de navigation
+ * Regroupe les informations correspondant à la position du robot par rapport à une ligne de couleur
  */
 public abstract class Area {
 
 	/**
-	 * ID de l'area
+	 * couleur de la ligne associée
 	 */
-	protected final int 		id;
+	protected final Color 		lineColor;
+	
+	/**
+	 * vrai si les données sont utilisable, faux sinon
+	 */
+	protected boolean			isConsistent;
+	
+	/**
+	 * vrai si la robot possède une position en x plus petite que cette ligne, faux sinon
+	 */
+	protected boolean			smallerThan;
 	
 	/**
 	 * Angle par rapport à une ligne de couleur en dessous duquel on ne peut pas considérer être fiable pour un changement d'Area
@@ -21,141 +29,71 @@ public abstract class Area {
 	protected final static int 	AMBIGUOUS_ANGLE	= 10;
 	
 	/**
-	 * Marge d'erreur authorisé pour le calcul de cohérence, en mm
+	 * Marge d'erreur en dessous de laquelle ne mettre pas à jour
 	 */
-	protected static final int 	MARGE_ERREUR	= 50;
+	protected static final int 	MIN_ERREUR		= 50;
 	
 	/**
-	 * @param id ID de l'Area
+	 * Marge d'erreur au dessus de laquelle on préfèrera se fier à la position du gestionnaire de position (erreur du capteur)
+	 * et ou on ne mettra donc pas à jour
 	 */
-	public Area(final int id){
-		this.id = id;
-	}
+	protected static final int	MAX_ERREUR		= 400;
 	
 	/**
-	 * @param p la position actuelle du robot.
-	 * @return l'area associée a cette position.
+	 * Taux de correction de la pose
 	 */
-	public static Area getAreaWithPosition(final Pose p){
-		if(p == null){
-			return Main.getArea(15);
-		}
-		if(p.getY() > (Main.Y_TOP_WHITE)){
-			return Main.getArea(0);
-		}
-		else if(p.getY() < (Main.Y_BOTTOM_WHITE)){
-			return Main.getArea(14);
-		}
-		else if(p.getY() < (Main.Y_GREEN_LINE) && p.getY() > (Main.Y_BOTTOM_WHITE)){
-			if(p.getX() < (Main.X_YELLOW_LINE)){
-				return Main.getArea(10);
-			}
-			else if(p.getX() > (Main.X_YELLOW_LINE) && p.getX() < (Main.X_BLACK_LINE)){
-				return Main.getArea(11);
-			}
-			else if(p.getX() > (Main.X_BLACK_LINE) && p.getX() < (Main.X_RED_LINE)){
-				return Main.getArea(12);
-			}
-			else if(p.getX() > (Main.X_RED_LINE)){
-				return Main.getArea(13);
-			}
-		}
-		else if(p.getY() < (Main.Y_BLACK_LINE) && p.getY() > (Main.Y_GREEN_LINE)){
-			if(p.getX() < (Main.X_YELLOW_LINE)){
-				return Main.getArea(8);
-			}
-			else if(p.getX() > (Main.X_YELLOW_LINE) && p.getX() < (Main.X_BLACK_LINE)){
-				return Main.getArea(6);
-			}
-			else if(p.getX() > (Main.X_BLACK_LINE) && p.getX() < (Main.X_RED_LINE)){
-				return Main.getArea(6);
-			}
-			else if(p.getX() > (Main.X_RED_LINE)){
-				return Main.getArea(9);
-			}
-		}
-		else if(p.getY() < (Main.Y_BLUE_LINE) && p.getY() > (Main.Y_BLACK_LINE)){
-			if(p.getX() < (Main.X_YELLOW_LINE)){
-				return Main.getArea(5);
-			}
-			else if(p.getX() > (Main.X_YELLOW_LINE) && p.getX() < (Main.X_BLACK_LINE)){
-				return Main.getArea(6);
-			}
-			else if(p.getX() > (Main.X_BLACK_LINE) && p.getX() < (Main.X_RED_LINE)){
-				return Main.getArea(6);
-			}
-			else if(p.getX() > (Main.X_RED_LINE)){
-				return Main.getArea(7);
-			}
-		}
-		else if(p.getY() < (Main.Y_TOP_WHITE) && p.getY() > (Main.Y_BLUE_LINE)){
-			if(p.getX() < (Main.X_YELLOW_LINE)){
-				return Main.getArea(1);
-			}
-			else if(p.getX() > (Main.X_YELLOW_LINE) && p.getX() < (Main.X_BLACK_LINE)){
-				return Main.getArea(2);
-			}
-			else if(p.getX() > (Main.X_BLACK_LINE) && p.getX() < (Main.X_RED_LINE)){
-				return Main.getArea(3);
-			}
-			else if(p.getX() > (Main.X_RED_LINE)){
-				return Main.getArea(4);
-			}
-		}
-		return Main.getArea(15);
+	protected static final float PERCENT		= 0.2f;
+	
+	/**
+	 * @param color couleur de la ligne associée
+	 */
+	public Area(final Color color){
+		this.lineColor = color;
 	}
 	
 	@Override
 	public String toString(){
-		return "A"+this.id;
+		return "A"+this.lineColor + " @ " + this.smallerThan;
 	}
-	
-	/**
-	 * @return l'ID de l'area
-	 */
-	public int getId(){
-		return this.id;
-	}
-	
-	/**
-	 * @param p une position du robot
-	 * @return vrai si il est possible que la pose soit comprise dans cette area, faux sinon
-	 */
-	public abstract boolean getConsistency(Pose p);
-	
-	/**
-	 * minX<br/>
-	 * maxX<br/>
-	 * minY<br/>
-	 * maxY<br/>
-	 * @return un tableau contenant les borne minimal et maximal de l'area
-	 */
-	public abstract float[] getBorder();
 	
 	/**
 	 * @param currentColor la couleur que l'on vient de détecter
 	 * @param heading la direction du robot
-	 * @return l'area associée ce changement de couleur
 	 */
-	public abstract Area colorChange(Color currentColor, float heading);
-	
-	/**
-	 * Vérifie si l'angle est succeptible d'entrainer un doute lorsque l'on rencontre une ligne Verticale
-	 * @param h la pose du robot
-	 * @return vrai si l'angle ne perttra pas de définir avec précision la nouvelle area en fonction d'une couleur, faux sinon
-	 */
-	public static boolean checkAmbiguousAngleVertical(final float h){
-		return Math.abs(h) > (90 + AMBIGUOUS_ANGLE) || 
-				Math.abs(h) < (90 - AMBIGUOUS_ANGLE);
+	public void colorChange(Color currentColor, float heading){
+		if(currentColor == this.lineColor){
+			this.smallerThan = !this.smallerThan;
+			this.isConsistent = checkConsistantAngle(heading);
+		}
 	}
 	
 	/**
-	 * Vérifie si l'angle est succeptible d'entrainer un doute lorsque l'on rencontre une ligne horizontale
-	 * @param h la pose du robot
-	 * @return vrai si l'angle ne perttra pas de définir avec précision la nouvelle area en fonction d'une couleur, faux sinon
+	 * met a jour les donnees de l'area avec la pose actuelle
+	 * @param p la position actuelle du robot.
+	 * @param force force la mise à jour en fonction de la pose, si faux, ne met à jour que si inconsistance
 	 */
-	public static boolean checkAmbiguousAngleHorizontal(final float h){
-		return Math.abs(h) > (0 + AMBIGUOUS_ANGLE) || 
-				Math.abs(h) < (180 - AMBIGUOUS_ANGLE);
+	public void updateAreaWithPosition(final Pose p, boolean force){
+		if(force || !this.isConsistent){
+			updateAreaWithPosition(p);
+		}
 	}
+
+	/**
+	 * @param p la pose du robot sur laquelle mettre à jour
+	 */
+	protected abstract void updateAreaWithPosition(Pose p);
+
+	/**
+	 * met à jour la pose en fonction des données de cette area
+	 * @param p une pose
+	 */
+	public abstract void updatePose(Pose p);
+	
+	/**
+	 * Vérifie si l'angle est succeptible d'entrainer un doute lorsque l'on rencontre une ligne en X OU en y (selon l'area)
+	 * @param h la pose du robot
+	 * @return vrai si l'angle permet de définir convenablement la direction du robot
+	 */
+	protected abstract boolean checkConsistantAngle(final float h);
+
 }

@@ -126,7 +126,7 @@ public class GoalRecalibrate extends Goal {
 					
 					Pose myPose = new Pose(me.x(), me.y(), angle);
 					
-					this.pg.setPose(myPose);
+					this.pg.setPose(myPose, true);
 					System.out.println("calculated pose = " + myPose);
 					success = true;
 				}

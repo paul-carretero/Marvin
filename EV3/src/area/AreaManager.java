@@ -1,10 +1,13 @@
-package positionManager;
+package area;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import aiPlanner.Main;
-import area.Area;
 import interfaces.AreaGiver;
 import interfaces.PoseListener;
 import lejos.robotics.navigation.Pose;
+import positionManager.ColorSensor;
 import shared.Color;
 
 /**
@@ -15,7 +18,7 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	/**
 	 * Contient l'Area dans laquelle le robot se trouve
 	 */
-	private Area 				currentArea;
+	private final List<Area> 	areas;
 	
 	/**
 	 * Capteur de couleur
@@ -28,6 +31,11 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	private Color				currentColor;
 	
 	/**
+	 * Couleur de la dernière ligne traversee
+	 */
+	private Color 				lastLine;
+	
+	/**
 	 * Interface donnant la position du robot
 	 */
 	private volatile Pose		myPose;
@@ -35,12 +43,7 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	/**
 	 * Objet sur lequelle notifier un thread en attente lorsque l'on detecte une couleur significative
 	 */
-	private Object				wakeUp;
-	
-	/**
-	 * Couleur de la dernière ligne traversee
-	 */
-	private Color 				lastLine;
+	private volatile Object		wakeUp;
 	
 	/**
 	 * durée entre deux vérification de couleur
@@ -55,7 +58,14 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		this.currentColor	= null;
 		this.colorSensor	= new ColorSensor();
 		this.myPose 		= new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
-		this.currentArea	= Area.getAreaWithPosition(this.myPose);
+		this.areas			= new ArrayList<Area>();
+		
+		this.areas.add(new XArea(Color.YELLOW));
+		this.areas.add(new XArea(Color.RED));
+		this.areas.add(new YArea(Color.BLUE));
+		this.areas.add(new YArea(Color.GREEN));
+		
+		updateArea(true);
 		
 		Main.printf("[AREA MANAGER]          : Initialized");
 	}
@@ -65,22 +75,22 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		Main.printf("[AREA MANAGER]          : Started");
 		this.setPriority(Thread.NORM_PRIORITY);
 		this.colorSensor.lightOn();
+		
 		while(!isInterrupted()){
 			if(updateColor()){
 				synchronized(this){
-					if(Main.USE_AREA){
-						this.currentArea = this.currentArea.colorChange(this.currentColor, this.myPose.getHeading());
-						Main.log("[AREA MANAGER]          : Couleur detecte : " + this.currentColor);
-						Main.printf("[AREA MANAGER]          : AREA = " + this.currentArea.toString());
-					}
 					if(this.currentColor != Color.GREY){
 						this.lastLine = this.currentColor;
+						for(Area area : this.areas){
+							area.colorChange(this.currentColor, this.myPose.getHeading());
+						}
 					}
 				}
 				wakeUpOnColor();
 			}
 			syncWait();
 		}
+		
 		this.colorSensor.lightOff();
 		Main.printf("[AREA MANAGER]          : Finished");
 	}
@@ -101,7 +111,6 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	
 	/**
 	 * Vérifie si la vouleur à changer par rapport à la dernière vérification.
-	 * A pour effet de bord d'informer le gestionnaire de position si une ligne est detecté (où l'on est sûr de ses coordonnées)
 	 * @return vrai si la couleur a changé, faux sinon.
 	 */
 	synchronized private boolean updateColor(){
@@ -135,12 +144,10 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		}
 	}
 
-	synchronized public Area getCurrentArea() {
-		return this.currentArea;
-	}
-
-	synchronized public void updateArea() {
-		this.currentArea = Area.getAreaWithPosition(this.myPose);
+	synchronized public void updateArea(boolean force) {
+		for(Area area : this.areas){
+			area.updateAreaWithPosition(this.myPose , force);
+		}
 	}
 
 	synchronized public Color getColor() {
@@ -153,5 +160,11 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 
 	synchronized public void setPose(Pose p) {
 		this.myPose = p;
+	}
+	
+	synchronized public void updatePose(Pose p) {
+		for(Area area : this.areas){
+			area.updatePose(p);
+		}
 	}
 }

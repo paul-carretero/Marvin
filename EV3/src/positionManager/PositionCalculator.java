@@ -26,16 +26,6 @@ public class PositionCalculator implements PoseGiver {
 	private static final float		MAP_PERCENT			= 0.5f;
 	
 	/**
-	 *  Pourcentage de la position du areaManager qui sera utilisé pour calculer la position final une fois le mouvement arrété
-	 */
-	private static final float		AREA_PERCENT		= 0f;
-	
-	/**
-	 * Distance au dela de laquelle on considère l'area comme invalidee
-	 */
-	private static final float		AREA_LOST			= 300f;
-	
-	/**
 	 * Distance maximum entre le point donné et le point calculé (en mm) avant qu'un gestionnaire de position se déclare en état de "lost".
 	 */
 	private static final int		MAX_SAMPLE_ERROR	= 300;
@@ -61,7 +51,8 @@ public class PositionCalculator implements PoseGiver {
 	private final ItemGiver			eom;
 	
 	/**
-	 * Classe donnant l'area actuelle sur laquelle est le robot.
+	 * Gestionnaire d'area permettant de récupérer des informations sur les couleurs 
+	 * et de mettre à jour sa pose en fonction de la position des lignes traversées
 	 */
 	private final AreaGiver 		area;
 	
@@ -106,55 +97,17 @@ public class PositionCalculator implements PoseGiver {
 	 * @return La distance avec la position sur la map
 	 */
 	private float updatePose() {
-		if(this.area.getCurrentArea().getId() != 15 && Main.USE_AREA){
-			areaPositionUpdate();
-		}
+		this.area.updatePose(getPosition());
+		broadcastPose();
 		float dist = mapPositionUpdate();
-		if(Main.USE_AREA && this.area.getCurrentArea().getId() == 15 && checkRadarConsistancy()){
-			this.area.updateArea();
+		broadcastPose();
+		if(checkRadarConsistancy()){
+			this.area.updateArea(false);
 		}
-		
+
 		return dist;
 	}
 	
-	/**
-	 * Mets à jour la position en fonction des données de la zone actuelle
-	 * @return vrai si l'area est coherente avec la position, faux sinon (demande de mise à jour de l'area)
-	 */
-	private boolean areaPositionUpdate() {
-		float[] borders = this.area.getCurrentArea().getBorder();
-		Pose myPose = this.odometryPoseProvider.getPose();
-		
-		float x = myPose.getX();
-		float y = myPose.getY();
-		
-		// si minX est plus grand que le x actuel
-		if(borders[0] > myPose.getX()){
-			x = (1 - AREA_PERCENT) * x + (AREA_PERCENT) * borders[0];
-		}
-		
-		// si x est plus grand que maxX
-		if(borders[1] < myPose.getX()){
-			x = (1 - AREA_PERCENT) * x + (AREA_PERCENT) * borders[1];
-		}
-		
-		if(borders[2] > myPose.getY()){
-			y = (1 - AREA_PERCENT) * y + (AREA_PERCENT) * borders[2];
-		}
-		
-		if(borders[3] < myPose.getY()){
-			y = (1 - AREA_PERCENT) * y + (AREA_PERCENT) * borders[3];
-		}
-		
-		myPose.setLocation(x, y);
-		if(this.odometryPoseProvider.getPose().distanceTo(myPose.getLocation()) < AREA_LOST){
-			this.odometryPoseProvider.setPose(myPose);
-			return true;
-		}
-		return false;
-		
-	}
-
 	/**
 	 * Mets à jour la position en fonction des données de l'item le plus proche sur la map.
 	 * @return la distance entre la position theroque et celle sur la carte
@@ -189,11 +142,13 @@ public class PositionCalculator implements PoseGiver {
 		return this.odometryPoseProvider.getPose();
 	}
 
-	synchronized public void setPose(Pose p) {
+	synchronized public void setPose(Pose p, boolean updateArea) {
 		this.odometryPoseProvider.setPose(p);
 		broadcastPose();
 		mapPositionUpdate();
 		broadcastPose();
+		this.area.updateArea(updateArea);
+		
 	}
 	
 	/**

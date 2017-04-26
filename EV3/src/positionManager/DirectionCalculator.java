@@ -83,7 +83,7 @@ public class DirectionCalculator {
 		if(this.startPoint != null){
 			Pose myPose = this.pg.getPosition();
 			if(updateAngle(myPose)){
-				this.pg.setPose(myPose);
+				this.pg.setPose(myPose, false);
 			}
 			Main.printf("[DIRECTION CALCULATOR]  : nouveau angle pose = " + myPose);
 		}

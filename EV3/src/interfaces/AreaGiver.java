@@ -1,6 +1,7 @@
 package interfaces;
 
 import area.Area;
+import lejos.robotics.navigation.Pose;
 import shared.Color;
 
 /**
@@ -9,14 +10,16 @@ import shared.Color;
  */
 public interface AreaGiver {
 	/**
-	 * @return une Area correspondant à l'Area courrante
+	 * Informe le gestionnaire d'Area qu'il peut tenter de mettre à jour l'area courrante en fonction de la position actuelle.
+	 * @param force force la mise à jour des areas avec la dernière pose, si faux alors ne met pas à jour si area cohérente
 	 */
-	public Area getCurrentArea();
+	public void updateArea(boolean force);
 	
 	/**
-	 * Informe le gestionnaire d'Area qu'il peut tenter de mettre à jour l'area courrante en fonction de la position actuelle.
+	 * Met à jour la pose p avec les données des Areas
+	 * @param p Une pose du robot
 	 */
-	public void updateArea();
+	public void updatePose(Pose p);
 	
 	/**
 	 * @return retourne la couleur courrante
