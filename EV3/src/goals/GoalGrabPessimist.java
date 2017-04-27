@@ -207,13 +207,13 @@ public class GoalGrabPessimist extends Goal {
 	 */
 	protected void failGrabHandler() {
 		this.ia.goBackward(400);
-		this.ia.turnHere(15);
-		this.ia.goForward(400);
+		this.ia.turnHere(16);
+		this.ia.goForward(450);
 		
 		if(!tryGrab()){
-			this.ia.goBackward(400);
-			this.ia.turnHere(-30);
-			this.ia.goForward(400);
+			this.ia.goBackward(450);
+			this.ia.turnHere(-32);
+			this.ia.goForward(450);
 			tryGrab();
 		}
 	}

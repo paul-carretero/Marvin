@@ -17,6 +17,10 @@ import lejos.robotics.geometry.Point;
 public class GoalFactory {
 	
 	/**
+	 * Nombre maximum de grab en echec avant d'ajouter un objectif de recalibration
+	 */
+	private static final int MAX_FAILED_GRAB = 6;
+	/**
 	 * instance de Marvin, gestionnaire de l'ia et des moteurs
 	 */
 	private	final Marvin		ia;
@@ -32,6 +36,10 @@ public class GoalFactory {
 	 * Permet de stocker l'état de la dernière tentative degrab pour décider si on doit choisir un objectif de grab de type optimiste ou pessimiste à l'avenir
 	 */
 	private	boolean 			lastGrabOk;
+	/**
+	 * Permet de stocker l'état de la dernière tentative degrab pour décider si on doit choisir un objectif de grab de type optimiste ou pessimiste à l'avenir
+	 */
+	private	int		 			failGrabCount = 0;
 	/**
 	 * un DistanceGiver permettant de donner des distance radar
 	 */
@@ -79,6 +87,16 @@ public class GoalFactory {
 	 */
 	public void setLastGrab(final boolean b){
 		this.lastGrabOk = b;
+		if(this.lastGrabOk){
+			this.failGrabCount = 0;
+		}
+		else{
+			this.failGrabCount++;
+			if(this.failGrabCount > MAX_FAILED_GRAB){
+				this.ia.pushGoal(goalRecalibrate());
+				this.failGrabCount = 0;
+			}
+		}
 	}
 	
 	/**
