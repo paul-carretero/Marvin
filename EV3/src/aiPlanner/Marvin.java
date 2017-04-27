@@ -253,20 +253,18 @@ public class Marvin implements SignalListener, WaitProvider{
 	 */
 	public void goForward(final float distance){
 		if(distance > 0 && this.linearSpeed > 0){	
-			
-			this.engine.setrightWheelCorrection(this.linearSpeed);
-			
+						
 			if(distance > Main.FIABLE_DIST){
 				this.directionCalculator.startLine();
 			}
 			this.positionManager.startLine(distance);
+			this.areaManager.setDistance(distance);
 			
 			boolean everythingFine = this.engine.goForward(distance, this.linearSpeed);
 			
 			this.directionCalculator.reset();
-			
-			this.engine.setrightWheelCorrection(0);
-			
+			this.areaManager.setDistance(0);
+
 			this.positionManager.endLine(everythingFine);
 		}
 	}

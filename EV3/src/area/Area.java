@@ -45,10 +45,17 @@ public abstract class Area {
 	protected static final float PERCENT		= 0.2f;
 	
 	/**
-	 * @param color couleur de la ligne associée
+	 * AreaManager permettant d'obtenir une position et un objectif de position du robot
 	 */
-	public Area(final Color color){
-		this.lineColor = color;
+	protected final AreaManager am;
+	
+	/**
+	 * @param color couleur de la ligne associée
+	 * @param am AreaManager permettant d'obtenir une position et un objectif de position du robot
+	 */
+	public Area(final Color color,final AreaManager am){
+		this.lineColor	= color;
+		this.am			= am;
 	}
 	
 	@Override
@@ -59,11 +66,14 @@ public abstract class Area {
 	/**
 	 * @param currentColor la couleur que l'on vient de détecter
 	 * @param heading la direction du robot
+	 * @param distance distance que le robot parcoure en avant
 	 */
-	public void colorChange(Color currentColor, float heading){
-		if(currentColor == this.lineColor){
-			this.smallerThan = !this.smallerThan;
-			this.isConsistent = checkConsistantAngle(heading);
+	public void colorChange(final Color currentColor, final float heading, final float distance){
+		if(currentColor == this.lineColor && this.isConsistent){
+			this.isConsistent = this.isConsistent && checkConsistantAngle(heading) && checkColorValidity(distance);
+			if(this.isConsistent){
+				this.smallerThan = !this.smallerThan;
+			}
 		}
 	}
 	
@@ -72,7 +82,7 @@ public abstract class Area {
 	 * @param p la position actuelle du robot.
 	 * @param force force la mise à jour en fonction de la pose, si faux, ne met à jour que si inconsistance
 	 */
-	public void updateAreaWithPosition(final Pose p, boolean force){
+	public void updateAreaWithPosition(final Pose p, final boolean force){
 		if(force || !this.isConsistent){
 			updateAreaWithPosition(p);
 		}
@@ -81,13 +91,13 @@ public abstract class Area {
 	/**
 	 * @param p la pose du robot sur laquelle mettre à jour
 	 */
-	protected abstract void updateAreaWithPosition(Pose p);
+	protected abstract void updateAreaWithPosition(final Pose p);
 
 	/**
 	 * met à jour la pose en fonction des données de cette area
 	 * @param p une pose
 	 */
-	public abstract void updatePose(Pose p);
+	public abstract void updatePose(final Pose p);
 	
 	/**
 	 * Vérifie si l'angle est succeptible d'entrainer un doute lorsque l'on rencontre une ligne en X OU en y (selon l'area)
@@ -95,5 +105,11 @@ public abstract class Area {
 	 * @return vrai si l'angle permet de définir convenablement la direction du robot
 	 */
 	protected abstract boolean checkConsistantAngle(final float h);
+	
+	/**
+	 * @param distance une distance que le robot est en train de parcourire en avant
+	 * @return vrai si il est théoriquement possible de rencontrer la couleur, faux sinon
+	 */
+	protected abstract boolean checkColorValidity(final float distance);
 
 }

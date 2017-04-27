@@ -1,6 +1,7 @@
 package goals;
 
 import java.util.List;
+import java.util.Random;
 
 import aiPlanner.Main;
 import aiPlanner.Marvin;
@@ -135,6 +136,10 @@ public class GoalRecalibrate extends Goal {
 		this.ia.setSpeed(Main.CRUISE_SPEED);
 		if(success){
 			this.ia.signalNoLost();
+		}
+		else{
+			Random r = new Random();
+			this.ia.turnHere(r.nextInt(360) - 180);
 		}
 		
 	}

@@ -1,4 +1,4 @@
-package positionManager;
+package aiPlanner;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,7 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 
-import aiPlanner.Main;
+import area.ColorSensor;
 import lejos.hardware.Button;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.port.Port;

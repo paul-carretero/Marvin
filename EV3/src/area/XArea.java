@@ -18,9 +18,10 @@ public class XArea extends Area {
 	/**
 	 * Initialise cette Area avec la couleur d'une ligne en x (jaune ou rouge)
 	 * @param color la couleur d'une ligne en x, soit rouge, soit jaune
+	 * @param am AreaManager permettant d'obtenir une position et un objectif de position du robot
 	 */
-	public XArea(Color color) {
-		super(color);
+	public XArea(final Color color, final AreaManager am) {
+		super(color,am);
 		
 		if(color == Color.YELLOW){
 			this.xLine = Main.X_YELLOW_LINE;
@@ -33,13 +34,13 @@ public class XArea extends Area {
 	}
 
 	@Override
-	public void updateAreaWithPosition(Pose p) {		
+	public void updateAreaWithPosition(final Pose p) {		
 		this.smallerThan = (p.getX() < this.xLine);
 		this.isConsistent = (Math.abs(p.getX() - this.xLine) > Area.MIN_ERREUR);
 	}
 
 	@Override
-	public void updatePose(Pose p) {
+	public void updatePose(final Pose p) {
 		if(Math.abs(p.getX() - this.xLine) < MAX_ERREUR){
 			if(this.isConsistent){
 				if((this.smallerThan && p.getX() > this.xLine) || (!this.smallerThan && p.getX() < this.xLine)){
@@ -56,6 +57,39 @@ public class XArea extends Area {
 	@Override
 	protected boolean checkConsistantAngle(final float h){
 		return Math.abs(h) > (90 + AMBIGUOUS_ANGLE) || Math.abs(h) < (90 - AMBIGUOUS_ANGLE);
+	}
+
+	@Override
+	protected boolean checkColorValidity(final float distance) {
+		Pose myPose = this.am.getLastPose();
+		float xInit = myPose.getX();
+		
+		// si on est proche au départ de cette ligne
+		if(Math.abs(myPose.getX() - this.xLine) < MAX_ERREUR){
+			return true;
+		}
+
+		// si la position de départ est incohérente avec cette ligne
+		if((this.smallerThan && myPose.getX() > this.xLine) || (!this.smallerThan && myPose.getX() < this.xLine)){
+			this.isConsistent = false;
+			return false;
+		}
+		
+		float fixDistance = distance + MAX_ERREUR;
+		myPose.moveUpdate(fixDistance);
+		
+		// si on ne devrait pas avoir franchi cette ligne
+		if((this.smallerThan && xInit < this.xLine && myPose.getX() < this.xLine) || (!this.smallerThan && xInit > this.xLine && myPose.getX() > this.xLine)){
+			this.isConsistent = false;
+			return false;
+		}
+		
+		// si on devrait avoir franchi cette ligne alors OKs
+		if((this.smallerThan && xInit < this.xLine && myPose.getX() > this.xLine) || (!this.smallerThan && xInit > this.xLine && myPose.getX() < this.xLine)){
+			return true;
+		}
+		
+		return false;
 	}
 
 }

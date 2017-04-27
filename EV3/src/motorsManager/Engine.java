@@ -98,17 +98,6 @@ public class Engine{
 	public MovePilot getPilot(){
 		return this.pilot;
 	}
-	
-	/**
-	 * met à jour la correction de la roue droite en fonction de la vitesse
-	 * @param speed une vitesse
-	 */
-	public void setrightWheelCorrection(int speed){
-		RIGHT_WHEEL_CORRECTION = -0.2f;
-		if(speed == Main.MAX_SPEED){
-			RIGHT_WHEEL_CORRECTION = 3f;
-		}
-	}
 
 	/**
 	 * @param ml un MoveListener qui sera informer a chaque début et fin de déplacement

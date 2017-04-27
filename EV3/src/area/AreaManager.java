@@ -7,11 +7,10 @@ import aiPlanner.Main;
 import interfaces.AreaGiver;
 import interfaces.PoseListener;
 import lejos.robotics.navigation.Pose;
-import positionManager.ColorSensor;
 import shared.Color;
 
 /**
- * class gérant la position du robot sur les 15+1 zones du terrain en fonction des lignes de couleurs.
+ * class gérant la position du robot par rapport aux 4 lignes de couleurs (jaune, rouge, verte et bleu).
  */
 public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	
@@ -41,6 +40,11 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	private volatile Pose		myPose;
 	
 	/**
+	 * Distance que le robot est en train de parcourir en avant
+	 */
+	private volatile float		distance = 0;
+	
+	/**
 	 * Objet sur lequelle notifier un thread en attente lorsque l'on detecte une couleur significative
 	 */
 	private volatile Object		wakeUp;
@@ -60,10 +64,10 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		this.myPose 		= new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
 		this.areas			= new ArrayList<Area>();
 		
-		this.areas.add(new XArea(Color.YELLOW));
-		this.areas.add(new XArea(Color.RED));
-		this.areas.add(new YArea(Color.BLUE));
-		this.areas.add(new YArea(Color.GREEN));
+		this.areas.add(new XArea(Color.YELLOW,this));
+		this.areas.add(new XArea(Color.RED,this));
+		this.areas.add(new YArea(Color.BLUE,this));
+		this.areas.add(new YArea(Color.GREEN,this));
 		
 		updateArea(true);
 		
@@ -77,12 +81,12 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		this.colorSensor.lightOn();
 		
 		while(!isInterrupted()){
-			if(updateColor()){
-				synchronized(this){
+			synchronized(this){
+				if(updateColor()){
 					if(this.currentColor != Color.GREY){
 						this.lastLine = this.currentColor;
 						for(Area area : this.areas){
-							area.colorChange(this.currentColor, this.myPose.getHeading());
+							area.colorChange(this.currentColor, this.myPose.getHeading(), this.distance);
 						}
 					}
 				}
@@ -98,14 +102,14 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	/**
 	 * @param w un objet moniteur
 	 */
-	public void addWakeUp(final Object w){
+	synchronized public void addWakeUp(final Object w){
 		this.wakeUp = w;
 	}
 	
 	/**
 	 * supprime le moniteur
 	 */
-	public void removeWakeUp(){
+	synchronized public void removeWakeUp(){
 		this.wakeUp = null;
 	}
 	
@@ -113,7 +117,7 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	 * Vérifie si la vouleur à changer par rapport à la dernière vérification.
 	 * @return vrai si la couleur a changé, faux sinon.
 	 */
-	synchronized private boolean updateColor(){
+	private boolean updateColor(){
 		Color checkColor = this.colorSensor.getCurrentColor();
 		if(checkColor != this.currentColor){
 			this.currentColor = checkColor;
@@ -125,7 +129,7 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	/**
 	 * réveille un thread ayant demander à être réveiller si l'on passe sur une couleur significative
 	 */
-	synchronized private void wakeUpOnColor(){
+	private void wakeUpOnColor(){
 		if(this.wakeUp != null && this.currentColor != Color.GREY && this.currentColor != Color.BLACK && this.currentColor != Color.WHITE){
 			synchronized (this.wakeUp) {
 				this.wakeUp.notify();
@@ -144,7 +148,7 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		}
 	}
 
-	synchronized public void updateArea(boolean force) {
+	synchronized public void updateArea(final boolean force) {
 		for(Area area : this.areas){
 			area.updateAreaWithPosition(this.myPose , force);
 		}
@@ -158,13 +162,27 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		return this.lastLine;
 	}
 
-	synchronized public void setPose(Pose p) {
+	synchronized public void setPose(final Pose p) {
 		this.myPose = p;
 	}
 	
-	synchronized public void updatePose(Pose p) {
+	synchronized public void updatePose(final Pose p) {
 		for(Area area : this.areas){
 			area.updatePose(p);
 		}
+	}
+	
+	/**
+	 * @return la dernière pose connue par l'areamanager
+	 */
+	synchronized protected Pose getLastPose(){
+		return this.myPose;
+	}
+	
+	/**
+	 * @param distance la distance que le robot est en train de parcourir en avant
+	 */
+	synchronized public void setDistance(final float distance){
+		this.distance = distance;
 	}
 }

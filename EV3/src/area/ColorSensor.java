@@ -1,4 +1,4 @@
-package positionManager;
+package area;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -125,7 +125,7 @@ public class ColorSensor {
 	 * @param v2 la seconde couleur
 	 * @return la distance entre les deux couleurs.
 	 */
-	protected static double scalaire(final float[] v1, final float[] v2) {
+	public static double scalaire(final float[] v1, final float[] v2) {
 		return Math.sqrt (Math.pow(v1[0] - v2[0], 2.0) +
 				Math.pow(v1[1] - v2[1], 2.0) +
 				Math.pow(v1[2] - v2[2], 2.0));
