@@ -114,7 +114,7 @@ public abstract class Area {
 	protected abstract boolean checkConsistantAngle(final float h);
 	
 	/**
-	 * @param distance une distance que le robot est en train de parcourire en avant
+	 * @param distance une distance que le robot est en train de parcourir en avant
 	 * @return vrai si il est théoriquement possible de rencontrer la couleur, faux sinon
 	 */
 	protected abstract boolean checkColorValidity(final float distance);

@@ -33,23 +33,23 @@ import java.util.Deque;
 public class Marvin implements SignalListener, WaitProvider{
 	
 	/**
-	 * Pile d'objectif à accomplir
+	 * Pile d'objectifs à accomplir
 	 */
 	private	final Deque<Goal> 					goals;
 	/**
-	 * EyeOfMarvin, gestionnaire des item sur le terrain
+	 * EyeOfMarvin, gestionnaire des items sur le terrain
 	 */
 	private	final EyeOfMarvin 					itemManager;
 	/**
-	 * Gestionnaire d'evenements et des interaction de l'exterieur vers le robot
+	 * Gestionnaire d'evenements et des interactions de l'exterieur vers le robot
 	 */
 	private	final EventHandler 					eventManager;
 	/**
-	 * Gestionnaire de position, calcul la position après chaque deplacement
+	 * Gestionnaire de positions, calcul la position après chaque deplacement
 	 */
 	private	final PositionCalculator 			positionManager;
 	/**
-	 * Serveur permettant de receptionner les donnes fourni par la camera
+	 * Serveur permettant de receptionner les donnes fournies par la camera
 	 */
 	private	final Server						server;
 	/**
@@ -84,7 +84,6 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * Gestionnaire du radar a ultrason
 	 */
 	private final VisionSensor					radar;
-	
 	/**
 	 * Vitesse a utiliser par le robot
 	 */
@@ -93,7 +92,6 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * Autorise ou non les interruptions lors de la detection d'une pression
 	 */
 	private boolean allowInterrupt 	= false;
-	
 	/**
 	 * initialise une instance complète du système de navigation et de décision de Marvin
 	 */
@@ -143,6 +141,10 @@ public class Marvin implements SignalListener, WaitProvider{
 		this.positionManager.addPoseListener(this.areaManager);
 		this.positionManager.addPoseListener(this.itemManager);
 		
+		if(Main.I_ALSO_LIKE_TO_LIVE_DANGEROUSLY){
+			this.positionManager.addPoseListener(this.cis);
+		}
+		
 		/**********************************************************/
 		
 		this.GFactory 				= new GoalFactory(this,this.positionManager, this.itemManager, this.radar, this.cis, this.areaManager);
@@ -158,8 +160,8 @@ public class Marvin implements SignalListener, WaitProvider{
 	
 	/**
 	 * Lance tout les Threads utilitaires. 
-	 * Attends un peu plus de 2 seconde afin de récupérer les données du serveur, 
-	 * les calibrer et les marquer comme palet.
+	 * Attends un peu plus de 2 secondes afin de récupérer les données du serveur, 
+	 * les calibrer et les marquer comme palets.
 	 */
 	public void startThreads(){
 		this.server.start();
@@ -198,6 +200,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * Une foit fini, termine proprement le programme.
 	 */
 	public void run(){
+		this.audio.addOrder();
 		this.positionManager.initPose();
 		Goal newGoal;
 		while(!this.goals.isEmpty() && (Main.TIMER.getElapsedMin() < 5)){
@@ -241,7 +244,7 @@ public class Marvin implements SignalListener, WaitProvider{
 			Thread.currentThread().interrupt();
 		}
 		Main.printf("[MARVIN]                : I told you this would all end in tears.");
-		syncWait(1000);
+		syncWait(500);
 	}
 
 	/********************************************************
@@ -249,7 +252,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	 *******************************************************/
 	
 	/**
-	 * Fonction permettant de parcourir une distance donné vers l'avant (encapsule les traitement de navigation)
+	 * Fonction permettant de parcourir une distance donnée vers l'avant (encapsule les traitements de navigation)
 	 * @param distance distance à parcourir
 	 */
 	synchronized public void goForward(final float distance){
@@ -271,7 +274,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	}
 	
 	/**
-	 * Fonction permettant de parcourir une distance donné vers l'arrière
+	 * Fonction permettant de parcourir une distance donnée vers l'arrière
 	 * @param distance distance à parcourir
 	 */
 	synchronized public void goBackward(final float distance){
@@ -279,6 +282,8 @@ public class Marvin implements SignalListener, WaitProvider{
 			
 			Pose myFuturePose = this.positionManager.getPosition();
 			myFuturePose.moveUpdate((-1) * distance);
+			
+			this.audio.addBips();
 			
 			this.engine.goBackward(distance, this.linearSpeed);
 			this.positionManager.setPose(myFuturePose, false);
@@ -363,7 +368,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	
 	/**
 	 * Ajoute un objectif au sommet de la pile<br/>
-	 * N'ajoutera pas l'objectif si le prochaine objectif a etre executer est l'objectif de recalibration
+	 * N'ajoutera pas l'objectif si le prochaine objectif à etre executé est l'objectif de recalibration.
 	 * @param g un Goal à ajouter dans la pile si possible
 	 */
 	public void pushGoal(final Goal g){
@@ -385,7 +390,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	}
 	
 	/**
-	 * indique au gestionnaire de couleur de ne plus interrompre lorsque l'on
+	 * indique au gestionnaire de couleurs de ne plus interrompre lorsque l'on passe sur une couleur significative
 	 */
 	public void removeMeWakeUpOnColor(){
 		this.areaManager.removeWakeUp();
@@ -396,7 +401,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	 *******************************************************/
 	
 	/**
-	 * Tente d'interrompre les moteurs si l'action est autorisé par la variable allowInterrupt
+	 * Tente d'interrompre les moteurs si l'action est autorisée par la variable allowInterrupt
 	 */
 	synchronized public void tryInterruptEngine(){
 		if(this.allowInterrupt){
@@ -472,7 +477,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	}
 	
 	/**
-	 * Affiche les stackTraces des différent Threads
+	 * Affiche les stackTraces des différents Threads
 	 */
 	private static void debug() {
 		System.err.println("-------- START of StackLog --------");

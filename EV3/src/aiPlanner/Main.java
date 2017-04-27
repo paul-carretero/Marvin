@@ -126,7 +126,7 @@ public class Main{
 	 */
 	public static final int	RADAR_DEFAULT_RANGE		= 550;
 	/**
-	 *  distance où on est sur de ne pas avoir de palet, et suffisamant petite pour éviter les faux-positif
+	 *  distance où on est sur de ne pas avoir de palet, et suffisamant petite pour éviter les faux-positifs
 	 */
 	public static final int RADAR_WALL_DETECT		= 250;
 	/**
@@ -156,7 +156,7 @@ public class Main{
 	 */
 	public static final float DISTANCE_TO_CENTER	= 62.5f;
 	/**
-	 * Distance des roues par rapport au centre, corrige de la presence d'un palet
+	 * Distance des roues par rapport au centre, corrigee de la presence d'un palet
 	 */
 	public static final float DISTANCE_TO_CENTER_P	= 65f;
 	/**
@@ -174,10 +174,10 @@ public class Main{
 	/**
 	 * Acceleration Lineaire (probablement non utilise)
 	 */
-	public static final float LINEAR_ACCELERATION	= 100.0f;
+	public static final float LINEAR_ACCELERATION	= 300.0f;
 	
 	/**
-	 * Distance (en mm) au délà de laquelle on considère la distance parcouru suffisament fiable pour avoir une calcul précis de l'angle.
+	 * Distance (en mm) au délà de laquelle on considère la distance parcourue suffisament fiable pour avoir une calcul précis de l'angle.
 	 */
 	public static final int FIABLE_DIST	= 375;
 	

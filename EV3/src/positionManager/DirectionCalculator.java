@@ -18,7 +18,7 @@ public class DirectionCalculator {
 	private Point 			 startPoint;
 	
 	/**
-	 * Le gestionnaire de position fournissant une interface pour la mise à jour de la Pose actuelle.
+	 * Le gestionnaire de positions fournissant une interface pour la mise à jour de la Pose actuelle.
 	 */
 	private final PoseGiver	 pg;
 	
@@ -52,8 +52,8 @@ public class DirectionCalculator {
 	}
 	
 	/**
-	 * Met à jour l'angle de la pose passé en paramètre avec l'angle calculé durant la trajectoire.
-	 * La mise à jour est plus importante si la distance parcouru est grande (plus fiable)
+	 * Met à jour l'angle de la pose passée en paramètre avec l'angle calculé durant la trajectoire.
+	 * La mise à jour est plus importante si la distance parcouru est grande (un peu plus fiable)
 	 * @param p une pose obtenue par le calculateur de position.
 	 * @return vrai si on a effectué une mise à jour sur l'angle
 	 */
@@ -74,7 +74,7 @@ public class DirectionCalculator {
 	}
 	
 	/**
-	 * Utilisé par l'ia notament afin d'informer le calculateur de direction que le robot à terminé une ligne droite en avant.
+	 * Utilisé par l'ia notament afin d'informer le calculateur de direction que le robot a terminé une ligne droite en avant.
 	 * calcul la direction durant ce trajet et met à jour le gestionnaire de position.
 	 */
 	public void reset(){
@@ -96,7 +96,7 @@ public class DirectionCalculator {
 	
 	
 	/**
-	 * Utilisé par l'ia notament afin d'informer le calculateur de direction que le robot à commencé une ligne droite en avant.
+	 * Utilisé par l'ia notament afin d'informer le calculateur de direction que le robot a commencé une ligne droite en avant.
 	 * Enregistre la position initiale à ce moment.
 	 */
 	public void startLine(){

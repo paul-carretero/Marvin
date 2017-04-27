@@ -150,7 +150,7 @@ public class GoalGrabPessimist extends Goal {
 	
 	/**
 	 * Recherche le meilleur angle d'approche en fonction du retour de distance du radar.
-	 * Recherche le meilleur angle dans a + ou - 25° en fonction de l'angle initial.
+	 * Recherche le meilleur angle dans a + ou - 20° en fonction de l'angle initial.
 	 */
 	private void setBestAngle(){
 		int[] radarDistances = new int[]{

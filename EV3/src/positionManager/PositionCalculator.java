@@ -22,9 +22,9 @@ import lejos.robotics.navigation.Pose;
 public class PositionCalculator implements PoseGiver {
 
 	/**
-	 * Pourcentage de la position de la carte qui sera utilisé pour calculer la position final une fois le mouvement arrété
+	 * Pourcentage de la position de la carte qui sera utilisée pour calculer la position final une fois le mouvement arrété
 	 */
-	private static final float		MAP_PERCENT			= 0.5f;
+	private static final float		MAP_PERCENT			= 0.4f;
 	
 	/**
 	 * Distance maximum entre le point donné et le point calculé (en mm) avant qu'un gestionnaire de position se déclare en état de "lost".
@@ -37,12 +37,12 @@ public class PositionCalculator implements PoseGiver {
 	private final DistanceGiver 	radar;
 	
 	/**
-	 * Pose provider fourni par la librairie LeJos, utilisé comme base pour suivre les déplacement du robot
+	 * Pose provider fourni par la librairie LeJos, utilisé comme base pour suivre les déplacements du robot
 	 */
 	private final OdometryPoseProvider odometryPoseProvider;
 	
 	/**
-	 * Classe centralisant les données de type IA, notament les interruption ou les demandes de navigation
+	 * Classe centralisant les données de type IA, notament les interruptions ou les demandes de navigation
 	 */
 	private final SignalListener	marvin;
 	
@@ -63,7 +63,7 @@ public class PositionCalculator implements PoseGiver {
 	private volatile Point			estimatedDest;
 
 	/**
-	 * Liste de pose listener a mettre à jour a chaque fin de parcours
+	 * Liste de pose listener à mettre à jour à chaque fin de parcours
 	 */
 	private final List<PoseListener> poseListeners;
 	
@@ -154,7 +154,6 @@ public class PositionCalculator implements PoseGiver {
 		mapPositionUpdate();
 		broadcastPose();
 		this.area.updateArea(updateArea);
-		
 	}
 	
 	/**

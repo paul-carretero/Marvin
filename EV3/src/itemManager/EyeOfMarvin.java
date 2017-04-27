@@ -14,8 +14,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
- * gestionnaire de la mastermap des items du terrain.
- * Définit et permet d'accéder aux Item de type ME (le robot) ou Palet.
+ * gestionnaire de la mastermap des items du terrain.<br/>
+ * Définit et permet d'accéder aux Item de type ME (le robot) ou Palet.<br/>
+ * Les opérations de recherche ou d'insertion dans la map doivent être réalisées de manière atomique (donc synchronized)
  * @see Item
  * @author paul.carretero
  */
@@ -79,8 +80,8 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 	 *******************************************************/
 	
 	/**
-	 * Calcul la différences moyennes des coordonnées fournies par le serveur avec les coordonnées connues de départ des palets.
-	 * Définit les écart moyen en X et en Y directement à la reception serveur afin d'obtenir une carte plus précise des palet.
+	 * Calcul la différences moyennes des coordonnées fournies par le serveur avec les coordonnées connues de départ des palets.<br/>
+	 * Définit les écarts moyen en X et en Y directement à la reception serveur afin d'obtenir une carte plus précise des palets.
 	 */
 	public void calibrateSensor(){
 		int sensorMarge = 200;
@@ -159,8 +160,8 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 	}
 	
 	/**
-	 * supprime les référence obsolète de la mastermap
-	 * @param timeout temps au dessous duquel on supprime les référence de la map
+	 * supprime les références obsolètes de la mastermap
+	 * @param timeout temps en dessous duquel on supprime les références de la map
 	 */
 	synchronized private void cleanHashMap(final int timeout) {
 		for(Iterator<Item> it = this.masterList.iterator(); it.hasNext(); ) {
@@ -362,7 +363,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 		Main.printf("------------------------------------------------------");
 	}
 
-	synchronized public void setPose(Pose p) {
+	public void setPose(Pose p) {
 		this.myPose = p;
 	}
 

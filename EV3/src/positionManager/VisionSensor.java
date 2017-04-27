@@ -25,13 +25,13 @@ public class VisionSensor implements DistanceGiver{
 	private	final SampleProvider		radar;
 	
 	/**
-	 * Représente les données reçu sur la présence ou non de radar ennemi.
+	 * Représente les données reçues sur la présence ou non de radar ennemi.
 	 */
 	private final SampleProvider		spy;
 	
 	
 	/**
-	 * fix de la position du radar en fonction des données obtenue à l'initialisation
+	 * fix de la position du radar en fonction des données obtenues à l'initialisation
 	 */
 	private	float				dynamicOffset	= 0;
 	
@@ -41,22 +41,22 @@ public class VisionSensor implements DistanceGiver{
 	private	static final float	RADAR_OFFSET	= 100f;
 	
 	/**
-	 * Symbolise l'absence de données exploitable
+	 * Symbolise l'absence de données exploitables.
 	 */
 	private static 	final int	OUT_OF_RANGE	= 9999;
 	
 	/**
-	 * Distance entre l'item en face du robot et son point de dépar au début.
+	 * Distance entre l'item en face du robot et son point de départ au début.
 	 */
 	private static 	final int	START_DISTANCE	= 700;
 	
 	/**
-	 * Distance maximal au délà dela de laquelle on considère que le radar est en défaut (il faut redémarer...)
+	 * Distance maximale au délà dela de laquelle on considère que le radar est en défaut (il faut redémarer...)
 	 */
 	private static 	final int	MAX_RADAR_BIAS	= 400;
 	
 	/**
-	 * Créé une nouvelle instance du controlleur du radar
+	 * Crée une nouvelle instance du controlleur du radar
 	 * Exception InvalidSensorMode soulevée aléatoirement par le bibliothèque Lejos, il suffit de redémarer le programme.
 	 */
 	public VisionSensor(){

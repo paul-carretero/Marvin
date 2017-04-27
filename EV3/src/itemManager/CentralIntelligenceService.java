@@ -3,7 +3,9 @@ package itemManager;
 import aiPlanner.Main;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
+import interfaces.PoseListener;
 import lejos.robotics.geometry.Point;
+import lejos.robotics.navigation.Pose;
 import shared.IntPoint;
 import shared.Item;
 
@@ -12,7 +14,7 @@ import shared.Item;
  * En capturant deux positions de robot ennemi alors on peut estimer une possibilité de point d'interception.
  * @author paul.carretero
  */
-public class CentralIntelligenceService extends Thread{
+public class CentralIntelligenceService extends Thread implements PoseListener{
 	
 	/**
 	 * EyeOfMarvin, permet de fournir les positions des items
@@ -22,7 +24,7 @@ public class CentralIntelligenceService extends Thread{
 	/**
 	 * PoseGiver permettant de retourner une pose du robot
 	 */
-	private final PoseGiver 	pg;
+	private volatile Pose 		myPose;
 	
 	/**
 	 * Point où il est éventuellement possible d'intercepter un robot ennemi (avant qu'il n'atteigne notre camps)
@@ -45,9 +47,9 @@ public class CentralIntelligenceService extends Thread{
 	 */
 	public CentralIntelligenceService(final ItemGiver eom, final PoseGiver pg){
 		super("CentralIntelligenceService");
-		this.pg						= pg;
 		this.interceptionTarget		= null;
 		this.eom					= eom;
+		this.myPose 				= new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
 		Main.printf("[CIS]                   : Initialized");
 	}
 	
@@ -125,10 +127,14 @@ public class CentralIntelligenceService extends Thread{
 		Point ennemy = this.eom.getPossibleEnnemy().toLejosPoint();
 		if(this.interceptionTarget != null 
 				&& ennemy != null
-				&& (this.pg.getPosition().distanceTo(this.interceptionTarget.toLejosPoint()) < ennemy.distance(this.interceptionTarget.toLejosPoint()))
+				&& (this.myPose.distanceTo(this.interceptionTarget.toLejosPoint()) < ennemy.distance(this.interceptionTarget.toLejosPoint()))
 		){	
 			return this.interceptionTarget.toLejosPoint();
 		}
 		return null;
+	}
+
+	public void setPose(Pose p) {
+		this.myPose = p;
 	}
 }
