@@ -11,8 +11,9 @@ import lejos.robotics.navigation.MoveListener;
 import lejos.robotics.navigation.MovePilot;
 
 /**
- * Fournit des primitive pour les mouvement (marche avant/arrière et rotation) du robot.
- * Sa base principalement sur les primitives LeJos existante
+ * Fournit des primitives pour les mouvements (marche avant/arrière et rotation) du robot.
+ * Sa base principalement sur les primitives LeJos existantes.
+ * @author paul.carretero
  */
 public class Engine{
 	

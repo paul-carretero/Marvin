@@ -1,10 +1,12 @@
 package goals;
 
+import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.ItemGiver;
 
 /**
  * Encapsule la gestion de la partie, va ajouter les goal grabAndDrop par exemple.
+ * @author paul.carretero
  */
 public class GoalPlay extends Goal {
 	
@@ -33,6 +35,9 @@ public class GoalPlay extends Goal {
 		if(this.eom.canPlayAgain()){
 			this.ia.pushGoal(this);
 			this.ia.pushGoal(this.gf.goalGrabAndDropPalet());
+		}
+		if(Main.I_ALSO_LIKE_TO_LIVE_DANGEROUSLY && Main.TIMER.getElapsedMin() > 3 && Main.RANDOMIZER.nextBoolean()){
+			this.ia.pushGoal(this.gf.goalIntercept());
 		}
 	}
 	

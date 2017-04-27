@@ -2,7 +2,7 @@ package shared;
 
 /**
  * Enumeration des couleurs visibles par le capteur de couleur.
- *
+ * @author paul.carretero
  */
 public enum Color {
 	/**

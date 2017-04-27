@@ -1,7 +1,8 @@
 package goals;
 
 /**
- * permet d'identifier les Goal de manière précise
+ * permet d'identifier les Goal de manière précise.
+ * @author paul.carretero
  */
 public enum GoalType {
 	/**

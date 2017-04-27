@@ -8,6 +8,7 @@ import shared.IntPoint;
 
 /**
  * Objectif permettant de rechercher un palet et d'ajouter les objectif de grab et de drop sur ce palet.
+ * @author paul.carretero
  */
 public class GoalGrabAndDropPalet extends Goal {
 	

@@ -11,6 +11,7 @@ import shared.IntPoint;
 /**
  * Effectue une tentative de Grab sur un palet donné de manière optimiste:
  * on considère qu'on est bien positionné par rapport au palet, on avance d'abord et on corrige éventuellement après.
+ * @author paul.carretero
  */
 public class GoalGrabOptimist extends GoalGrabPessimist {
 	

@@ -3,6 +3,7 @@ package aiPlanner;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Random;
 
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
@@ -17,6 +18,7 @@ import shared.Timer;
  * les informations fixes sur l'environnement et le terrain et des informations fixes sur les capteurs
  * Instancie et lance un Objet Marvin pour initialiser le programme
  * @see Marvin
+ * @author paul.carretero
  */
 public class Main{
 	
@@ -229,6 +231,12 @@ public class Main{
 	 * Definie si il faut afficher ou non les logs secondaires
 	 */
 	public static final boolean PRINT_LOG 			= false;
+	
+	/**
+	 * Fournit des boolean et chiffre aléatoire entre autre,
+	 * Une seule initialisation pour éviter les erreurs
+	 */
+	public static final Random RANDOMIZER			= new Random();
 	
 	/**
 	 * Représente les positions initiales des 9 palet, notament utilisé pour calibrer la Map des item

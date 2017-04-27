@@ -17,6 +17,7 @@ import shared.IntPoint;
  * Objectif de recalibration de la pose du robot
  * Recalibre la position et l'angle en recherchant une ligne significative a exploiter.
  * @see Pose
+ * @author paul.carretero
  */
 public class GoalRecalibrate extends Goal {
 	
@@ -40,7 +41,8 @@ public class GoalRecalibrate extends Goal {
 	private final AreaGiver am;
 	
 	/**
-	 * 
+	 * vrai si l'on doit recherche une couleur en marche arriere
+	 * vrai une fois sur deux
 	 */
 	private static boolean BACKWARD = true;
 
@@ -140,6 +142,7 @@ public class GoalRecalibrate extends Goal {
 		else{
 			Random r = new Random();
 			this.ia.turnHere(r.nextInt(360) - 180);
+			this.ia.pushGoal(this);
 		}
 		
 	}

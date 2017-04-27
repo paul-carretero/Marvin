@@ -5,7 +5,8 @@ import java.util.List;
 import shared.Item;
 
 /**
- * Interface implémenté par un objet souhaitant recevoir des données structurés du serveur (de la caméra infrarouge du terrain).
+ * Interface implémentée par un objet souhaitant recevoir des données structurés du serveur (de la caméra infrarouge du terrain).
+ * @author paul.carretero
  */
 public interface ServerListener {
 	/**

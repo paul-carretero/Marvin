@@ -12,19 +12,40 @@ import lejos.robotics.Color;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
 
-@SuppressWarnings("javadoc")
 /**
  * Classe représentant le capteur de couleur du robot.
  * Principalement utilisé pour obtenir la couleur "vue" par le robot.
+ * @author paul.carretero
  */
 public class ColorSensor {
 
+	/**
+	 * indice de la couleur bleu dans le tableau
+	 */
 	public static final int COLOR_BLUE 		= 0;
+	/**
+	 * indice de la couleur noire dans le tableau
+	 */
 	public static final int COLOR_BLACK 	= 1;
+	/**
+	 * indice de la couleur blanche dans le tableau
+	 */
 	public static final int COLOR_WHITE 	= 2;
+	/**
+	 * indice de la couleur grise dans le tableau
+	 */
 	public static final int COLOR_GREY 		= 3;
+	/**
+	 * indice de la couleur jaune dans le tableau
+	 */
 	public static final int COLOR_YELLOW 	= 4;
+	/**
+	 * indice de la couleur rouge dans le tableau
+	 */
 	public static final int COLOR_RED 		= 5;
+	/**
+	 * indice de la couleur verte dans le tableau
+	 */
 	public static final int COLOR_GREEN 	= 6;
 	
 	/**

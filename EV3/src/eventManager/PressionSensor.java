@@ -6,6 +6,7 @@ import lejos.hardware.sensor.EV3TouchSensor;
 
 /**
  * Fournit une primitive pour la detection de la pression du capteur de pression.
+ * @author paul.carretero
  */
 public class PressionSensor extends EV3TouchSensor
 {

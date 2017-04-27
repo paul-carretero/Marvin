@@ -1,8 +1,6 @@
 package goals;
 
 
-import java.util.Random;
-
 import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.DistanceGiver;
@@ -14,6 +12,7 @@ import shared.IntPoint;
 
 /**
  * Permet d'effectuer un Grab de manière pessimist (on recherche avant la position considéré comme la meilleure).
+ * @author paul.carretero
  */
 public class GoalGrabPessimist extends Goal {
 	
@@ -179,8 +178,7 @@ public class GoalGrabPessimist extends Goal {
 	 * Se déplacer permet d'éviter les problème de infinite loop
 	 */
 	protected void failPoseHandler(){
-		Random r = new Random();
-		boolean forward = r.nextBoolean();
+		boolean forward = Main.RANDOMIZER.nextBoolean();
 		if(forward){
 			this.ia.goForward(Main.RADAR_MIN_RANGE);
 		}

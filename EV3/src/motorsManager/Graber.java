@@ -7,6 +7,7 @@ import lejos.hardware.port.Port;
 
 /**
  * Fournit des primitives pour les actions du graber (grab, fermer et stop).
+ * @author paul.carretero
  */
 public class Graber {
 	/**

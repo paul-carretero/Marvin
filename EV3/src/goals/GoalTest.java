@@ -4,7 +4,8 @@ import aiPlanner.Marvin;
 import interfaces.PoseGiver;
 
 /**
- * Objectif de déplacement à un point donné a la vitesse maximal
+ * Objectif de déplacement à un point donné a la vitesse maximal.
+ * @author paul.carretero
  */
 public class GoalTest extends Goal {
 	

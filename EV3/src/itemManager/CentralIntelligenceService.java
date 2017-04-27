@@ -10,6 +10,7 @@ import shared.Item;
 /**
  * Thread analysant les position des items de type undefined. Si un seul Item de ce type existe alors il s'agit probablement du robot ennemi.
  * En capturant deux positions de robot ennemi alors on peut estimer une possibilité de point d'interception.
+ * @author paul.carretero
  */
 public class CentralIntelligenceService extends Thread{
 	

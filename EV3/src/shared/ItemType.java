@@ -1,8 +1,9 @@
 package shared;
 
 /**
- * Enumeration fournissant les possibilité pour le type d'un item
+ * Enumeration fournissant les possibilités pour le type d'un item
  * @see Item
+ * @author paul.carretero
  */
 public enum ItemType {
 	/**

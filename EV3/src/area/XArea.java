@@ -6,7 +6,8 @@ import shared.Color;
 
 /**
  * Symbolise une division du terrain en fonction des lignes en X (jaune ou rouge).
- * Propose une implémentation de Area afin de mettre à jour la position
+ * Propose une implémentation de Area afin de mettre à jour la position.
+ * @author paul.carretero
  */
 public class XArea extends Area {
 	

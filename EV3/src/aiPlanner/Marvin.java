@@ -28,6 +28,7 @@ import java.util.Deque;
 /**
  * Classe principale du programme de navigation et de Décision du robot, 
  * gère les objectif à accomplir ainsi que les signaux envoyer par les différent gestionnaire d'évennement et de navigtion
+ * @author paul.carretero
  */
 public class Marvin implements SignalListener, WaitProvider{
 	
@@ -361,11 +362,15 @@ public class Marvin implements SignalListener, WaitProvider{
 	}
 	
 	/**
-	 * Ajoute un objectif au sommet de la pile
+	 * Ajoute un objectif au sommet de la pile<br/>
+	 * N'ajoutera pas l'objectif si le prochaine objectif a etre executer est l'objectif de recalibration
 	 * @param g un Goal à ajouter dans la pile si possible
 	 */
 	public void pushGoal(final Goal g){
-		this.goals.push(g);
+		Goal peek = this.goals.peek();
+		if(peek != null && peek.getName() != GoalType.RECALIBRATE){
+			this.goals.push(g);
+		}
 	}
 	
 	/********************************************************

@@ -7,6 +7,7 @@ import shared.Color;
 /**
  * Implémenté par le gestionnaire d'Area notament, propose des primitives pour la consultation de l'area courrante
  * @see Area
+ * @author paul.carretero
  */
 public interface AreaGiver {
 	/**

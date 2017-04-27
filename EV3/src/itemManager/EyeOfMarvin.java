@@ -17,6 +17,7 @@ import java.util.Iterator;
  * gestionnaire de la mastermap des items du terrain.
  * Définit et permet d'accéder aux Item de type ME (le robot) ou Palet.
  * @see Item
+ * @author paul.carretero
  */
 public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 

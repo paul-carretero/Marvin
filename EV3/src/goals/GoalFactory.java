@@ -12,7 +12,8 @@ import itemManager.CentralIntelligenceService;
 import lejos.robotics.geometry.Point;
 
 /**
- * Factory permettant de construire une pile d'objectif et de construire des objectif à l'aide de primitive simple
+ * Factory permettant de construire une pile d'objectif et de construire des objectif à l'aide de primitives simples.
+ * @author paul.carretero
  */
 public class GoalFactory {
 	

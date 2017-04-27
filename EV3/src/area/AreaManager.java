@@ -11,6 +11,7 @@ import shared.Color;
 
 /**
  * class gérant la position du robot par rapport aux 4 lignes de couleurs (jaune, rouge, verte et bleu).
+ * @author paul.carretero
  */
 public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	
@@ -27,12 +28,12 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	/**
 	 * représente la dernière couleur vu par le robot
 	 */
-	private Color				currentColor;
+	private volatile Color		currentColor;
 	
 	/**
 	 * Couleur de la dernière ligne traversee
 	 */
-	private Color 				lastLine;
+	private volatile Color 		lastLine;
 	
 	/**
 	 * Interface donnant la position du robot
@@ -58,7 +59,6 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	 * initialise le gestionnaire de couleur
 	 * N'initialise pas les couleur verte et bleu car trop d'erreur de lecture...
 	 */
-	@SuppressWarnings("deprecation")
 	public AreaManager(){
 		super("AreaManager");
 		setColor(null);

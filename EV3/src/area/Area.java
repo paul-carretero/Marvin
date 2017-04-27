@@ -6,6 +6,7 @@ import shared.Color;
 
 /**
  * Regroupe les informations correspondant à la position du robot par rapport à une ligne de couleur
+ * @author paul.carretero
  */
 public abstract class Area {
 

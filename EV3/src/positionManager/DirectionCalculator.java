@@ -6,8 +6,9 @@ import lejos.robotics.geometry.Point;
 import lejos.robotics.navigation.Pose;
 
 /**
- * Classe permettant de calculer l'angle du robot (suivant les convention utilisées par LeJos)
+ * Classe permettant de calculer l'angle du robot (suivant les conventions utilisées par LeJos)
  * Se base sur les données de la carte (générer par la caméra et le serveur) au début et à la fin d'un déplacement pour calculer les angles.
+ * @author paul.carretero
  */
 public class DirectionCalculator {
 	
@@ -60,9 +61,9 @@ public class DirectionCalculator {
 		if(p != null){
 			float calcAngle = getAngle(p.getLocation());
 			float distance = p.distanceTo(this.startPoint);
-			float newCoeff = 0.7f;
+			float newCoeff = 0.65f;
 			if(distance > 2 * Main.FIABLE_DIST){
-				newCoeff = 0.9f;
+				newCoeff = 0.8f;
 			}
 			if(calcAngle != NO_ANGLE_FOUND){
 				p.setHeading((p.getHeading() * (1f - newCoeff)) + (calcAngle * newCoeff));

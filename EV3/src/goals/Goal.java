@@ -4,7 +4,8 @@ import aiPlanner.Main;
 import aiPlanner.Marvin;
 
 /**
- * Représente un objectif et ses fonctions communes
+ * Représente un objectif et ses fonctions communes.
+ * @author paul.carretero
  */
 public abstract class Goal {
 	
@@ -32,7 +33,7 @@ public abstract class Goal {
 	public abstract GoalType getName();
 
 	/**
-	 * @return vrai si les précondition sont vérifié, faux sinon
+	 * @return vrai si les préconditions sont vérifiées, faux sinon
 	 */
 	protected boolean checkPreConditions(){
 		return true;

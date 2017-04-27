@@ -3,6 +3,7 @@ package interfaces;
 /**
  * Interface notament implémenté par le gestionnaire de l'IA et des Objectifs.
  * Permet d'être informer lors d'evénement interne ou externe au système.
+ * @author paul.carretero
  */
 public interface SignalListener {
 	

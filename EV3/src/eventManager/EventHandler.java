@@ -9,8 +9,9 @@ import lejos.robotics.navigation.MoveProvider;
 import positionManager.VisionSensor;
 
 /**
- * Classe permettant de gérer les évenements et interruption exterieurs au système
- * Permet également de detecter certain type d'erreurs
+ * Classe permettant de gérer les évenements et interruption exterieurs au système.
+ * Permet également de detecter certain type d'erreurs.
+ * @author paul.carretero
  */
 public class EventHandler extends Thread implements MoveListener{
 	

@@ -9,6 +9,7 @@ import shared.IntPoint;
 
 /**
  * Interface proposant la gestion des item (recherche) en se basant sur les données de la caméra
+ * @author paul.carretero
  */
 public interface ItemGiver {
 	/**

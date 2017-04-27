@@ -9,7 +9,8 @@ import lejos.robotics.navigation.Pose;
 import shared.Color;
 
 /**
- * Objectif de drop d'un palet (ne s'éxécutera que si l'on dispose d'un palet)
+ * Objectif de drop d'un palet (ne s'éxécutera que si l'on dispose d'un palet).
+ * @author paul.carretero
  */
 public class GoalDrop extends Goal{
 	
