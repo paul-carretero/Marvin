@@ -30,9 +30,7 @@ public class GoalTest extends Goal {
 
 	@Override
 	public void start() {
-		this.ia.goForward(200);
-		this.ia.turnHere(90);
-		this.ia.goForward(10000);
+		this.ia.goForward(1000);
 	}
 	
 	@Override

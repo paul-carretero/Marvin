@@ -40,8 +40,9 @@ public class GoalGrabOptimist extends GoalGrabPessimist {
 			grabWrapper();
 			decal();
 		}
-		
-		updateStatus();
+		else{
+			failPoseHandler();
+		}
 	}
 	
 	@Override

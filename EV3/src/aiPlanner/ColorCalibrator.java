@@ -3,7 +3,6 @@ package aiPlanner;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
@@ -32,7 +31,7 @@ public class ColorCalibrator {
 	public static final int COLOR_RED 		= 5;
 	public static final int COLOR_GREEN 	= 6;
 	
-	public static void main(String[] args) throws IOException, ClassNotFoundException {
+	public static void Calibrate() {
 		Port port = LocalEV3.get().getPort(Main.COLOR_SENSOR);
 		EV3ColorSensor colorSensor = new EV3ColorSensor(port);
 		SampleProvider average = new MeanFilter(colorSensor.getRGBMode(), 1);
@@ -95,20 +94,31 @@ public class ColorCalibrator {
 		colors[COLOR_YELLOW] = yellow;
 		
 		colorSensor.setFloodlight(false);
+		float[][] readColors = new float[][]{};
 		
-		final File fichier =  new File("conf.txt") ;
-		
-		PrintWriter writer = new PrintWriter(fichier);
-		writer.print("");
-		writer.close();
-		
-		ObjectOutputStream oos =  new ObjectOutputStream(new FileOutputStream(fichier)) ;
-		oos.writeObject(colors) ;
-		oos.close();
-		
-		ObjectInputStream ois =  new ObjectInputStream(new FileInputStream(fichier)) ;
-		float[][] readColors = (float[][])ois.readObject() ;
-		ois.close();
+		try {
+			
+			File fichier =  new File("conf.txt") ;
+			
+			PrintWriter writer = new PrintWriter(fichier);
+			writer.print("");
+			writer.close();
+			
+			ObjectOutputStream oos =  new ObjectOutputStream(new FileOutputStream(fichier)) ;
+			oos.writeObject(colors) ;
+			oos.close();
+			
+			ObjectInputStream ois;
+			
+			ois = new ObjectInputStream(new FileInputStream(fichier));
+			
+			readColors = (float[][])ois.readObject() ;
+			ois.close();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(3);
+		}
 		
 		boolean again = true;
 		
@@ -163,7 +173,7 @@ public class ColorCalibrator {
 			}
 			
 			System.out.println("The color is " + color + " \n");
-			System.out.println("Press ENTER to continue \n");
+			System.out.println("Press UP to continue \n");
 			System.out.println("ESCAPE to exit");
 			Button.waitForAnyPress();
 			if(Button.ESCAPE.isDown()) {

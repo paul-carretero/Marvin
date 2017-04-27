@@ -60,9 +60,9 @@ public class DirectionCalculator {
 		if(p != null){
 			float calcAngle = getAngle(p.getLocation());
 			float distance = p.distanceTo(this.startPoint);
-			float newCoeff = 0.5f;
+			float newCoeff = 0.7f;
 			if(distance > 2 * Main.FIABLE_DIST){
-				newCoeff = 0.7f;
+				newCoeff = 0.9f;
 			}
 			if(calcAngle != NO_ANGLE_FOUND){
 				p.setHeading((p.getHeading() * (1f - newCoeff)) + (calcAngle * newCoeff));
@@ -82,7 +82,7 @@ public class DirectionCalculator {
 		
 		if(this.startPoint != null){
 			Pose myPose = this.pg.getPosition();
-			if(updateAngle(myPose)){
+			if((myPose.distanceTo(this.startPoint) > Main.FIABLE_DIST) && updateAngle(myPose)){
 				this.pg.setPose(myPose, false);
 			}
 			Main.printf("[DIRECTION CALCULATOR]  : nouveau angle pose = " + myPose);

@@ -97,11 +97,16 @@ public class PositionCalculator implements PoseGiver {
 	 * @return La distance avec la position sur la map
 	 */
 	private float updatePose() {
-		this.area.updatePose(getPosition());
+		
+		Pose myPose = getPosition();
+		this.area.updatePose(myPose);
+		this.odometryPoseProvider.setPose(myPose);
 		broadcastPose();
+		
 		float dist = mapPositionUpdate();
 		broadcastPose();
-		if(checkRadarConsistancy()){
+		
+		if(checkRadarConsistancy() || !Main.USE_RADAR){
 			this.area.updateArea(false);
 		}
 
@@ -196,9 +201,9 @@ public class PositionCalculator implements PoseGiver {
 
 	/**
 	 * Operation a effectuer pour garantire la consistance de la position a la fin d'un deplacement en type lieaire
-	 * @param hasBeenInterrupted vrai si le deplacement a ete interrompu, faux sinon
+	 * @param everythingFine vrai si le deplacement n'a pas ete interrompu, faux sinon
 	 */
-	synchronized public void endLine(boolean hasBeenInterrupted){
+	synchronized public void endLine(boolean everythingFine){
 		Main.log("[POSITION CALCULATOR]   : arrivee sur la position estimee : " + this.odometryPoseProvider.getPose().toString());
 		
 		broadcastPose();
@@ -207,7 +212,8 @@ public class PositionCalculator implements PoseGiver {
 		
 		Main.printf("[POSITION CALCULATOR]   : (linear) Position fixee : " + this.odometryPoseProvider.getPose().toString());
 			
-		if(!hasBeenInterrupted){
+		if(everythingFine){
+			
 			float errorDistance = getPosition().distanceTo(this.estimatedDest);
 			if(errorDistance > MAX_SAMPLE_ERROR && !Main.PRESSION || dist > MAX_SAMPLE_ERROR * 2){
 				this.marvin.signalLost();

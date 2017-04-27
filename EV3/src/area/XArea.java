@@ -38,16 +38,40 @@ public class XArea extends Area {
 		this.smallerThan = (p.getX() < this.xLine);
 		this.isConsistent = (Math.abs(p.getX() - this.xLine) > Area.MIN_ERREUR);
 	}
+	
+	/**
+	 * fonction de mise à jour de la pose p en fonction des donnees sur la position du robot par rapport à la lignes
+	 * @param p une pose a mettre à jour
+	 */
+	private void actualUpdate(final Pose p){
+		if(this.isConsistent){
+			if((this.smallerThan && p.getX() > this.xLine) || (!this.smallerThan && p.getX() < this.xLine)){
+				
+				Main.printf("[AREA MANAGER]          : [color = "+this.lineColor+"] mise à jour de la pose, ancienne : " + p);
+				
+				float newX = p.getX() * (1f-PERCENT) + this.xLine * PERCENT;
+				p.setLocation(newX, p.getY());
+				
+				Main.printf("[AREA MANAGER]          : [color = "+this.lineColor+"] mise à jour de la pose, nouvelle : " + p);
+			}
+		}
+	}
 
+	/**
+	 * Met à jour si les coordonnees sont coherentes<br/>
+	 * si le robot ne se trouve pas dans les zone d'enbut (il n'y a pas de ligne ici)<br/>
+	 * ou si il se trouve dans les zone d'enbut mais parfaitement parralèle et loin de la ligne
+	 */
 	@Override
 	public void updatePose(final Pose p) {
 		if(Math.abs(p.getX() - this.xLine) < MAX_ERREUR){
-			if(this.isConsistent){
-				if((this.smallerThan && p.getX() > this.xLine) || (!this.smallerThan && p.getX() < this.xLine)){
-					float newX = p.getX() * (1f-PERCENT) + this.xLine * PERCENT;
-					p.setLocation(newX, p.getY());
-				}
-			}
+			this.isConsistent = false;
+		}
+		else if((p.getY() > Main.Y_BOTTOM_WHITE && p.getY() < Main.Y_TOP_WHITE)){
+			actualUpdate(p);
+		}
+		else if(Math.abs(p.getHeading()) < (90 + AMBIGUOUS_ANGLE) && Math.abs(p.getHeading()) > (90 - AMBIGUOUS_ANGLE) && Math.abs(p.getX() - this.xLine) > MAX_ERREUR ){
+			actualUpdate(p);
 		}
 		else{
 			this.isConsistent = false;

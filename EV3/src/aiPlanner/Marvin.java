@@ -164,7 +164,7 @@ public class Marvin implements SignalListener, WaitProvider{
 		this.server.start();
 		this.eventManager.start();
 		this.areaManager.start();
-		if(Main.USE_CIS){
+		if(Main.I_ALSO_LIKE_TO_LIVE_DANGEROUSLY){
 			this.cis.start();
 		}
 		if(Main.USE_SOUND){
@@ -251,7 +251,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * Fonction permettant de parcourir une distance donné vers l'avant (encapsule les traitement de navigation)
 	 * @param distance distance à parcourir
 	 */
-	public void goForward(final float distance){
+	synchronized public void goForward(final float distance){
 		if(distance > 0 && this.linearSpeed > 0){	
 						
 			if(distance > Main.FIABLE_DIST){
@@ -273,7 +273,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * Fonction permettant de parcourir une distance donné vers l'arrière
 	 * @param distance distance à parcourir
 	 */
-	public void goBackward(final float distance){
+	synchronized public void goBackward(final float distance){
 		if(distance > 0 && this.linearSpeed > 0){
 			
 			Pose myFuturePose = this.positionManager.getPosition();
@@ -288,7 +288,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	 * Permet de tourner sur place (encapsule les traitement de navigation, ainsi que la présence ou non du palet)
 	 * @param f angle en degrès de rotation par rapport à la position courrante, compris entre -180 et 180
 	 */
-	public void turnHere(final float f){
+	synchronized public void turnHere(final float f){
 		if(f != 0){
 			this.engine.updateWheelOffset();
 			if(Main.HAVE_PALET){
@@ -314,7 +314,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	/**
 	 * @param speed nouvelle vitesse linéaire à utiliser
 	 */
-	public void setSpeed(int speed) {
+	synchronized public void setSpeed(int speed) {
 		this.linearSpeed = speed;
 	}
 	

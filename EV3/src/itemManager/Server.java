@@ -102,7 +102,6 @@ public class Server extends Thread{
 	public void run() {
 		Main.printf("[SERVER]                : Started");
 		this.setPriority(Thread.NORM_PRIORITY);
-		int aJeter = 0;
 		while(! isInterrupted() && !this.stop){
 			try {
 				this.dsocket.receive(this.packet);
@@ -111,22 +110,20 @@ public class Server extends Thread{
 				Main.printf("[SERVER]                : Socket Closed");
 				this.stop = true;
 			}
-			if(aJeter == 0){
-				String msg = new String(this.buffer, 0, this.packet.getLength());
-				String[] items = msg.split("\n");
-				this.lastPointsReceived.clear();
-				for (int i = 0; i < items.length; i++) 
-		        {
-					String[] coord = items[i].split(";");
-					if(coord.length == 3){
-			        	int x = Integer.parseInt(coord[1]);
-			        	int y = 300 - Integer.parseInt(coord[2]); // convertion en mode 'genius'
-			        	this.lastPointsReceived.add(new Item((x*10) + xOffset, (y*10) + yOffset, this.lastReceivedTimer, ItemType.UNDEFINED));		        	
-					}
-		        }
-				this.eom.receiveRawPoints(this.lastReceivedTimer,this.lastPointsReceived);
-				this.packet.setLength(this.buffer.length);
-			}
+			String msg = new String(this.buffer, 0, this.packet.getLength());
+			String[] items = msg.split("\n");
+			this.lastPointsReceived.clear();
+			for (int i = 0; i < items.length; i++) 
+	        {
+				String[] coord = items[i].split(";");
+				if(coord.length == 3){
+		        	int x = Integer.parseInt(coord[1]);
+		        	int y = 300 - Integer.parseInt(coord[2]); // convertion en mode 'genius'
+		        	this.lastPointsReceived.add(new Item((x*10) + xOffset, (y*10) + yOffset, this.lastReceivedTimer, ItemType.UNDEFINED));		        	
+				}
+	        }
+			this.eom.receiveRawPoints(this.lastReceivedTimer,this.lastPointsReceived);
+			this.packet.setLength(this.buffer.length);
 		}
 		Main.printf("[SERVER]                : Finished");
 	}

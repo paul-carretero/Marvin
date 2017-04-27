@@ -1,9 +1,7 @@
 package goals;
 
-import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.ItemGiver;
-import lejos.robotics.geometry.Point;
 
 /**
  * Encapsule la gestion de la partie, va ajouter les goal grabAndDrop par exemple.
@@ -32,14 +30,10 @@ public class GoalPlay extends Goal {
 
 	@Override
 	public void start() {
-		this.ia.pushGoal(this);
 		if(this.eom.canPlayAgain()){
+			this.ia.pushGoal(this);
 			this.ia.pushGoal(this.gf.goalGrabAndDropPalet());
 		}
-		else{
-			this.ia.pushGoal(this.gf.goalGoToPosition(new Point(Main.X_INITIAL, Main.Y_INITIAL)));
-		}
-		
 	}
 	
 	@Override

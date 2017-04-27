@@ -1,6 +1,8 @@
 package goals;
 
 
+import java.util.Random;
+
 import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.DistanceGiver;
@@ -117,13 +119,6 @@ public class GoalGrabPessimist extends Goal {
 	}
 	
 	/**
-	 * Met à jour a vrai le lastGrabStatus de goalFactory en fonction du status de la dernière tentative de grab.
-	 */
-	protected void updateStatus(){
-		this.gf.setLastGrab(Main.HAVE_PALET);
-	}
-	
-	/**
 	 * Encapsule toutes les fonctionnalités liées au grab.
 	 * Ne grab que si un palet est détecté par le sensor.
 	 * Vérifie au radar qu'un palet existe avant de tenter.
@@ -131,7 +126,7 @@ public class GoalGrabPessimist extends Goal {
 	protected void grabWrapper(){
 		Pose currentPose 	= this.pg.getPosition();
 		int distance 		= (int)currentPose.distanceTo(this.palet);
-		distance += 100;
+		distance += 50;
 		
 		this.ia.setAllowInterrupt(true);
 		
@@ -139,9 +134,16 @@ public class GoalGrabPessimist extends Goal {
 			
 			this.ia.goForward(distance);
 			
-			if(!tryGrab()){			
+			if(tryGrab()){
+				this.gf.setLastGrab(true);
+			}
+			else{
+				this.gf.setLastGrab(false);
 				failGrabHandler();
 			}
+		}
+		else{
+			failPoseHandler();
 		}
 				
 		this.ia.setAllowInterrupt(false);
@@ -172,11 +174,27 @@ public class GoalGrabPessimist extends Goal {
 		}
 	}
 	
+	/**
+	 * Gère le fonctionnement du robot lorsque le test de position est invalide par rapport au palet choisi,
+	 * Se déplacer permet d'éviter les problème de infinite loop
+	 */
+	protected void failPoseHandler(){
+		Random r = new Random();
+		boolean forward = r.nextBoolean();
+		if(forward){
+			this.ia.goForward(Main.RADAR_MIN_RANGE);
+		}
+		else{
+			this.ia.goBackward(Main.RADAR_MIN_RANGE);
+		}
+		
+		this.gf.setLastGrab(false);
+	}
+	
 	@Override
 	public void start() {
 		
 		if(this.eom.checkpalet(new IntPoint(this.palet))){
-			
 			correctPosition();
 			if(Main.USE_RADAR){
 				setBestAngle();
@@ -184,15 +202,16 @@ public class GoalGrabPessimist extends Goal {
 			grabWrapper();
 			decal();
 		}
-		
-		updateStatus();
+		else{
+			failPoseHandler();
+		}
 	}
 
 	/**
 	 * Se décalle légèrement afin de ne pas percuter les autre palets
 	 */
 	protected void decal() {
-		if(decal && Main.areApproximatelyEqual((int)this.pg.getPosition().getHeading(), -90, 10)){
+		if(decal && (Main.areApproximatelyEqual((int)this.pg.getPosition().getHeading(), -90, 10) || Main.areApproximatelyEqual((int)this.pg.getPosition().getHeading(), 90, 10)) ){
 			this.ia.turnHere(90);
 			this.ia.goForward(200);
 			this.ia.turnHere(-90);
@@ -206,14 +225,14 @@ public class GoalGrabPessimist extends Goal {
 	 * Un grab n'est pas réussi si on a pas eu de confirmation du capteur de pression.
 	 */
 	protected void failGrabHandler() {
-		this.ia.goBackward(400);
-		this.ia.turnHere(16);
-		this.ia.goForward(450);
+		this.ia.goBackward(350);
+		this.ia.turnHere(-17);
+		this.ia.goForward(400);
 		
 		if(!tryGrab()){
-			this.ia.goBackward(450);
-			this.ia.turnHere(-32);
-			this.ia.goForward(450);
+			this.ia.goBackward(400);
+			this.ia.turnHere(34);
+			this.ia.goForward(400);
 			tryGrab();
 		}
 	}

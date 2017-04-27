@@ -1,5 +1,6 @@
 package area;
 
+import aiPlanner.Main;
 import lejos.robotics.navigation.Pose;
 import shared.Color;
 
@@ -26,23 +27,26 @@ public abstract class Area {
 	/**
 	 * Angle par rapport à une ligne de couleur en dessous duquel on ne peut pas considérer être fiable pour un changement d'Area
 	 */
-	protected final static int 	AMBIGUOUS_ANGLE	= 10;
+	protected final static int 	AMBIGUOUS_ANGLE	= 20;
 	
 	/**
 	 * Marge d'erreur en dessous de laquelle ne mettre pas à jour
 	 */
-	protected static final int 	MIN_ERREUR		= 50;
+	protected static final int 	MIN_ERREUR		= 100;
 	
 	/**
 	 * Marge d'erreur au dessus de laquelle on préfèrera se fier à la position du gestionnaire de position (erreur du capteur)
 	 * et ou on ne mettra donc pas à jour
+	 * Les couleurs plantent souvent, très peu fiable...
 	 */
-	protected static final int	MAX_ERREUR		= 400;
+	protected static final int	MAX_ERREUR		= 250;
 	
 	/**
 	 * Taux de correction de la pose
+	 * Les couleurs plantent souvent, peu fiable...
+	 * 30% max en tout en safe
 	 */
-	protected static final float PERCENT		= 0.2f;
+	protected static final float PERCENT		= 0.15f;
 	
 	/**
 	 * AreaManager permettant d'obtenir une position et un objectif de position du robot
@@ -60,7 +64,7 @@ public abstract class Area {
 	
 	@Override
 	public String toString(){
-		return "A"+this.lineColor + " @ " + this.smallerThan;
+		return "A"+this.lineColor + " && < = " + this.smallerThan + " && valid = " + this.isConsistent;
 	}
 	
 	/**
@@ -74,6 +78,7 @@ public abstract class Area {
 			if(this.isConsistent){
 				this.smallerThan = !this.smallerThan;
 			}
+			Main.printf("[AREA MANAGER]          : color = "+ currentColor + " && " + this.toString());
 		}
 	}
 	
@@ -85,6 +90,7 @@ public abstract class Area {
 	public void updateAreaWithPosition(final Pose p, final boolean force){
 		if(force || !this.isConsistent){
 			updateAreaWithPosition(p);
+			Main.printf("[AREA MANAGER]          : " + this.toString());
 		}
 	}
 

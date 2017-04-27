@@ -47,12 +47,12 @@ public class VisionSensor implements DistanceGiver{
 	/**
 	 * Distance entre l'item en face du robot et son point de dépar au début.
 	 */
-	private static 	final int	START_DISTANCE	= 600;
+	private static 	final int	START_DISTANCE	= 700;
 	
 	/**
 	 * Distance maximal au délà dela de laquelle on considère que le radar est en défaut (il faut redémarer...)
 	 */
-	private static 	final int	MAX_RADAR_BIAS	= 300;
+	private static 	final int	MAX_RADAR_BIAS	= 400;
 	
 	/**
 	 * Créé une nouvelle instance du controlleur du radar
@@ -84,6 +84,7 @@ public class VisionSensor implements DistanceGiver{
 		}
 		else{
 			Main.printf("[VISION SENSOR]         : This sensor is nothing but bugged, will try without...");
+			Main.printf("[VISION SENSOR]         : Distance lue : " + dist);
 			Sound.beep();
 			Sound.beep();
 			Sound.beep();

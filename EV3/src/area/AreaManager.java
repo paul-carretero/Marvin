@@ -56,18 +56,24 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	
 	/**
 	 * initialise le gestionnaire de couleur
+	 * N'initialise pas les couleur verte et bleu car trop d'erreur de lecture...
 	 */
+	@SuppressWarnings("deprecation")
 	public AreaManager(){
 		super("AreaManager");
-		this.currentColor	= null;
+		setColor(null);
 		this.colorSensor	= new ColorSensor();
 		this.myPose 		= new Pose(Main.X_INITIAL, Main.Y_INITIAL, Main.H_INITIAL);
 		this.areas			= new ArrayList<Area>();
 		
 		this.areas.add(new XArea(Color.YELLOW,this));
 		this.areas.add(new XArea(Color.RED,this));
-		this.areas.add(new YArea(Color.BLUE,this));
-		this.areas.add(new YArea(Color.GREEN,this));
+		
+		if(Main.I_ALSO_LIKE_TO_LIVE_DANGEROUSLY){
+			this.areas.add(new YArea(Color.BLUE,this));
+			this.areas.add(new YArea(Color.GREEN,this));
+		}
+		
 		
 		updateArea(true);
 		
@@ -79,20 +85,20 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		Main.printf("[AREA MANAGER]          : Started");
 		this.setPriority(Thread.NORM_PRIORITY);
 		this.colorSensor.lightOn();
+		Color tColor;
 		
 		while(!isInterrupted()){
-			synchronized(this){
-				if(updateColor()){
-					if(this.currentColor != Color.GREY){
-						this.lastLine = this.currentColor;
-						for(Area area : this.areas){
-							area.colorChange(this.currentColor, this.myPose.getHeading(), this.distance);
-						}
+			if(updateColor()){
+				tColor = getColor();
+				if(tColor != Color.GREY){
+					setLastLine(tColor);
+					for(Area area : this.areas){
+						area.colorChange(tColor, this.myPose.getHeading(), this.distance);
 					}
 				}
 				wakeUpOnColor();
 			}
-			syncWait();
+			syncWait();			
 		}
 		
 		this.colorSensor.lightOff();
@@ -102,14 +108,14 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	/**
 	 * @param w un objet moniteur
 	 */
-	synchronized public void addWakeUp(final Object w){
+	public void addWakeUp(final Object w){
 		this.wakeUp = w;
 	}
 	
 	/**
 	 * supprime le moniteur
 	 */
-	synchronized public void removeWakeUp(){
+	public void removeWakeUp(){
 		this.wakeUp = null;
 	}
 	
@@ -119,8 +125,8 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	 */
 	private boolean updateColor(){
 		Color checkColor = this.colorSensor.getCurrentColor();
-		if(checkColor != this.currentColor){
-			this.currentColor = checkColor;
+		if(checkColor != getColor()){
+			setColor(checkColor);
 			return true;
 		}
 		return false;
@@ -130,7 +136,8 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	 * réveille un thread ayant demander à être réveiller si l'on passe sur une couleur significative
 	 */
 	private void wakeUpOnColor(){
-		if(this.wakeUp != null && this.currentColor != Color.GREY && this.currentColor != Color.BLACK && this.currentColor != Color.WHITE){
+		Color tColor = getColor();
+		if(this.wakeUp != null && tColor != Color.GREY && tColor != Color.BLACK && tColor != Color.WHITE){
 			synchronized (this.wakeUp) {
 				this.wakeUp.notify();
 			}
@@ -148,25 +155,41 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		}
 	}
 
-	synchronized public void updateArea(final boolean force) {
+	public void updateArea(final boolean force) {
 		for(Area area : this.areas){
 			area.updateAreaWithPosition(this.myPose , force);
 		}
 	}
 
-	synchronized public Color getColor() {
+	public Color getColor() {
 		return this.currentColor;
 	}
 	
-	synchronized public Color getLastLine(){
+	public Color getLastLine(){
 		return this.lastLine;
 	}
 
-	synchronized public void setPose(final Pose p) {
+	/**
+	 * Definie la couleur courrante
+	 * @param c une couleur
+	 */
+	public void setColor(Color c) {
+		this.currentColor = c;
+	}
+	
+	/**
+	 * définie la couleur de la dernière ligne
+	 * @param c une couleur
+	 */
+	public void setLastLine(Color c){
+		this.lastLine = c;
+	}
+	
+	public void setPose(final Pose p) {
 		this.myPose = p;
 	}
 	
-	synchronized public void updatePose(final Pose p) {
+	public void updatePose(final Pose p) {
 		for(Area area : this.areas){
 			area.updatePose(p);
 		}
@@ -175,14 +198,14 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	/**
 	 * @return la dernière pose connue par l'areamanager
 	 */
-	synchronized protected Pose getLastPose(){
+	protected Pose getLastPose(){
 		return this.myPose;
 	}
 	
 	/**
 	 * @param distance la distance que le robot est en train de parcourir en avant
 	 */
-	synchronized public void setDistance(final float distance){
+	public void setDistance(final float distance){
 		this.distance = distance;
 	}
 }

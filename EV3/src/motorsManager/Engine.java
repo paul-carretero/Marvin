@@ -48,7 +48,7 @@ public class Engine{
 	/**
 	 * Permet de stabiliser la trajectoire en fonction des irrégularités de symétrie des roues
 	 */
-	private static  float 			RIGHT_WHEEL_CORRECTION 	= -0.2f; // positif ou negatif...
+	private static final float 		RIGHT_WHEEL_CORRECTION 	= -0.25f; // positif ou negatif...
 	
 	/**
 	 * Créer un nouvel Engine (un seul en tout sinon erreur).
@@ -162,6 +162,8 @@ public class Engine{
 		int start = Main.TIMER.getElapsedMs();
 		this.waitProvider.syncWait(ms);
 		int end = Main.TIMER.getElapsedMs();
+		
+		System.out.println();
 		
 		return Main.areApproximatelyEqual(end - start, ms, MARGE_MS);
 	}

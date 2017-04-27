@@ -26,19 +26,16 @@ public class Main{
 	public static       boolean	USE_RADAR			= true;
 	
 	/**
-	 * Defini si l'on doit utiliser le gestionnaire d'area ou juste de couleur
-	 */
-	public static       boolean	USE_AREA			= false;
-	
-	/**
 	 * Defini si l'on doit utiliser les sons
 	 */
 	public static final boolean	USE_SOUND			= false;
 	
 	/**
-	 * Defini si l'on doit detecter les positions ennemies
+	 * Defini si l'on doit utiliser les couleurs verte ou bleu dans les area<br/>
+	 * Defini si l'on doit utiliser le calculateur de direction ennemies<br/>
+	 * FORTEMENT DECONSEILLE, tres peu fiable et/ou succeptiblede provoquer des erreurs
 	 */
-	public static final boolean	USE_CIS				= true;
+	public static boolean I_ALSO_LIKE_TO_LIVE_DANGEROUSLY = false;
 	
 	/**
 	 * position en x intiale du robot
@@ -47,7 +44,11 @@ public class Main{
 	/**
 	 * position en y initiale du robot
 	 */
-	public static       int Y_INITIAL 				= 2700;
+	public static       int Y_INITIAL 				= 2800;
+	/**
+	 * position en y initiale du robot par rapport à la ligne blanche (environ 10cm)
+	 */
+	public static final int Y_INITIAL_DECAL			= 100;
 	/**
 	 * orientation initiale du robot
 	 */
@@ -176,7 +177,7 @@ public class Main{
 	/**
 	 * Distance (en mm) au délà de laquelle on considère la distance parcouru suffisament fiable pour avoir une calcul précis de l'angle.
 	 */
-	public static final int FIABLE_DIST	= 400;
+	public static final int FIABLE_DIST	= 375;
 	
 	/**
 	 * Vitesse d'une rotation standard
@@ -195,17 +196,17 @@ public class Main{
 	/**
 	 * Vitesse standard En mm/s
 	 */
-	public static final int   CRUISE_SPEED			= 240;
+	public static final int   CRUISE_SPEED			= 240; // 240
 	
 	/**
 	 * Vitesse maximum sans perte de precision En mm/s
 	 */
-	public static final int   MAX_SPEED				= 300;
+	public static final int   MAX_SPEED				= 300; // 300
 	
 	/**
 	 * Distance maximum considéré comme fiable
 	 */
-	public static final float MAX_SAFE_DISTANCE		= 1000;
+	public static final float MAX_SAFE_DISTANCE		= 1200;
 	
 	/**
 	 * Duree d'un grab
@@ -219,7 +220,7 @@ public class Main{
 	/**
 	 * IP du pc affichant le détail des log
 	 */
-	public static final String	IP					= "192.168.0.12";
+	public static final String	IP					= "192.168.0.22";
 	/**
 	 * Timer du programme
 	 */
@@ -341,12 +342,12 @@ public class Main{
 		};
 		
 		int startPoses[][] = new int[][]{
-			new int[]{500,2700,-90},
-			new int[]{1000,2700,-90},
-			new int[]{1500,2700,-90},
-			new int[]{500,300,90},
-			new int[]{1000,300,90},
-			new int[]{1500,300,90},
+			new int[]{500,2800,-90,300,2700},
+			new int[]{1000,2800,-90,300,2700},
+			new int[]{1500,2800,-90,300,2700},
+			new int[]{500,200,90,2700,300},
+			new int[]{1000,200,90,2700,300},
+			new int[]{1500,200,90,2700,300},
 		};
 		
 		int current = 1;
@@ -401,16 +402,15 @@ public class Main{
 		X_INITIAL = startPoses[current][0];
 		Y_INITIAL = startPoses[current][1];
 		H_INITIAL = startPoses[current][2];
+		Y_OBJECTIVE_WHITE = startPoses[current][3];
+		Y_DEFEND_WHITE = startPoses[current][4];
 	}
-
-
+	
 	/**
-	 * Fonction de lancement du programme
-	 * @param args unused
+	 * Lance le programme principale
+	 * Chargera le fichier de calibration couleur depuis le fichier conf.txt
 	 */
-	public static void main(String[] args) {
-		
-		LocalEV3.get().getLED().setPattern(1);
+	private static void runMainProgram(){
 		menu();
 		LocalEV3.get().getLED().setPattern(2);
 		
@@ -422,33 +422,58 @@ public class Main{
  		
  		LocalEV3.get().getLED().setPattern(1);
  		
- 		System.out.print("\n-----------------\n   [HAND OPEN]\n \n[OPEN] [X] [GRAB]\n\n  [HAND CLOSED]\n-----------------\nMarvin Start Menu");
+ 		System.out.print("\n [SAFE HAND OPEN]\n\n[UNSAFE] [UNSAFE]\n[OPEN]    [CLOSE]\n\n[SAFE HAND CLOSE]\n-----------------\nMarvin Start Menu");
  		int pressButton = Button.waitForAnyPress();
  		
  		if(pressButton == Button.ID_DOWN){
  			HAND_OPEN = false;
  			Sound.beep();
- 			
- 			Main.TIMER.resetTimer();
- 			marvin.run();
  		}
  		else if(pressButton == Button.ID_UP || pressButton == Button.ID_ENTER){
  			HAND_OPEN = true;
  			Sound.beep();
- 			
- 			Main.TIMER.resetTimer();
- 			marvin.run();
  		}
  		else if(pressButton == Button.ID_RIGHT){
- 			HAND_OPEN = true;
- 			marvin.grab();
- 			Delay.msDelay(800);
+ 			HAND_OPEN = false;
+ 			I_ALSO_LIKE_TO_LIVE_DANGEROUSLY = true;
+ 			Sound.beep();
  		}
  		else if(pressButton == Button.ID_LEFT){
- 			HAND_OPEN = false;
- 			marvin.open();
- 			Delay.msDelay(800);
+ 			HAND_OPEN = true;
+ 			I_ALSO_LIKE_TO_LIVE_DANGEROUSLY = true;
+ 			Sound.beep();
  		}
+ 		
+ 		Main.TIMER.resetTimer();
+		marvin.run();
+	}
+
+
+	/**
+	 * Fonction de lancement du programme
+	 * @param args unused
+	 */
+	public static void main(String[] args) {
+		
+		LocalEV3.get().getLED().setPattern(1);
+		
+		System.out.print("\n [DEFAULT START]\n\n[CALIBRATE COLOR]\n\n   [CALIBRATE]\n   [AND START]\n-----------------\nMarvin Start Menu");
+		int pressButton = Button.waitForAnyPress();
+		
+		if(pressButton == Button.ID_DOWN){
+			System.out.println("Lancement de la calibration couleur");
+			Delay.msDelay(300);
+			ColorCalibrator.Calibrate();
+			runMainProgram();
+		}
+		if(pressButton == Button.ID_ENTER){
+			System.out.println("Lancement de la calibration couleur");
+			Delay.msDelay(300);
+			ColorCalibrator.Calibrate();
+		}
+		if(pressButton == Button.ID_UP){
+			runMainProgram();
+		}
 		
 		printf("@@@ The first ten million years were the worst. And the second ten million: they were the worst, too. The third ten million I didn't enjoy at all. After that, I went into a bit of a decline. @@@");
 	}

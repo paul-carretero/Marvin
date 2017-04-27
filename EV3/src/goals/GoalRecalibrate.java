@@ -89,18 +89,18 @@ public class GoalRecalibrate extends Goal {
 		if(color != Color.GREY){
 			List<IntPoint> initialList = this.eom.searchPosition(color);
 			
-			System.out.println("initial list : ");
+			Main.printf("[GOAL RECALIBRATE]       : initial list :  ");
 			for(IntPoint p : initialList){
-				System.out.println(p);
+				Main.printf("[GOAL RECALIBRATE]       : " + p);
 			}
 			
 			this.ia.goForward(300);
 			
 			List<IntPoint> finalList = this.eom.searchPosition(color);
 			
-			System.out.println("final list : ");
+			Main.printf("[GOAL RECALIBRATE]       : final list :  ");
 			for(IntPoint p : initialList){
-				System.out.println(p);
+				Main.printf("[GOAL RECALIBRATE]       : " + p);
 			}
 			
 			IntPoint start	= null;
@@ -111,14 +111,14 @@ public class GoalRecalibrate extends Goal {
 				}
 			}
 			
-			System.out.println("start = " + start);
+			Main.printf("[GOAL RECALIBRATE]       : start = " + start);
 			
 			if(start != null){
 				List<IntPoint> resList = this.eom.searchPosition(start, 200, 400);
 				
-				System.out.println("resList list : ");
+				Main.printf("[GOAL RECALIBRATE]       : Result list :  ");
 				for(IntPoint p : resList){
-					System.out.println(p);
+					Main.printf("[GOAL RECALIBRATE]       : " + p);
 				}
 				
 				if(resList.size() == 1){
@@ -128,7 +128,7 @@ public class GoalRecalibrate extends Goal {
 					Pose myPose = new Pose(me.x(), me.y(), angle);
 					
 					this.pg.setPose(myPose, true);
-					System.out.println("calculated pose = " + myPose);
+					Main.printf("[GOAL RECALIBRATE]       : calculated pose = " + myPose);
 					success = true;
 				}
 			}
