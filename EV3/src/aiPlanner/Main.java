@@ -222,7 +222,7 @@ public class Main{
 	/**
 	 * IP du pc affichant le détail des log
 	 */
-	public static final String	IP					= "192.168.0.12";
+	public static final String	IP					= "192.168.0.11";
 	/**
 	 * Timer du programme
 	 */

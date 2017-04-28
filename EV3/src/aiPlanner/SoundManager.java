@@ -12,6 +12,10 @@ import lejos.hardware.Sound;
  */
 public class SoundManager extends Thread{
 	/**
+	 * temps d'attentes entre chaque vérification
+	 */
+	private static final int REFRESH_RATE = 1000;
+	/**
 	 * list FIFO contenant une liste de son à jouer (éventuellement vide)
 	 */
 	private Queue<String> audioList;
@@ -78,7 +82,7 @@ public class SoundManager extends Thread{
 	 */
 	synchronized private void synchWait() {
 		try {
-			this.wait();
+			this.wait(REFRESH_RATE);
 		} catch (InterruptedException e) {
 			Thread.currentThread().interrupt();
 		}
