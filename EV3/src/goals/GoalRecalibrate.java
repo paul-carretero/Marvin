@@ -84,7 +84,7 @@ public class GoalRecalibrate extends Goal {
 		
 		this.ia.removeMeWakeUpOnColor();
 		
-		Main.printf("on color : " + color);
+		Main.printf("[GOAL RECALIBRATE]       : on color : " + color);
 		
 		this.ia.syncWait(200);
 		

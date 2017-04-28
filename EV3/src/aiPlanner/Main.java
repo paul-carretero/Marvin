@@ -30,12 +30,12 @@ public class Main{
 	/**
 	 * Defini si l'on doit utiliser les sons
 	 */
-	public static final boolean	USE_SOUND			= false;
+	public static final boolean	USE_SOUND			= true;
 	
 	/**
 	 * Defini si l'on doit utiliser les couleurs verte ou bleu dans les area<br/>
 	 * Defini si l'on doit utiliser le calculateur de direction ennemies<br/>
-	 * FORTEMENT DECONSEILLE, tres peu fiable et/ou succeptiblede provoquer des erreurs
+	 * FORTEMENT DECONSEILLE, tres peu fiable et/ou succeptible de provoquer des erreurs
 	 */
 	public static boolean I_ALSO_LIKE_TO_LIVE_DANGEROUSLY = false;
 	
@@ -452,8 +452,10 @@ public class Main{
  			Sound.beep();
  		}
  		
- 		Main.TIMER.resetTimer();
-		marvin.run();
+ 		if(pressButton != Button.ID_ESCAPE){
+	 		Main.TIMER.resetTimer();
+			marvin.run();
+ 		}
 	}
 
 

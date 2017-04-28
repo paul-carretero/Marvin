@@ -50,6 +50,9 @@ public class GoalDrop extends Goal{
 
 	@Override
 	protected boolean checkPreConditions() {
+		if(!Main.HAVE_PALET){
+			this.gf.incrFailGrabCount();
+		}
 		return Main.HAVE_PALET;
 	}
 	

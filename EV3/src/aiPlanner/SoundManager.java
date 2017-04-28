@@ -41,11 +41,7 @@ public class SoundManager extends Thread{
 				}
 			}
 			else{
-				try {
-					this.wait();
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
+				synchWait();
 			}
 		}
 		Main.printf("[AUDIO]                 : Finished");
@@ -75,5 +71,16 @@ public class SoundManager extends Thread{
 		this.audioList.add("bip.wav");
 		this.audioList.add("bip.wav");
 		this.notify();
+	}
+	
+	/**
+	 * Attends jusqu'a etre reveiller par un autre Thread
+	 */
+	synchronized private void synchWait() {
+		try {
+			this.wait();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
 	}
 }

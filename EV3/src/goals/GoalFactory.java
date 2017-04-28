@@ -91,12 +91,17 @@ public class GoalFactory {
 		if(this.lastGrabOk){
 			this.failGrabCount = 0;
 		}
-		else{
-			this.failGrabCount++;
-			if(this.failGrabCount > MAX_FAILED_GRAB){
-				this.ia.pushGoal(goalRecalibrate());
-				this.failGrabCount = 0;
-			}
+	}
+	
+	/**
+	 * incrémente le compte de fail grab
+	 * Ajoute un objectif de recalibration si le nombre d'echec est trop important
+	 */
+	public void incrFailGrabCount(){
+		this.failGrabCount++;
+		if(this.failGrabCount > MAX_FAILED_GRAB){
+			this.ia.pushGoal(goalRecalibrate());
+			this.failGrabCount = 0;
 		}
 	}
 	
