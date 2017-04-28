@@ -29,7 +29,7 @@ public class PositionCalculator implements PoseGiver {
 	/**
 	 * Distance maximum entre le point donné et le point calculé (en mm) avant qu'un gestionnaire de position se déclare en état de "lost".
 	 */
-	private static final int		MAX_SAMPLE_ERROR	= 300;
+	private static final int		MAX_SAMPLE_ERROR	= 270;
 	
 	/**
 	 * Instance du radar permettant de retourne la distance vers un objet situé devant le robot

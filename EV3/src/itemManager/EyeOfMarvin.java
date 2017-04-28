@@ -219,7 +219,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 	}
 	
 	synchronized public Item getMarvinPosition(){
-		Main.printf("[EYE OF MARVIN]                          :" + this.myPose);
+		Main.printf("[EYE OF MARVIN]         : recherche de position sur " + this.myPose);
 		Main.poseRealToSensor(this.myPose);
 		IntPoint myPosition = new IntPoint(this.myPose);
 		averagize(myPosition);

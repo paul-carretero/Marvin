@@ -373,7 +373,7 @@ public class Marvin implements SignalListener, WaitProvider{
 	 */
 	public void pushGoal(final Goal g){
 		Goal peek = this.goals.peek();
-		if(peek != null && peek.getName() != GoalType.RECALIBRATE){
+		if((peek != null && peek.getName() != GoalType.RECALIBRATE) || peek == null){
 			this.goals.push(g);
 		}
 	}

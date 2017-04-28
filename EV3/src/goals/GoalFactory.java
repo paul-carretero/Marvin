@@ -20,7 +20,7 @@ public class GoalFactory {
 	/**
 	 * Nombre maximum de grab en echec avant d'ajouter un objectif de recalibration
 	 */
-	private static final int MAX_FAILED_GRAB = 6;
+	private static final int MAX_FAILED_GRAB = 3;
 	/**
 	 * instance de Marvin, gestionnaire de l'ia et des moteurs
 	 */
@@ -79,7 +79,6 @@ public class GoalFactory {
 	public Deque<Goal> initializeStartGoals(){
 		Deque<Goal> goals = new ConcurrentLinkedDeque<Goal>();
 		goals.push(play());
-		//goals.push(goalTest());
 		return goals;
 	}
 	

@@ -94,12 +94,12 @@ public class EventHandler extends Thread implements MoveListener{
 		this.lastPression		= -1;
 		this.lastWall			= -1;
 		
-		Main.printf("[EVENTHANDLER]          : Initialized");
+		Main.printf("[EVENT MANAGER]         : Initialized");
 	}
 	
 	@Override
 	public void run() {
-		Main.printf("[EVENTHANDLER]          : Started");
+		Main.printf("[EVENT MANAGER]         : Started");
 		this.setPriority(MIN_PRIORITY);
 		
 		while(!isInterrupted()){
@@ -114,7 +114,7 @@ public class EventHandler extends Thread implements MoveListener{
 			syncWait();
 		}
 		
-		Main.printf("[EVENTHANDLER]          : Finished");
+		Main.printf("[EVENT MANAGER]         : Finished");
 	}
 	
 	/**

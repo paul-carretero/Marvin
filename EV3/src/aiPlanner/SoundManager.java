@@ -54,7 +54,7 @@ public class SoundManager extends Thread{
 	/**
 	 * Ajoute le son VictoryTheme dans la liste
 	 */
-	public void addVictoryTheme(){
+	synchronized public void addVictoryTheme(){
 		this.audioList.add("victory.wav");
 		this.notify();
 	}
@@ -62,7 +62,7 @@ public class SoundManager extends Thread{
 	/**
 	 * Ajoute le son order66 dans la liste
 	 */
-	public void addOrder(){
+	synchronized public void addOrder(){
 		this.audioList.add("order66.wav");
 		this.notify();
 	}
@@ -70,7 +70,7 @@ public class SoundManager extends Thread{
 	/**
 	 * Ajoute le son Bip dans la liste
 	 */
-	public void addBips() {
+	synchronized public void addBips() {
 		this.audioList.add("bip.wav");
 		this.audioList.add("bip.wav");
 		this.audioList.add("bip.wav");

@@ -32,6 +32,7 @@ public class GoalPlay extends Goal {
 
 	@Override
 	public void start() {
+		System.out.println("play" + this.eom.canPlayAgain());
 		if(this.eom.canPlayAgain()){
 			this.ia.pushGoal(this);
 			this.ia.pushGoal(this.gf.goalGrabAndDropPalet());
