@@ -5,7 +5,7 @@ import interfaces.PoseGiver;
 
 /**
  * Objectif de déplacement à un point donné a la vitesse maximal.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class GoalTest extends Goal {
 	

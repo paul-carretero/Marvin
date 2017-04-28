@@ -10,7 +10,7 @@ import lejos.robotics.SampleProvider;
 
 /**
  * Vision Sensor permet d'abstraire la gestion du radar et offre quelque primitives de base pour le traitement des informations en provenance de celui ci.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class VisionSensor implements DistanceGiver{
 	

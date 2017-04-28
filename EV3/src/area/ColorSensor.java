@@ -15,7 +15,7 @@ import lejos.robotics.filter.MeanFilter;
 /**
  * Classe représentant le capteur de couleur du robot.
  * Principalement utilisé pour obtenir la couleur "vue" par le robot.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class ColorSensor {
 

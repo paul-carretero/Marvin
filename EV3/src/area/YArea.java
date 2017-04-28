@@ -8,7 +8,7 @@ import shared.Color;
  * Symbolise une division du terrain en fonction des lignes en X (bleue ou vertes).
  * Propose une implémentation de Area afin de mettre à jour la position
  * Deprecated car très peu précise du fait des nombreux faux-positif...
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class YArea extends Area {
 

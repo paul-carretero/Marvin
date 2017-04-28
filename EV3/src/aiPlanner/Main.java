@@ -18,7 +18,7 @@ import shared.Timer;
  * les informations fixes sur l'environnement et le terrain et des informations fixes sur les capteurs
  * Instancie et lance un Objet Marvin pour initialiser le programme
  * @see Marvin
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class Main{
 	

@@ -11,7 +11,7 @@ import positionManager.VisionSensor;
 /**
  * Classe permettant de gérer les évenements et interruption exterieurs au système.
  * Permet également de detecter certain type d'erreurs.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class EventHandler extends Thread implements MoveListener{
 	

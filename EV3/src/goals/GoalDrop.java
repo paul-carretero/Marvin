@@ -10,7 +10,7 @@ import shared.Color;
 
 /**
  * Objectif de drop d'un palet (ne s'éxécutera que si l'on dispose d'un palet).
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class GoalDrop extends Goal{
 	

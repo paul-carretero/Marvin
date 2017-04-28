@@ -6,7 +6,7 @@ import interfaces.ItemGiver;
 
 /**
  * Encapsule la gestion de la partie, va ajouter les goal grabAndDrop par exemple.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class GoalPlay extends Goal {
 	

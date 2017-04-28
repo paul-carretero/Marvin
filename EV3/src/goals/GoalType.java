@@ -2,7 +2,7 @@ package goals;
 
 /**
  * permet d'identifier les Goal de manière précise.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public enum GoalType {
 	/**

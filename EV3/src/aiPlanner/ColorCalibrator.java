@@ -19,7 +19,7 @@ import lejos.utility.Delay;
 
 /**
  * Classe utilitaire permettant de générer un fichier de calibration des couleurs.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class ColorCalibrator {
 	

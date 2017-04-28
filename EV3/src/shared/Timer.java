@@ -2,7 +2,7 @@ package shared;
 
 /**
  * Classe utilitaire proposant une implémentation simple d'un timer pour mesurer le temps.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class Timer {
 	/**

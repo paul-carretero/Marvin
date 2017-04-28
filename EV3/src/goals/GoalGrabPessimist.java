@@ -12,7 +12,7 @@ import shared.IntPoint;
 
 /**
  * Permet d'effectuer un Grab de manière pessimist (on recherche avant la position considéré comme la meilleure).
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class GoalGrabPessimist extends Goal {
 	

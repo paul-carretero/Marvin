@@ -17,7 +17,7 @@ import shared.IntPoint;
  * Objectif de recalibration de la pose du robot
  * Recalibre la position et l'angle en recherchant une ligne significative a exploiter.
  * @see Pose
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class GoalRecalibrate extends Goal {
 	

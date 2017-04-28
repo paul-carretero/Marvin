@@ -2,7 +2,7 @@ package interfaces;
 
 /**
  * Implémenté par le radar afin de proposer des primitives pour la detection d'objets.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public interface DistanceGiver {
 	/**

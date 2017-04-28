@@ -5,7 +5,7 @@ import aiPlanner.Marvin;
 
 /**
  * Représente un objectif et ses fonctions communes.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public abstract class Goal {
 	

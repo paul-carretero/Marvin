@@ -7,7 +7,7 @@ import lejos.robotics.navigation.Pose;
 /**
  * Classe representant un point ayant des coordonnées entière dans un repère cartésien.
  * Permet des opérations simple sur les points.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  * @see Item
  */
 public class IntPoint {

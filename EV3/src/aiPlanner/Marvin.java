@@ -28,7 +28,7 @@ import java.util.Deque;
 /**
  * Classe principale du programme de navigation et de Décision du robot, 
  * gère les objectif à accomplir ainsi que les signaux envoyer par les différent gestionnaire d'évennement et de navigtion
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class Marvin implements SignalListener, WaitProvider{
 	

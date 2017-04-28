@@ -11,7 +11,7 @@ import shared.Color;
 
 /**
  * class gérant la position du robot par rapport aux 4 lignes de couleurs (jaune, rouge, verte et bleu).
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	

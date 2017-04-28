@@ -17,7 +17,7 @@ import lejos.robotics.navigation.MoveProvider;
 import lejos.robotics.navigation.Pose;
 /**
  * Class principale centralisant les informations de position. reçoit ou les informations de déplacement et calcule la cohérence en fonction des capteurs.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class PositionCalculator implements PoseGiver {
 

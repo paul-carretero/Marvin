@@ -8,7 +8,7 @@ import lejos.robotics.navigation.Pose;
 /**
  * Classe permettant de calculer l'angle du robot (suivant les conventions utilisées par LeJos)
  * Se base sur les données de la carte (générer par la caméra et le serveur) au début et à la fin d'un déplacement pour calculer les angles.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class DirectionCalculator {
 	

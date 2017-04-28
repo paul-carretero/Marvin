@@ -18,7 +18,7 @@ import java.util.Iterator;
  * Définit et permet d'accéder aux Item de type ME (le robot) ou Palet.<br/>
  * Les opérations de recherche ou d'insertion dans la map doivent être réalisées de manière atomique (donc synchronized)
  * @see Item
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 

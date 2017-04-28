@@ -8,7 +8,7 @@ import lejos.hardware.Sound;
 
 /**
  * Classe charger de jouer des son en arrière plan
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class SoundManager extends Thread{
 	/**

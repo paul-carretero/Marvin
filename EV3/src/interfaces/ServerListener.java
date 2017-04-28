@@ -6,7 +6,7 @@ import shared.Item;
 
 /**
  * Interface implémentée par un objet souhaitant recevoir des données structurés du serveur (de la caméra infrarouge du terrain).
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public interface ServerListener {
 	/**

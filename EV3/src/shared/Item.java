@@ -5,7 +5,7 @@ import aiPlanner.Main;
 /**
  * représente un objet sur le plateau, cet objet est représenté par son type, son emplacement et sa durée de vie
  * @see Timer
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class Item extends IntPoint{
 	

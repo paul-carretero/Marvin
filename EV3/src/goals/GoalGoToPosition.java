@@ -8,7 +8,7 @@ import lejos.robotics.navigation.Pose;
 
 /**
  * Objectif de déplacement à un point donné a la vitesse maximal.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class GoalGoToPosition extends Goal {
 	

@@ -3,7 +3,7 @@ package shared;
 /**
  * Enumeration fournissant les possibilités pour le type d'un item
  * @see Item
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public enum ItemType {
 	/**

@@ -2,7 +2,7 @@ package interfaces;
 
 /**
  * Propose à d'autre Thread d'attendre sur un Thread particulier, permet une meilleur gestion des attentes/notifications.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public interface WaitProvider {
 	/**

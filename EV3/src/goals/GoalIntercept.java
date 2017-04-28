@@ -8,7 +8,7 @@ import lejos.robotics.geometry.Point;
 
 /**
  * Obtient un éventuel point d'interception, s'y rend et attends quelque seconde afin d'être percuter par le robot ennemi.
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class GoalIntercept extends Goal {
 	

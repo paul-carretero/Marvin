@@ -16,7 +16,7 @@ import shared.ItemType;
  * Thread gérant la reception des position des item du terrain de la caméra.
  * Créer une liste de point qui sera traitée par EyeOfMarvin.
  * @see Item
- * @author paul.carretero
+ * @author paul.carretero, florent.chastagner
  */
 public class Server extends Thread{
 	
