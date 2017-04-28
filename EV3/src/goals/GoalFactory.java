@@ -78,7 +78,7 @@ public class GoalFactory {
 	 */
 	public Deque<Goal> initializeStartGoals(){
 		Deque<Goal> goals = new ConcurrentLinkedDeque<Goal>();
-		goals.push(goalTest());
+		goals.push(play());
 		return goals;
 	}
 	
