@@ -142,7 +142,7 @@ public class ColorSensor {
 
 	/**
 	 * Calcule la distance entre deux couleurs.
-	 * @param v1 la preière couleur
+	 * @param v1 la preiere couleur
 	 * @param v2 la seconde couleur
 	 * @return la distance entre les deux couleurs.
 	 */

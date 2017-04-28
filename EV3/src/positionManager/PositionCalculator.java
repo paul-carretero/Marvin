@@ -167,7 +167,7 @@ public class PositionCalculator implements PoseGiver {
 	/**
 	 * @param pl un PoseListener a ajouter
 	 */
-	synchronized public void addPoseListener(PoseListener pl){
+	synchronized public void addPoseListener(final PoseListener pl){
 		this.poseListeners.add(pl);
 	}
 	
@@ -203,7 +203,7 @@ public class PositionCalculator implements PoseGiver {
 	 * Operation a effectuer pour garantire la consistance de la position a la fin d'un deplacement en type lieaire
 	 * @param everythingFine vrai si le deplacement n'a pas ete interrompu, faux sinon
 	 */
-	synchronized public void endLine(boolean everythingFine){
+	synchronized public void endLine(final boolean everythingFine){
 		Main.log("[POSITION CALCULATOR]   : arrivee sur la position estimee : " + this.odometryPoseProvider.getPose().toString());
 		
 		broadcastPose();
