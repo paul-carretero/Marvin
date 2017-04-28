@@ -17,12 +17,10 @@ import motorsManager.Graber;
 import positionManager.DirectionCalculator;
 import positionManager.PositionCalculator;
 import positionManager.VisionSensor;
-
+import shared.SoundManager;
 import java.util.Iterator;
 import java.util.Map;
-
 import area.AreaManager;
-
 import java.util.Deque;
 
 /**

@@ -1,13 +1,14 @@
-package aiPlanner;
+package shared;
 
 import java.io.File;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import aiPlanner.Main;
 import lejos.hardware.Sound;
 
 /**
- * Classe charger de jouer des son en arrière plan
+ * Classe chargée de jouer des sons en arrière plan
  * @author paul.carretero, florent.chastagner
  */
 public class SoundManager extends Thread{

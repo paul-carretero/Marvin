@@ -99,6 +99,9 @@ public class Server extends Thread{
 		yOffset = y;
 	}
 	
+	/**
+	 * Récupère les positions des items fournies par la caméra, les encode en Item et transmet cette liste a EyeOfMarvin pour traitement
+	 */
 	@Override
 	public void run() {
 		Main.printf("[SERVER]                : Started");

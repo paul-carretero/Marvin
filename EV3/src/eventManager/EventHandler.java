@@ -97,6 +97,10 @@ public class EventHandler extends Thread implements MoveListener{
 		Main.printf("[EVENT MANAGER]         : Initialized");
 	}
 	
+	/**
+	 * Vérifie a intervals constant différents évenement pouvant survenir de manière "non décidé" par le robot.<br>
+	 * Détecte notament les obstacles et lorsqu'un palet est touché.
+	 */
 	@Override
 	public void run() {
 		Main.printf("[EVENT MANAGER]         : Started");

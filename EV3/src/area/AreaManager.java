@@ -80,6 +80,10 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 		Main.printf("[AREA MANAGER]          : Initialized");
 	}
 	
+	/**
+	 * Système de détection des couleurs du gestionnaire d'Area.
+	 * Récupère les données du capteur de couleur et décide du traitement a réaliser avec la couleur détectée
+	 */
 	@Override
 	public void run(){
 		Main.printf("[AREA MANAGER]          : Started");

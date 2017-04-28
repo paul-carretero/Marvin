@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.net.*;
 
 /**
- * Server a lancer sur un PC afin de visualiser les log et informations émise par le robot.
+ * Server a lancer sur un PC afin de visualiser les logs et informations émises par le robot.
  * Il est nécessaire de configurer le robot pour emmetre vers l'IP de ce PC au préalable
  * @author paul.carretero
  */
@@ -70,7 +70,7 @@ class TrillianServer{
 	}
 		
 	/**
-	 * Lance le serveur et l'était lorsque le robot envoie une phrase de fin valide
+	 * Lance le serveur et l'éteint lorsque le robot envoie une phrase de fin valide
 	 * @param args unused
 	 * @throws IOException lors d'une erreur de communication
 	 */
