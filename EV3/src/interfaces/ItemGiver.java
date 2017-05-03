@@ -51,4 +51,9 @@ public interface ItemGiver {
 	 * @return vrai si il reste des palet sur la map, faux sinon
 	 */
 	public boolean canPlayAgain();
+	
+	/**
+	 * @return une list des item classifié comme UNDEFINIED
+	 */
+	public List<IntPoint> getNewItem();
 }

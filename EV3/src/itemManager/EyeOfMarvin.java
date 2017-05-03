@@ -234,6 +234,17 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 					myIndex = i;
 					distance = testDist;
 				}
+				
+				// on réinitialise l'ancienne position
+				
+				if(this.masterList.get(i).getType() == ItemType.ME){
+					if(this.masterList.get(i).getLifeTime() > MIN_LIFE){
+						this.masterList.get(i).setType(ItemType.PALET);
+					}
+					else{
+						this.masterList.get(i).setType(ItemType.UNDEFINED);
+					}
+				}
 			}
 
 			if(myIndex > -1){
@@ -282,6 +293,7 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 	 * @return la position d'un ennemy éventuel ou null si plusieurs ennemie possible ou non trouvé
 	 */
 	synchronized public Item getPossibleEnnemy(){
+		getMarvinPosition(); // on se défini en Item.ME
 		if(count(ItemType.UNDEFINED) == 1){
 			for (Item item : this.masterList){
 				if(item.getType() == ItemType.UNDEFINED){
@@ -344,6 +356,18 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 				resList.add(entry);
 			}
 		}
+		return resList;
+	}
+	
+	synchronized public List<IntPoint> getNewItem() {
+		List<IntPoint> resList = new ArrayList<IntPoint>();
+		
+		for(Item i : this.masterList){
+			if(i.getType() == ItemType.UNDEFINED){
+				resList.add(i);
+			}
+		}
+		
 		return resList;
 	}
 	

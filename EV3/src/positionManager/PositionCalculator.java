@@ -217,7 +217,7 @@ public class PositionCalculator implements PoseGiver {
 		if(everythingFine){
 			
 			float errorDistance = getPosition().distanceTo(this.estimatedDest);
-			if(errorDistance > MAX_SAMPLE_ERROR && !Main.PRESSION || dist > MAX_SAMPLE_ERROR * 2){
+			if((errorDistance > MAX_SAMPLE_ERROR && !Main.PRESSION) || dist > MAX_SAMPLE_ERROR * 1.5){
 				this.marvin.signalLost();
 			}
 			broadcastPose();

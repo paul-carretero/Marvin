@@ -1,7 +1,6 @@
 package goals;
 
 import java.util.List;
-import java.util.Random;
 
 import aiPlanner.Main;
 import aiPlanner.Marvin;
@@ -21,6 +20,21 @@ import shared.IntPoint;
  */
 public class GoalRecalibrate extends Goal {
 	
+	/**
+	 * Distance a parcourir afin de calibrer l'angle (minimum assez fiable)
+	 */
+	private static final int CALIBRATE_DIST = 300;
+
+	/**
+	 * marge d'erreur pour la récupération de l'item de fin
+	 */
+	private static final int MARGE_ERREUR = 100;
+	
+	/**
+	 * Minute a laquelle une tentative de recalibration rapide a été réalisée
+	 */
+	private static int lastFastTry = -1;
+
 	/**
 	 * Nom de l'objectif
 	 */
@@ -60,8 +74,13 @@ public class GoalRecalibrate extends Goal {
 		this.am		= am;
 	}
 	
-	@Override
-	public void start() {
+	/**
+	 * recherchera une ligne pour se resynchronizer.
+	 * plus lent du coup.
+	 */
+	private void pessimistRecalibrate(){
+		
+		lastFastTry = -1;
 		
 		boolean success = false;
 		
@@ -86,7 +105,7 @@ public class GoalRecalibrate extends Goal {
 		
 		Main.printf("[GOAL RECALIBRATE]       : on color : " + color);
 		
-		this.ia.syncWait(200);
+		this.ia.syncWait(150);
 		
 		if(color != Color.GREY){
 			List<IntPoint> initialList = this.eom.searchPosition(color);
@@ -96,7 +115,7 @@ public class GoalRecalibrate extends Goal {
 				Main.printf("[GOAL RECALIBRATE]       : " + p);
 			}
 			
-			this.ia.goForward(300);
+			this.ia.goForward(CALIBRATE_DIST);
 			
 			List<IntPoint> finalList = this.eom.searchPosition(color);
 			
@@ -116,7 +135,7 @@ public class GoalRecalibrate extends Goal {
 			Main.printf("[GOAL RECALIBRATE]       : start = " + start);
 			
 			if(start != null){
-				List<IntPoint> resList = this.eom.searchPosition(start, 200, 400);
+				List<IntPoint> resList = this.eom.searchPosition(start, CALIBRATE_DIST-MARGE_ERREUR, CALIBRATE_DIST+MARGE_ERREUR);
 				
 				Main.printf("[GOAL RECALIBRATE]       : Result list :  ");
 				for(IntPoint p : resList){
@@ -135,16 +154,79 @@ public class GoalRecalibrate extends Goal {
 				}
 			}
 		}
+		
 		this.ia.setSpeed(Main.CRUISE_SPEED);
+		
 		if(success){
 			this.ia.signalNoLost();
 		}
 		else{
-			Random r = new Random();
-			this.ia.turnHere(r.nextInt(360) - 180);
+			this.ia.turnHere(Main.RANDOMIZER.nextInt(360) - 180);
 			this.ia.pushGoal(this);
 		}
+	}
+	
+	/**
+	 * Tente de mettre à jour la pose de manière rapide (au détriment de la précision)
+	 * @return vrai si l'on a pu mettre à jour la pose de manière plus ou moins certaine, faux sinon
+	 */
+	private boolean fastTry(){
 		
+		lastFastTry = Main.TIMER.getElapsedMin();
+		
+		this.ia.goBackward(400);
+		
+		List<IntPoint> startList = this.eom.getNewItem();
+		
+		// on considère que l'on peut tester avec un 2 item inconnu max
+		
+		if(startList.size() > 2){
+			return false;
+		}
+		
+		this.ia.goBackward(CALIBRATE_DIST);
+		
+		List<IntPoint> endList = this.eom.getNewItem();
+		
+		// on considère que l'on peut tester avec un 2 item inconnu max
+		
+		if(startList.size() > 2){
+			return false;
+		}
+		
+		Pose myPose = null;
+		float h = 0;
+		
+		for(IntPoint start : startList){
+			for(IntPoint end : endList){
+				if(Main.areApproximatelyEqual(start.getDistance(end), CALIBRATE_DIST, MARGE_ERREUR)){
+					
+					// si ambiguité
+					if(myPose != null){
+						return false;
+					}
+					
+					h = getAngle(start.toLejosPoint(), end.toLejosPoint());
+					myPose = new Pose(end.x(),end.y(),h);
+				}
+			}
+		}
+		
+		if(myPose == null){
+			return false;
+		}
+		
+		this.pg.setPose(myPose, true);		
+		return true;
+	}
+	
+	
+	
+	@Override
+	public void start() {
+		if(lastFastTry < Main.TIMER.getElapsedMin() && !fastTry()){
+			pessimistRecalibrate();
+		}
 	}
 	
 	/**

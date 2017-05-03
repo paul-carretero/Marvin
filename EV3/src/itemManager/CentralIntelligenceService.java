@@ -77,6 +77,7 @@ public class CentralIntelligenceService extends Thread implements PoseListener{
 					// on vérifie que la distance est significative pour pouvoir extrapoler à une droite
 					if(firstContact.getDistance(confirmationContact) > SIGNIFICATIVE_DISTANCE){
 						IntPoint intersection = confirmationContact.getIntersection(firstContact.computeVector(confirmationContact));
+						
 						// on vérifie que l'ennemy avance vers l'intersection et que l'intersection est bien dans le terrain
 						if(intersection != null && intersection.x() > 0 && intersection.x() < 3000 && confirmationContact.getDistance(intersection) < firstContact.getDistance(intersection)){
 							updateInterceptionTarget(intersection);
