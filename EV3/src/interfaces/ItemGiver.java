@@ -21,10 +21,6 @@ public interface ItemGiver {
 	 */
 	public Item getMarvinPosition();
 	/**
-	 * @return un item correspondant a une position possible pour un robot ennemi, ou null si non exploitable 
-	 */
-	public Item getPossibleEnnemy();
-	/**
 	 * @param searchPoint un point à partir duquel cherche un item
 	 * @return l'item le plus prés du point searchPoint
 	 */

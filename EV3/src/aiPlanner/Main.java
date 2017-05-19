@@ -128,7 +128,7 @@ public class Main{
 	/**
 	 *  distance où on est sur de ne pas avoir de palet, et suffisamant petite pour éviter les faux-positifs
 	 */
-	public static final int RADAR_WALL_DETECT		= 250;
+	public static final int RADAR_WALL_DETECT		= 220;
 	/**
 	 * Arbitraire, absence de donnee radar
 	 */
@@ -174,7 +174,7 @@ public class Main{
 	/**
 	 * Acceleration Lineaire (probablement non utilise)
 	 */
-	public static final float LINEAR_ACCELERATION	= 300.0f;
+	public static final float LINEAR_ACCELERATION	= 10.0f;
 	
 	/**
 	 * Distance (en mm) au délà de laquelle on considère la distance parcourue suffisament fiable pour avoir une calcul précis de l'angle.
@@ -222,7 +222,7 @@ public class Main{
 	/**
 	 * IP du pc affichant le détail des log
 	 */
-	public static final String	IP					= "192.168.0.11";
+	public static final String	IP					= "192.168.1.10";
 	/**
 	 * Timer du programme
 	 */

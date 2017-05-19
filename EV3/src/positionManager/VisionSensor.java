@@ -89,6 +89,12 @@ public class VisionSensor implements DistanceGiver{
 			Sound.beep();
 			Sound.beep();
 			Sound.beep();
+			Sound.beep();
+			Sound.beep();
+			Sound.beep();
+			Sound.beep();
+			Sound.beep();
+			Sound.beep();
 			Main.USE_RADAR = false;
 		}
 	}

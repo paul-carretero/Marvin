@@ -180,10 +180,10 @@ public class GoalGrabPessimist extends Goal {
 	protected void failPoseHandler(){
 		boolean forward = Main.RANDOMIZER.nextBoolean();
 		if(forward){
-			this.ia.goForward(Main.RADAR_MIN_RANGE);
+			this.ia.goForward(200);
 		}
 		else{
-			this.ia.goBackward(Main.RADAR_MIN_RANGE);
+			this.ia.goBackward(200);
 		}
 		
 		this.gf.setLastGrab(false);
@@ -224,12 +224,12 @@ public class GoalGrabPessimist extends Goal {
 	 */
 	protected void failGrabHandler() {
 		this.ia.goBackward(350);
-		this.ia.turnHere(-17);
+		this.ia.turnHere(-18);
 		this.ia.goForward(400);
 		
 		if(!tryGrab()){
 			this.ia.goBackward(400);
-			this.ia.turnHere(34);
+			this.ia.turnHere(36);
 			this.ia.goForward(400);
 			tryGrab();
 		}

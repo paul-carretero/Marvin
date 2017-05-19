@@ -137,7 +137,7 @@ public class EventHandler extends Thread implements MoveListener{
 	 */
 	private void checkWall(){
 		if(this.radar.getRadarDistance() < Main.RADAR_WALL_DETECT && this.radar.getRadarDistance() > 0 && (Main.TIMER.getElapsedSec() - this.lastWall) > SENSOR_DELAY){
-			this.aiPlanner.signalObstacle();
+			this.aiPlanner.signalStalled();
 			this.lastWall = Main.TIMER.getElapsedSec();
 		}
 	}

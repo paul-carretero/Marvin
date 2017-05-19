@@ -53,7 +53,7 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 	/**
 	 * durée entre deux vérification de couleur
 	 */
-	private static final int REFRESHRATE = 100;
+	private static final int REFRESHRATE = 90;
 	
 	/**
 	 * initialise le gestionnaire de couleur
@@ -73,7 +73,6 @@ public class AreaManager extends Thread implements AreaGiver, PoseListener {
 			this.areas.add(new YArea(Color.BLUE,this));
 			this.areas.add(new YArea(Color.GREEN,this));
 		}
-		
 		
 		updateArea(true);
 		

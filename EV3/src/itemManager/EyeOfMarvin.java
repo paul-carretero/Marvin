@@ -47,12 +47,12 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 	/**
 	 * Distance minium en bordure des lignes blanches où l'on ne cherchera pas de palet a attraper
 	 */
-	private static final int			MIN_PALET_MARGE	= 100;
+	private static final int			MIN_PALET_MARGE	= 75;
 	
 	/**
 	 * Distance minium du robot en dessous de laquelle on ne recherche pas de palet
 	 */
-	private static final int			MIN_PALET_DIST	= 500;
+	private static final int			MIN_PALET_DIST	= 420;
 	
 	/**
 	 * marge de tolérance lors de la recherche d'un item
@@ -258,38 +258,6 @@ public class EyeOfMarvin implements ServerListener, ItemGiver, PoseListener {
 			}
 		}
 		return false;
-	}
-	
-	/********************************************************
-	 * Aide a la detection d'ennemies
-	 *******************************************************/
-	
-	/**
-	 * @param type Type d'un item a compter
-	 * @return le nombre d'item dans la mastermap ayant le type type.
-	 */
-	synchronized private int count(final ItemType type){
-		int res = 0;
-		for (Item item : this.masterList){
-			if(item.getType() == type){
-				res++;
-			}
-		}
-		return res;
-	}
-	
-	/**
-	 * @return la position d'un ennemy éventuel ou null si plusieurs ennemie possible ou non trouvé
-	 */
-	synchronized public Item getPossibleEnnemy(){
-		if(count(ItemType.UNDEFINED) == 1){
-			for (Item item : this.masterList){
-				if(item.getType() == ItemType.UNDEFINED){
-					return item;
-				}
-			}
-		}
-		return null;
 	}
 	
 	/********************************************************

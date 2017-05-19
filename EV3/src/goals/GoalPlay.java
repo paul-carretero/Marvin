@@ -1,6 +1,5 @@
 package goals;
 
-import aiPlanner.Main;
 import aiPlanner.Marvin;
 import interfaces.ItemGiver;
 
@@ -36,8 +35,12 @@ public class GoalPlay extends Goal {
 			this.ia.pushGoal(this);
 			this.ia.pushGoal(this.gf.goalGrabAndDropPalet());
 		}
-		if(Main.I_ALSO_LIKE_TO_LIVE_DANGEROUSLY && Main.TIMER.getElapsedMin() > 3 && Main.RANDOMIZER.nextBoolean()){
-			this.ia.pushGoal(this.gf.goalIntercept());
+		else{
+			this.ia.goBackward(200);
+			if(this.eom.canPlayAgain()){
+				this.ia.pushGoal(this);
+				this.ia.pushGoal(this.gf.goalGrabAndDropPalet());
+			}
 		}
 	}
 	

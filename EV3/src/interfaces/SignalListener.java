@@ -23,11 +23,6 @@ public interface SignalListener {
 	public void signalStalled();
 	
 	/**
-	 * Signal à l'IA qu'un obstacle a été detecté par le radar
-	 */
-	public void signalObstacle();
-	
-	/**
 	 * Signal à l'IA qu'un palet à été detcté par le capteur de pression
 	 */
 	public void signalPression();

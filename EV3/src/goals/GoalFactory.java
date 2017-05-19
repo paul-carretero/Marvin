@@ -8,7 +8,6 @@ import interfaces.AreaGiver;
 import interfaces.DistanceGiver;
 import interfaces.ItemGiver;
 import interfaces.PoseGiver;
-import itemManager.CentralIntelligenceService;
 import lejos.robotics.geometry.Point;
 
 /**
@@ -45,10 +44,6 @@ public class GoalFactory {
 	 * un DistanceGiver permettant de donner des distance radar
 	 */
 	private	final DistanceGiver	radar;
-	/**
-	 * CentralIntelligenceService permettant de donner des points d'interceptions
-	 */
-	private final CentralIntelligenceService cis;
 	
 	/**
 	 * Gestionnaire des area et des couleurs
@@ -60,16 +55,14 @@ public class GoalFactory {
 	 * @param pg PoseGiver permettant de retourner une pose du robot
 	 * @param eom EyeOfMarvin, permet de fournir les position
 	 * @param radar un DistanceGiver permettant de donner des distance radar
-	 * @param cis CentralIntelligenceService permettant de donner des points d'interceptions
 	 * @param areaManager gestionnaire de couleurs
 	 */
-	public GoalFactory(final Marvin ia, final PoseGiver pg, final ItemGiver eom, final DistanceGiver radar, final CentralIntelligenceService cis, final AreaGiver areaManager){
+	public GoalFactory(final Marvin ia, final PoseGiver pg, final ItemGiver eom, final DistanceGiver radar, final AreaGiver areaManager){
 		this.ia			= ia;
 		this.pg			= pg;
 		this.eom		= eom;
 		this.lastGrabOk = true;
 		this.radar		= radar;
-		this.cis		= cis;
 		this.areaManager = areaManager;
 	}
 	
@@ -150,13 +143,6 @@ public class GoalFactory {
 	 */
 	public Goal goalRecalibrate(){
 		return new GoalRecalibrate(this, this.ia, this.eom, this.pg, this.areaManager);
-	}
-	
-	/**
-	 * @return Un objectif d'interception
-	 */
-	public Goal goalIntercept(){
-		return new GoalIntercept(this,this.ia,this.cis,this.pg);
 	}
 	
 	/**
